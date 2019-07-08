@@ -1,0 +1,182 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.stitchr.sparkutils
+
+import com.stitchr.sparkutils.SharedSession.spark
+
+object Utils {
+
+
+  import org.apache.spark.sql.{DataFrame, SparkSession}
+
+  import scala.util.Random
+
+  // need to fix this through config but using system env for now
+  val defaultOutput = sys.env.getOrElse("defaultOutputDir", System.getProperty("global.defaultOutputDir"))
+
+  // provides a way to self checkpoint a DataFrame and return a new DF from the saved file
+  // object is plaed in the tmp persistence storage space (to be cleaned externally)
+  def selfCheckpoint(df: DataFrame, fileName: String = "tmp" + Random.nextInt(1000).toString, outDir: String = defaultOutput, fileType: String = "parquet"): DataFrame = {
+    val outputDir = outDir
+    val fileOut = outputDir + fileName
+    // log , s"writing ${fileType} temp checkpoint ${fileOut}")
+    df.write.format(fileType).mode("overwrite").save(fileOut + "." + fileType)
+    spark.read.format(fileType).load(fileOut + "." + fileType)
+  }
+
+
+  // used for the composition with spark sql. Uses and assumes one entry and one output.... but input spec is the same
+  def checkpoint(tableMaps: Map[String, Map[String, String]], outDir: String = defaultOutput, fileType: String = "parquet"): Map[String, Map[String, String]] = {
+    val (fileName, m) = tableMaps.head
+    val outputDir = outDir
+    val fileOut = outputDir + fileName
+    val  objectName: String = m("objectName")
+    // log, , s"writing ${fileType} temp checkpoint ${fileOut}")
+    spark.sql(s"select * from ${objectName}").write.format(fileType).mode("overwrite").save(fileOut + "." + fileType)
+    spark.read.format(fileType).load(fileOut + "." + fileType).createOrReplaceTempView(objectName)
+    Map(objectName -> m)
+  }
+
+
+  // provides the reader to the base data
+  def baseTransform(fileURL: String, fileType: String = "parquet"): DataFrame = {
+    spark.read.format(fileType).load(fileURL)
+  }
+
+  def initializeBaseTable(fileURL: String, tableName: String, fileType: String = "parquet"): DataFrame = {
+    val df = spark.read.format(fileType).load(fileURL)
+    df.createOrReplaceTempView(tableName)
+    df
+  }
+
+  def instantiateQuery(query: String, tableName: String, mode: String = "view"): DataFrame = {
+    val df = spark.sql(query)
+    /* here  we add code to decide if we persist or just use a view with lazy eval
+    possible modes include
+      view
+      table (this means we register the persisted object)
+      tempTable (that is to be cleared and not available across sessions. no registration necessary
+    */
+    df.createOrReplaceTempView(tableName)
+    df // really do not need the DF back but adds flexibility
+  }
+
+  case class BaseObject(objectURL: String, viewName: String)
+  case class BaseDataset(df: DataFrame, viewName: String)
+
+  def initializeArrayOfViews(arrayOfBaseTables: Array[BaseObject]): scala.collection.mutable.Map[String, DataFrame] = {
+    // get a mutable map
+    var dfMap = scala.collection.mutable.Map[String, DataFrame]()
+    // initialize all the array elements
+    for ( x <- arrayOfBaseTables ) {
+      val baseDataset = baseTransform(x.objectURL)
+      baseDataset.createOrReplaceTempView(x.viewName) // not really a side effect?!
+      dfMap += (x.viewName -> baseDataset)
+    }
+    dfMap
+  }
+
+
+  // dynamic invocation functions
+  /*
+  this assumes you generate a function1 ...
+  will need a similar one of the type def f1(d: DataFrame): DataFrame = {} as we may invoke them that way.... from a string pointing to an invocation of a function in a library
+ */
+  def invokeFunction1[T,W](t: T, functionString: String): W = {
+    // invoke a function1 that gets a DF and generates a DF... tough to test other than forcing evaluation....
+    val f1 = {
+      new Function1[T, W] {
+        // import scala.reflect.runtime.universe._
+        import scala.reflect.runtime.currentMirror
+        import scala.tools.reflect.ToolBox
+
+        lazy val toolbox = currentMirror.mkToolBox()
+        lazy val func = {
+          // println("calling reflected function") // triggered at every worker
+          synchronized { toolbox.eval(toolbox.parse(functionString)).asInstanceOf[T => W] }
+        }
+
+        def apply(t: T): W = func(t)
+      }
+    }
+    f1(t)
+  }
+
+  def invokeFunction[T](t: T, functionString: String): T = {
+    // invoke a function1 that gets a DF and generates a DF... tough to test other than forcing evaluation....
+    val f = {
+      new Function[T,T] {
+        // import scala.reflect.runtime.universe._
+        import scala.reflect.runtime.currentMirror
+        import scala.tools.reflect.ToolBox
+
+        lazy val toolbox = currentMirror.mkToolBox()
+        lazy val func = {
+          synchronized { toolbox.eval(toolbox.parse(functionString)).asInstanceOf[T => T] }
+        }
+
+        def apply(t: T): T = func(t)
+      }
+    }
+    f(t)
+  }
+
+  /* from Steve's */
+  /* import scala.reflect.runtime.{universe => ru}
+
+  lazy val customDFs: Set[DataFrame] = {
+    val tpe = ru.typeOf[DataFrame]
+    val clazz = tpe.typeSymbol.asClass
+    clazz.knownDirectSubclasses.map{ s =>
+      Class.forName(s"${s.fullName}$$")
+        .getField("MODULE$")
+        .get(classOf[DataFrame])
+        .asInstanceOf[DataFrame]
+    }
+   } */
+
+
+  object ApplyFunctionExample {
+    import scala.reflect.runtime.universe.{Quasiquote, runtimeMirror}
+    import scala.tools.reflect.ToolBox
+    def main(args: Array[String]): Unit = {
+      val mirror = runtimeMirror(getClass.getClassLoader)
+      val tb = ToolBox(mirror).mkToolBox()
+
+      val data = Array(1, 2, 3).asInstanceOf[Array[Int]]
+      //val data = Array(Array(1), Array(2), Array(30))
+      println("Data before function applied on it")
+      println(data.mkString(","))
+
+      val function = "def function(x: Int): Int = x + 2"
+      // val function = "def time1(w: Array[Long]): Array[Long] = {      println(\"In time()\")    Thread.sleep(w(0))      Array(System.nanoTime) }"
+
+      // val functionWrapper = "object FunctionWrapper { " + function + "}"
+
+      val functionWrapper = "object com.massmutual.cx.dats.util.Properties"
+      val functionSymbol = tb.define(tb.parse(functionWrapper).asInstanceOf[tb.u.ImplDef])
+
+      // Map each element using user specified function
+      val dataAfterFunctionApplied = data.map(x => tb.eval(q"$functionSymbol.function($x)")) // q is here a Quasiquote
+
+      println("Data after function applied on it")
+      println(dataAfterFunctionApplied.mkString(","))
+    }
+  }
+}
+

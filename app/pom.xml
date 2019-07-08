@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one or more
+  ~ contributor license agreements.  See the NOTICE file distributed with
+  ~ this work for additional information regarding copyright ownership.
+  ~ The ASF licenses this file to You under the Apache License, Version 2.0
+  ~ (the "License"); you may not use this file except in compliance with
+  ~ the License.  You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+    <artifactId>stitchr-app</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1-SNAPSHOT</version>
+    <name>stitchr-app</name>
+    <properties>
+        <scala.binary.version>2.11</scala.binary.version>
+        <scala.version>${scala.binary.version}.12</scala.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <zinc.enabled>false</zinc.enabled>
+        <zinc.port>7919</zinc.port>
+    </properties>
+
+    <parent>
+        <groupId>com.stitchr</groupId>
+        <artifactId>stitchr</artifactId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!-- <repositories>
+        <repository>
+            <id>bintray</id>
+            <name>bintray</name>
+            <url>https://dl.bintray.com/sbcd90/org.apache.spark/</url>
+        </repository>
+    </repositories> -->
+    <dependencies>
+        <!-- multi-module build dependencies -->
+        <dependency>
+            <groupId>com.stitchr</groupId>
+            <artifactId>stitchr-core</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.stitchr</groupId>
+            <artifactId>stitchr-util</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.5</version>
+        </dependency>
+        <!-- if we add to the local maven using
+             mvn install:install-file -DgroupId=com.hp-vertica -DartifactId=vertica-8.1.1_spark2.1_scala2.11 -Dversion=8.1.1 -Dpackaging=jar -Dfile=jars/vertica-8.1.1_spark2.1_scala2.11-20170623.jar -DgeneratePom=true
+             mvn install:install-file -DgroupId=com.hp-vertica -DartifactId=vertica-jdbc-8.1.1-0 -Dversion=8.1.1 -Dpackaging=jar -Dfile=jars/vertica-jdbc-8.1.1-0.jar -DgeneratePom=true
+        -->
+        <dependency>
+            <groupId>com.hp-vertica</groupId>
+            <artifactId>vertica-8.1.1_spark2.1_scala${scala.binary.version}</artifactId>
+            <version>8.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hp-vertica</groupId>
+            <artifactId>vertica-jdbc-8.1.1-0</artifactId>
+            <version>8.1.1</version>
+        </dependency>
+        <dependency>
+        <groupId>org.json4s</groupId>
+        <artifactId>json4s-native_${scala.binary.version}</artifactId>
+        <version>3.5.2</version>
+      </dependency>
+      <dependency>
+            <groupId>com.memsql</groupId>
+            <artifactId>memsql-connector_${scala.binary.version}</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.scopt</groupId>
+            <artifactId>scopt_${scala.binary.version}</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-core_${scala.binary.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-graphx_${scala.binary.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.spark</groupId>
+        	<artifactId>spark-sql_${scala.binary.version}</artifactId>
+        	<version>${spark.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.scalatest</groupId>
+          <artifactId>scalatest_${scala.binary.version}</artifactId>
+          <version>3.0.4</version>
+          <scope>test</scope>
+        </dependency>
+        <!-- <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.binary.version}</artifactId>
+            <version>2.2.0</version>
+        </dependency> -->
+        <dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-pickling_${scala.binary.version}</artifactId>
+            <version>0.10.0</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.scala-tools</groupId>
+        	<artifactId>maven-scala-plugin</artifactId>
+        	<version>2.15.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.3</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.mockito</groupId>
+        	<artifactId>mockito-all</artifactId>
+        	<version>1.10.19</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.pegdown</groupId>
+            <artifactId>pegdown</artifactId>
+            <version>1.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.databricks/spark-avro_2.11 -->
+        <dependency>
+            <groupId>com.databricks</groupId>
+            <artifactId>spark-avro_${scala.binary.version}</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.databricks/spark-xml_2.11 -->
+        <dependency>
+            <groupId>com.databricks</groupId>
+            <artifactId>spark-xml_${scala.binary.version}</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>1.7.25</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305 -->
+        <dependency>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+          <version>3.0.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
+        <dependency>
+          <groupId>org.javassist</groupId>
+          <artifactId>javassist</artifactId>
+          <version>3.22.0-GA</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+       <!--  <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+          <version>23.6-jre</version>
+        </dependency> -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.typelevel/cats-core -->
+        <dependency>
+            <groupId>org.typelevel</groupId>
+            <artifactId>cats-core_${scala.binary.version}</artifactId>
+            <version>1.5.0</version> 
+        </dependency>
+       <!-- https://mvnrepository.com/artifact/org.typelevel/scala-library -->
+       <dependency>
+         <groupId>org.typelevel</groupId>
+         <artifactId>scala-library</artifactId>
+         <version>2.11.11-bin-typelevel-4</version>
+       </dependency>
+    </dependencies>
+    <build>
+      <sourceDirectory>src/main/scala</sourceDirectory>
+      <testSourceDirectory>src/test/scala</testSourceDirectory>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>scala-maven-plugin</artifactId>
+                    <version>3.2.2</version>
+                    <configuration>
+                        <scalaCompatVersion>${scala.binary.version}</scalaCompatVersion>
+                        <scalaVersion>${scala.version}</scalaVersion>
+                        <recompileMode>incremental</recompileMode>
+                        <useZincServer>${zinc.enabled}</useZincServer>
+                        <zincPort>${zinc.port}</zincPort>
+                        <args>
+                            <arg>-target:jvm-1.8</arg>
+                            <arg>-Xlint</arg>
+                            <arg>-deprecation</arg>
+                            <arg>${project.build.directory}/.scala_dependencies</arg>
+                        </args>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>scala-compile</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+<!--                    <execution>
+                        <id>scala-test-compile</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals> 
+                    </execution>-->
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest-maven-plugin</artifactId>
+                <version>1.0</version>
+                <configuration>
+                    <!-- NOTE add to argLine for master heap dumps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/master -->
+                 <argLine>-Xmx2g -Xms2g -XX:MaxPermSize=512m</argLine>
+                    <filereports>StitchrTestSuite.txt</filereports>
+                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <htmlreporters>${project.build.directory}/html-reports</htmlreporters>
+                    <junitxml>.</junitxml>
+                    <systemProperties>
+                        <buildDirectory>${project.basedir}</buildDirectory>
+                        <StitchrFramework>${project.basedir}</StitchrFramework>
+                        <SparkTestMaster>${StitchrSparkTestMaster}</SparkTestMaster>
+                    </systemProperties>
+                </configuration>
+                <executions>
+                    <execution>
+                      <!-- <id>stitchrTest</id> -->
+                      <id>test</id>
+                      <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                           <!--  <tagsToInclude>${stitchrTagsToInclude}</tagsToInclude>
+                            <tagsToExclude>${stitchrTagsToExclude}</tagsToExclude> -->
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>clusterTest</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <tagsToInclude>com.stitchr.tags.SlowTest</tagsToInclude>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- maven java compiler - turn this off -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+<!--                    <archive>
+                        <manifest>
+                            <mainClass>com.stitchr.core.Runner</mainClass>
+                        </manifest>
+                    </archive> -->
+                    <descriptors>
+                        <descriptor>src/assembly/jarWithDep.xml</descriptor>
+                        <descriptor>src/assembly/jarWithWrapperDep.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>external.atlassian.jgitflow</groupId>
+                <artifactId>jgitflow-maven-plugin</artifactId>
+                <version>1.0-m5.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                        <version>2.11.0</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <noReleaseBuild>true</noReleaseBuild>
+                    <noHotfixBuild>true</noHotfixBuild>
+                    <pushReleases>true</pushReleases>
+                    <pushHotfixes>true</pushHotfixes>
+                    <updateDependencies>false</updateDependencies>
+                    <flowInitContext>
+                        <releaseBranchPrefix>release/release-</releaseBranchPrefix>
+                        <versionTagPrefix>release-</versionTagPrefix>
+                    </flowInitContext>
+                    <scmCommentPrefix>[JGitFlow] </scmCommentPrefix>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <StitchrTagsToExclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToExclude>
+                <StitchrTagsToInclude />
+                <StitchrSparkTestMaster>local-cluster[2,1,1024]</StitchrSparkTestMaster>
+            </properties>
+        </profile>
+        <profile>
+            <id>runJustClusterTests</id>
+            <properties>
+                <StitchrTagsToInclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToInclude>
+            </properties>
+        </profile>
+        <profile>
+            <id>runAllTests</id>
+            <!-- not overriding everything, assumes default behavior is nothing set for incl/excl tags -->
+        </profile>
+        <profile>
+            <id>localMaster</id>
+            <properties>
+                <StitchrTagsToExclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToExclude>
+                <StitchrTagsToInclude />
+                <StitchrSparkTestMaster>local</StitchrSparkTestMaster>
+            </properties>
+        </profile>
+    </profiles>
+</project>

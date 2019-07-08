@@ -1,0 +1,5 @@
+database,driver,host,index,port,pwd,user,db,id,source_type,storage_type,fetchsize
+tpcds,org.postgresql.Driver,localhost,postgres1,5432,user,pwd,postgres,1,jdbc,postgresql,10000
+tpcds,org.postgresql.Driver,xxx.xx.xxx,postgres0,5432,user,pwd,postgres,2,jdbc,postgresql,10000
+file0,/demo/data/cleaned,file://,file0,0,x,x,file,3,file,file,10000
+file1,/demo/data/cleaned,gs://,file1,0,x,x,gs,4,gs,file,10000

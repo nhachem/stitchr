@@ -1,0 +1,272 @@
+id,object_ref,format,storage_type,mode,container,object_type,object_name,data_source_ref,schema_ref,query,partition_key,number_partitions,priority_level,dataset_state_id
+1,postgres_catalog_page,postgres,database,base,public,table,catalog_page,postgres0,catalog_page,public.catalog_page,,1,1,
+2,postgres_customer,postgres,database,base,public,table,customer,postgres0,customer,public.customer,,1,1,
+3,postgres_customer_address,postgres,database,base,public,table,customer_address,postgres0,customer_address,public.customer_address,,1,1,
+4,postgres_customer_demographics,postgres,database,base,public,table,customer_demographics,postgres0,customer_demographics,public.customer_demographics,,1,1,
+5,postgres_date_dim,postgres,database,base,public,table,date_dim,postgres0,date_dim,public.date_dim,,1,1,
+6,postgres_dbgen_version,postgres,database,base,public,table,dbgen_version,postgres0,dbgen_version,public.dbgen_version,,1,1,
+7,postgres_household_demographics,postgres,database,base,public,table,household_demographics,postgres0,household_demographics,public.household_demographics,,1,1,
+8,postgres_income_band,postgres,database,base,public,table,income_band,postgres0,income_band,public.income_band,,1,1,
+9,postgres_item,postgres,database,base,public,table,item,postgres0,item,public.item,,1,1,
+10,postgres_promotion,postgres,database,base,public,table,promotion,postgres0,promotion,public.promotion,,1,1,
+11,postgres_time_dim,postgres,database,base,public,table,time_dim,postgres0,time_dim,public.time_dim,,1,1,
+12,postgres_warehouse,postgres,database,base,public,table,warehouse,postgres0,warehouse,public.warehouse,,1,1,
+13,postgres_web_page,postgres,database,base,public,table,web_page,postgres0,web_page,public.web_page,,1,,
+14,postgres_web_site,postgres,database,base,public,table,web_site,postgres0,web_site,public.web_site,,1,,
+15,postgres_catalog_returns,postgres,database,base,public,table,catalog_returns,postgres0,catalog_returns,public.catalog_returns,,1,,
+16,postgres_catalog_sales,postgres,database,base,public,table,catalog_sales,postgres0,catalog_sales,public.catalog_sales,,1,,
+17,postgres_inventory,postgres,database,base,public,table,inventory,postgres0,inventory,public.inventory,,1,,
+18,postgres_store_sales,postgres,database,base,public,table,store_sales,postgres0,store_sales,public.store_sales,,1,,
+19,postgres_web_returns,postgres,database,base,public,table,web_returns,postgres0,web_returns,public.web_returns,,1,,
+20,postgres_call_center,postgres,database,base,public,table,call_center,postgres0,call_center,public.call_center,,1,,
+21,postgres_reason,postgres,database,base,public,table,reason,postgres0,reason,public.reason,,1,,
+22,postgres_web_sales,postgres,database,base,public,table,web_sales,postgres0,web_sales,public.web_sales,,1,,
+23,postgres_ship_mode,postgres,database,base,public,table,ship_mode,postgres0,ship_mode,public.ship_mode,,1,,
+24,postgres_store,postgres,database,base,public,table,store,postgres0,store,public.store,,1,,
+25,postgres_store_returns,postgres,database,base,public,table,store_returns,postgres0,store_returns,public.store_returns,,1,,
+26,file_catalog_page,pipeDelimited,file,base,demo/data/tpcds,file,catalog_page,fileDir0,catalog_page,catalog_page.dat,,1,,
+27,file_customer,pipeDelimited,file,base,demo/data/tpcds,file,customer,fileDir0,customer,customer.dat,,1,,
+28,file_customer_address,pipeDelimited,file,base,demo/data/tpcds,file,customer_address,fileDir0,customer_address,customer_address.dat,,1,,
+29,file_customer_demographics,pipeDelimited,file,base,demo/data/tpcds,file,customer_demographics,fileDir0,customer_demographics,customer_demographics.dat,,1,,
+30,file_date_dim,pipeDelimited,file,base,demo/data/tpcds,file,date_dim,fileDir0,date_dim,date_dim.dat,,1,,
+31,file_dbgen_version,pipeDelimited,file,base,demo/data/tpcds,file,dbgen_version,fileDir0,dbgen_version,dbgen_version.dat,,1,,
+32,file_household_demographics,pipeDelimited,file,base,demo/data/tpcds,file,household_demographics,fileDir0,household_demographics,household_demographics.dat,,1,,
+33,file_income_band,pipeDelimited,file,base,demo/data/tpcds,file,income_band,fileDir0,income_band,income_band.dat,,1,,
+34,file_item,pipeDelimited,file,base,demo/data/tpcds,file,item,fileDir0,item,item.dat,,1,,
+35,file_promotion,pipeDelimited,file,base,demo/data/tpcds,file,promotion,fileDir0,promotion,promotion.dat,,1,,
+36,file_time_dim,pipeDelimited,file,base,demo/data/tpcds,file,time_dim,fileDir0,time_dim,time_dim.dat,,1,,
+37,file_warehouse,pipeDelimited,file,base,demo/data/tpcds,file,warehouse,fileDir0,warehouse,warehouse.dat,,1,,
+38,file_web_page,pipeDelimited,file,base,demo/data/tpcds,file,web_page,fileDir0,web_page,web_page.dat,,1,,
+39,file_web_site,pipeDelimited,file,base,demo/data/tpcds,file,web_site,fileDir0,web_site,web_site.dat,,1,,
+40,file_catalog_returns,pipeDelimited,file,base,demo/data/tpcds,file,catalog_returns,fileDir0,catalog_returns,catalog_returns.dat,,1,,
+41,file_catalog_sales,pipeDelimited,file,base,demo/data/tpcds,file,catalog_sales,fileDir0,catalog_sales,catalog_sales.dat,,1,,
+42,file_inventory,pipeDelimited,file,base,demo/data/tpcds,file,inventory,fileDir0,inventory,inventory.dat,,1,,
+43,file_store_sales,pipeDelimited,file,base,demo/data/tpcds,file,store_sales,fileDir0,store_sales,store_sales.dat,,1,,
+44,file_web_returns,pipeDelimited,file,base,demo/data/tpcds,file,web_returns,fileDir0,web_returns,web_returns.dat,,1,,
+45,file_call_center,pipeDelimited,file,base,demo/data/tpcds,file,call_center,fileDir0,call_center,call_center.dat,,1,,
+46,file_reason,pipeDelimited,file,base,demo/data/tpcds,file,reason,fileDir0,reason,reason.dat,,1,,
+47,file_web_sales,pipeDelimited,file,base,demo/data/tpcds,file,web_sales,fileDir0,web_sales,web_sales.dat,,1,,
+48,file_ship_mode,pipeDelimited,file,base,demo/data/tpcds,file,ship_mode,fileDir0,ship_mode,ship_mode.dat,,1,,
+49,file_store,pipeDelimited,file,base,demo/data/tpcds,file,store,fileDir0,store,store.dat,,1,,
+50,file_store_returns,pipeDelimited,file,base,demo/data/tpcds,file,store_returns,fileDir0,store_returns,store_returns.dat,,1,,
+51,q2,parquet,file,derived,demo/tpcds,file,q2,fileDir1,q2,"select d_week_seq1
+       ,round(sun_sales1/sun_sales2,2) sun
+       ,round(mon_sales1/mon_sales2,2) mon
+       ,round(tue_sales1/tue_sales2,2) tue
+       ,round(wed_sales1/wed_sales2,2) wed
+       ,round(thu_sales1/thu_sales2,2) thu
+       ,round(fri_sales1/fri_sales2,2) fri
+       ,round(sat_sales1/sat_sales2,2) sat
+ from
+ (select wswscs.d_week_seq d_week_seq1
+        ,sun_sales sun_sales1
+        ,mon_sales mon_sales1
+        ,tue_sales tue_sales1
+        ,wed_sales wed_sales1
+        ,thu_sales thu_sales1
+        ,fri_sales fri_sales1
+        ,sat_sales sat_sales1
+  from wswscs,date_dim
+  where date_dim.d_week_seq = wswscs.d_week_seq and
+        d_year = 1998) y,
+ (select wswscs.d_week_seq d_week_seq2
+        ,sun_sales sun_sales2
+        ,mon_sales mon_sales2
+        ,tue_sales tue_sales2
+        ,wed_sales wed_sales2
+        ,thu_sales thu_sales2
+        ,fri_sales fri_sales2
+        ,sat_sales sat_sales2
+  from wswscs
+      ,date_dim
+  where date_dim.d_week_seq = wswscs.d_week_seq and
+        d_year = 1998+1) z
+ where d_week_seq1=d_week_seq2-53
+ order by d_week_seq1",,1,,
+52,wswscs,parquet,file,derived,demo/tpcds,file,wswscs,fileDir1,wswscs,"select d_week_seq,
+        sum(case when (d_day_name='Sunday') then sales_price else null end) sun_sales,
+        sum(case when (d_day_name='Monday') then sales_price else null end) mon_sales,
+        sum(case when (d_day_name='Tuesday') then sales_price else  null end) tue_sales,
+        sum(case when (d_day_name='Wednesday') then sales_price else null end) wed_sales,
+        sum(case when (d_day_name='Thursday') then sales_price else null end) thu_sales,
+        sum(case when (d_day_name='Friday') then sales_price else null end) fri_sales,
+        sum(case when (d_day_name='Saturday') then sales_price else null end) sat_sales
+ from wscs
+     ,date_dim
+ where d_date_sk = sold_date_sk
+ group by d_week_seq",,1,,
+53,wscs,parquet,file,derived,demo/tpcds,file,wscs,fileDir1,wscs,"select sold_date_sk
+        ,sales_price
+  from (select ws_sold_date_sk sold_date_sk
+              ,ws_ext_sales_price sales_price
+        from web_sales 
+        union all
+        select cs_sold_date_sk sold_date_sk
+              ,cs_ext_sales_price sales_price
+        from catalog_sales) v",,1,,
+54,year_total,parquet,file,derived,demo/tpcds,file,year_total,fileDir1,year_total,"select c_customer_id customer_id
+       ,c_first_name customer_first_name
+       ,c_last_name customer_last_name
+       ,c_preferred_cust_flag customer_preferred_cust_flag
+       ,c_birth_country customer_birth_country
+       ,c_login customer_login
+       ,c_email_address customer_email_address
+       ,d_year dyear
+       ,sum(((ss_ext_list_price-ss_ext_wholesale_cost-ss_ext_discount_amt)+ss_ext_sales_price)/2) year_total
+       ,'s' sale_type
+ from customer
+     ,store_sales
+     ,date_dim
+ where c_customer_sk = ss_customer_sk
+   and ss_sold_date_sk = d_date_sk
+ group by c_customer_id
+         ,c_first_name
+         ,c_last_name
+         ,c_preferred_cust_flag
+         ,c_birth_country
+         ,c_login
+         ,c_email_address
+         ,d_year
+ union all
+ select c_customer_id customer_id
+       ,c_first_name customer_first_name
+       ,c_last_name customer_last_name
+       ,c_preferred_cust_flag customer_preferred_cust_flag
+       ,c_birth_country customer_birth_country
+       ,c_login customer_login
+       ,c_email_address customer_email_address
+       ,d_year dyear
+       ,sum((((cs_ext_list_price-cs_ext_wholesale_cost-cs_ext_discount_amt)+cs_ext_sales_price)/2) ) year_total
+       ,'c' sale_type
+ from customer
+     ,catalog_sales
+     ,date_dim
+ where c_customer_sk = cs_bill_customer_sk
+   and cs_sold_date_sk = d_date_sk
+ group by c_customer_id
+         ,c_first_name
+         ,c_last_name
+         ,c_preferred_cust_flag
+         ,c_birth_country
+         ,c_login
+         ,c_email_address
+         ,d_year
+union all
+ select c_customer_id customer_id
+       ,c_first_name customer_first_name
+       ,c_last_name customer_last_name
+       ,c_preferred_cust_flag customer_preferred_cust_flag
+       ,c_birth_country customer_birth_country
+       ,c_login customer_login
+       ,c_email_address customer_email_address
+       ,d_year dyear
+       ,sum((((ws_ext_list_price-ws_ext_wholesale_cost-ws_ext_discount_amt)+ws_ext_sales_price)/2) ) year_total
+       ,'w' sale_type
+ from customer
+     ,web_sales
+     ,date_dim
+ where c_customer_sk = ws_bill_customer_sk
+   and ws_sold_date_sk = d_date_sk
+ group by c_customer_id
+         ,c_first_name
+         ,c_last_name
+         ,c_preferred_cust_flag
+         ,c_birth_country
+         ,c_login
+         ,c_email_address
+         ,d_year",,1,,
+55,q4,parquet,file,derived,demo/tpcds,file,q4,fileDir1,q4,"select   
+                  t_s_secyear.customer_id
+                 ,t_s_secyear.customer_first_name
+                 ,t_s_secyear.customer_last_name
+                 ,t_s_secyear.customer_birth_country
+ from year_total t_s_firstyear
+     ,year_total t_s_secyear
+     ,year_total t_c_firstyear
+     ,year_total t_c_secyear
+     ,year_total t_w_firstyear
+     ,year_total t_w_secyear
+ where t_s_secyear.customer_id = t_s_firstyear.customer_id
+   and t_s_firstyear.customer_id = t_c_secyear.customer_id
+   and t_s_firstyear.customer_id = t_c_firstyear.customer_id
+   and t_s_firstyear.customer_id = t_w_firstyear.customer_id
+   and t_s_firstyear.customer_id = t_w_secyear.customer_id
+   and t_s_firstyear.sale_type = 's'
+   and t_c_firstyear.sale_type = 'c'
+   and t_w_firstyear.sale_type = 'w'
+   and t_s_secyear.sale_type = 's'
+   and t_c_secyear.sale_type = 'c'
+   and t_w_secyear.sale_type = 'w'
+   and t_s_firstyear.dyear =  1999
+   and t_s_secyear.dyear = 1999+1
+   and t_c_firstyear.dyear =  1999
+   and t_c_secyear.dyear =  1999+1
+   and t_w_firstyear.dyear = 1999
+   and t_w_secyear.dyear = 1999+1
+   and t_s_firstyear.year_total > 0
+   and t_c_firstyear.year_total > 0
+   and t_w_firstyear.year_total > 0
+   and case when t_c_firstyear.year_total > 0 then t_c_secyear.year_total / t_c_firstyear.year_total else null end
+           > case when t_s_firstyear.year_total > 0 then t_s_secyear.year_total / t_s_firstyear.year_total else null end
+   and case when t_c_firstyear.year_total > 0 then t_c_secyear.year_total / t_c_firstyear.year_total else null end
+           > case when t_w_firstyear.year_total > 0 then t_w_secyear.year_total / t_w_firstyear.year_total else null end
+ order by t_s_secyear.customer_id
+         ,t_s_secyear.customer_first_name
+         ,t_s_secyear.customer_last_name
+         ,t_s_secyear.customer_birth_country",,1,,
+56,wscs1,postgres,database,derived,public,view,wscs1,postgres0,wscs,"select sold_date_sk
+        ,sales_price
+  from (select ws_sold_date_sk sold_date_sk
+              ,ws_ext_sales_price sales_price
+        from web_sales 
+        union all
+        select cs_sold_date_sk sold_date_sk
+              ,cs_ext_sales_price sales_price
+        from catalog_sales) v",,1,,
+57,q21,postgres,database,derived,public,view,q21,postgres0,q2,"select d_week_seq1
+       ,round(sun_sales1/sun_sales2,2) sun
+       ,round(mon_sales1/mon_sales2,2) mon
+       ,round(tue_sales1/tue_sales2,2) tue
+       ,round(wed_sales1/wed_sales2,2) wed
+       ,round(thu_sales1/thu_sales2,2) thu
+       ,round(fri_sales1/fri_sales2,2) fri
+       ,round(sat_sales1/sat_sales2,2) sat
+ from
+ (select wswscs.d_week_seq d_week_seq1
+        ,sun_sales sun_sales1
+        ,mon_sales mon_sales1
+        ,tue_sales tue_sales1
+        ,wed_sales wed_sales1
+        ,thu_sales thu_sales1
+        ,fri_sales fri_sales1
+        ,sat_sales sat_sales1
+  from wswscs1 as wswscs,date_dim
+  where date_dim.d_week_seq = wswscs.d_week_seq and
+        d_year = 1998) y,
+ (select wswscs.d_week_seq d_week_seq2
+        ,sun_sales sun_sales2
+        ,mon_sales mon_sales2
+        ,tue_sales tue_sales2
+        ,wed_sales wed_sales2
+        ,thu_sales thu_sales2
+        ,fri_sales fri_sales2
+        ,sat_sales sat_sales2
+  from wswscs1 as wswscs
+      ,date_dim
+  where date_dim.d_week_seq = wswscs.d_week_seq and
+        d_year = 1998+1) z
+ where d_week_seq1=d_week_seq2-53
+ order by d_week_seq1",,1,,
+58,wswscs1,postgres,database,derived,public,view,wswscs1,postgres0,wswscs,"select d_week_seq,
+        sum(case when (d_day_name='Sunday') then sales_price else null end) sun_sales,
+        sum(case when (d_day_name='Monday') then sales_price else null end) mon_sales,
+        sum(case when (d_day_name='Tuesday') then sales_price else  null end) tue_sales,
+        sum(case when (d_day_name='Wednesday') then sales_price else null end) wed_sales,
+        sum(case when (d_day_name='Thursday') then sales_price else null end) thu_sales,
+        sum(case when (d_day_name='Friday') then sales_price else null end) fri_sales,
+        sum(case when (d_day_name='Saturday') then sales_price else null end) sat_sales
+ from wscs1 as wscs
+     ,date_dim
+ where d_date_sk = sold_date_sk
+ group by d_week_seq",,1,,
+59,web_sales_m,postgres,database,base,public,table,web_sales_m,fileDir1,web_sales_m,public.web_sales,ws_sold_date_sk,4,,
