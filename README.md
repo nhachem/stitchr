@@ -96,9 +96,7 @@ after you set up your environment properly (python 3.7)
     
     import run_demo
     
-    This will run the queries q2 and q4 based on the tpcds data files. 
-    Issue: 7/8/2019. broke regression here as we lose the session based database instantiation at the end of the run. 
-    
+    This will run the queries q2 and q4 based on the tpcds data files. Also the example code shows how to get back a handle to the scala spark session to list and work with the databadse tables.
     
 ### How does it work? ###
 

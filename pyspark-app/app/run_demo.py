@@ -47,14 +47,41 @@ print("Spark Version:", spark.sparkContext.version)
 
 s = Stitchr(spark, spark.sparkContext)
 
-s.derive_query('q2', 'file')
+"""
+note that the calls return a spark session. Which is the scala spark session. It is shared between the same calls on the stitchr class
+as well as if we invoke different oinstances of Stitchr 
 
-s.derive_query('q4', 'file')
+"""
 
+ss2 = s.derive_query('q2', 'file')
 
-spark.catalog.listTables()
+sc2 = ss2.catalog.container.sqlContext()
+sc2.tables().show()
+ss2.catalog.container.table("q2").show(False)
 
-df = spark.sql("select * from q2").cache()
-df.show(50)
-df = spark.sql("select * from q4").cache()
-df.show(50)
+ss4 = s.derive_query('q4', 'file')
+
+sc4 = ss4.catalog.container.sqlContext()
+
+sc4.tables().show()
+
+ss2.catalog.container.table("q4").show(False)
+sc2.tables().show()
+
+ss4.catalog.container.table("q2").show(False)
+## envirornment that  we can work with ss2 or ss4 ... as those are containers to the spark session on the jvm side
+sc4.tables().show()
+
+ss4.catalog.container.table("q4").show(False)
+
+ss2.catalog.container.table("q4").show(False)
+sc2.tables().show()
+
+## new instance of Stitchr  ut shares same session
+
+s1 = Stitchr(spark, spark.sparkContext)
+ss = s1.derive_query('q2', 'file')
+
+sc = ss.catalog.container.sqlContext()
+sc.tables().show()
+ss.catalog.container.table("q2").show(False)

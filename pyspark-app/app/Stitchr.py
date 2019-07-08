@@ -42,7 +42,9 @@ class Stitchr:
         self.spark_session = spark_session
         self.spark_context = spark_context
         self.jvm = self.spark_context._jvm
+        self.jcatalog = spark_session._jsparkSession.catalog()
 
     def derive_query(self, query, storage_type):
-        self.jvm.com.stitchr.core.dataflow.Runner.run(query, storage_type)
+        return self.jvm.com.stitchr.core.dataflow.Runner.run(query, storage_type)
+
 
