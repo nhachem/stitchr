@@ -16,7 +16,8 @@
  */
 
 // make sure you have the env variables set to your environment in env.sh and that env.sh is sourced
-// spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-0.1-SNAPSHOT-jar-with-dependencies.jar
+// we use avro as a default for materialization and need to add the package
+// spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-0.1-SNAPSHOT-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
 
 /**
   * Used to demo use cases
@@ -30,11 +31,53 @@
   */
 
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.app.DerivationService
+import com.stitchr.app.{DataIngestService, DerivationService}
+import com.stitchr.core.dbapi.SparkJdbcImpl
+import com.stitchr.core.registry.RegistrySchema.{dataSourceDF, datasetDF}
+import com.stitchr.core.registry.RegistryService.{getDataSource, getDataset}
+import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
+import com.stitchr.util.Logging
+import com.stitchr.util.Properties.configS3
+import com.stitchr.util.Util.time
+import com.stitchr.core.api.DataSet.Implicits
+
+val logging = new Logging
+
+spark.sparkContext.setLogLevel("INFO")
 
 // just list the session info
 val configMap:Map[String, String] = spark.conf.getAll
 // println(configMap)
+import spark.implicits._
+def getObjectRef(objectName: String, objectType: String = "database"): String = {
+  objectType match {
+    case "database" => datasetDF
+      .filter(s"object_name = '$objectName'")
+      .select("format", "data_source_id", "object_name")
+      .map { r =>
+        s"${r(0)}_${r(1)}_${r(2)}"
+      }
+      .take(1)(0)
+    case _ => objectName
+  }
+}
+// run the target queries only if storage type is file.
+// for target database connect to the db and verify. will cover in next iteration of the demo
+def runQueries (ql: List[String], st: String): Unit = {
+  st match {
+    case "file" => {
+      ql.foldLeft()(
+        (_, next) => {
+
+          val qr = spark.sql(s"select * from ${getObjectRef(next, st)}") // .cache()
+          time(qr.show(false), "running  the query")
+          time(println(s"total records returned is ${qr.count()}"), "running the count query")
+        }
+      )
+    }
+    case _ => println("querying the db directly is supported but interfaces are not completely developed yet")
+  }
+}
 
 /**
   * edit the parameters below to go against a target dbms or files. By default we run q2 on files (on yr laptop)
@@ -53,10 +96,11 @@ val stDatabase = "database"
 
 val ds = new DerivationService
 
-ds.deriveQueryList(ql0,stFile)
+ds.deriveQueryList(ql0) // ,stFile)
+runQueries (ql0, stFile)
 
-ds.deriveQueryList(ql1,stDatabase)
-
+ds.deriveQueryList(ql1) // ,stDatabase)
+runQueries (ql1, stDatabase)
 
 // clear all catalog cache for reruns with updated data catalog files
 spark.sql("clear cache").show()
@@ -64,14 +108,77 @@ spark.sql("clear cache").show()
 spark.catalog.listTables.show(50, false)
 
 
+// temporary out to speed up dev
 spark.sql("select * from q2").show(50)
-spark.sql("select * from postgres0_q21").show(50)
+spark.sql("select * from postgresql_1_q21").show(50)
 spark.sql("select * from q4").show(50)
 
-val q21DF = spark.table("postgres0_q21")
-q21DF.show(false)
+val q21DF = spark.table("postgresql_1_q21")
+q21DF.show(50,false)
 
-//import com.stitchr.core.registry.RegistrySchema._
-// import com.stitchr.core.registry.RegistryService._
-// getDataSource(dataSourceDF, "postgres0")
+/* test write back to postgres.
+this would be an api call for persistence
 
+ */
+val dsn = getDataSource(dataSourceDF, 1)
+val jdbc = SparkJdbcImpl(dataSourceNode2JdbcProp(dsn))
+// may not need to specify sc hema and rely on default schema
+time(jdbc.writeTable(q21DF, "postgresql_1_q21", 2), "writing to postgres")
+
+
+// NH: 7/11/2019 ... need to add the write use cases. ephemeral to tmp and persistence to target container using data sources
+// import spark.sqlContext.implicits._
+// spark.sparkContext.emptyRDD.toDF()
+// change logging to warn
+spark.catalog.listTables.show(50, false)
+
+def instantiateQueryList(ql: List[String], dataType: String = "database"): Unit = { // , st: String = "file"): Unit = {
+
+  val _ = configS3() // needed for AWS ... may make conditional based on config or metadata
+
+  // assumed to be not needed
+  // val ds = new DerivationService
+  // ds.deriveQueryList(ql)
+
+  // Then run the actual materialization of the target objects
+  ql.foldLeft()(
+    (_, next) => {
+      println(s"instantiating the target for $next")
+      val (viewName, dfm) = getDataset(getObjectRef(next, dataType)).materialize
+      println(s"viewname is $viewName")
+      spark.sparkContext.setLogLevel("INFO")
+      time(dfm.count, "counting the rows in the materialized object")
+      dfm.printSchema()
+
+    }
+  )
+}
+spark.sparkContext.setLogLevel("WARN")
+// DataIngestService.
+  instantiateQueryList(ql0, "file")
+// DataIngestService.
+  instantiateQueryList(ql1, "database")
+
+/*
+spark.sparkContext.setLogLevel("WARN")
+import com.stitchr.core.api.Helpers._
+import com.stitchr.core.registry.RegistryService._
+
+
+
+val (viewName, dfm) = getDataset("q2").materialize
+println(s"viewname is $viewName")
+spark.sparkContext.setLogLevel("INFO")
+time(dfm.count, "counting the rows in the materialized object")
+dfm.printSchema()
+
+val (viewName1, dfm1) = getDataset("postgresql_1_q21").materialize
+println(s"viewname is $viewName1")
+time(dfm1.count, "counting the rows in the materialized object")
+dfm1.printSchema()
+*/
+
+// show all
+spark.catalog.listTables.show(false)
+// show only the datalake contents
+spark.catalog.listTables.filter("name like 'datalake%'").show(false)

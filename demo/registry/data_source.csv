@@ -1,5 +1,7 @@
-database,driver,host,index,port,pwd,user,db,id,source_type,storage_type,fetchsize
-tpcds,org.postgresql.Driver,localhost,postgres1,5432,user,pwd,postgres,1,jdbc,postgresql,10000
-tpcds,org.postgresql.Driver,xxx.xx.xxx,postgres0,5432,user,pwd,postgres,2,jdbc,postgresql,10000
-file0,/demo/data/cleaned,file://,file0,0,x,x,file,3,file,file,10000
-file1,/demo/data/cleaned,gs://,file1,0,x,x,gs,4,gs,file,10000
+id,source_type,storage_type,driver,host,port,db,user,pwd,fetchsize
+0,file,file,NA,/tmp/data,,stitchr,dc,NA,
+1,jdbc,postgresql,org.postgresql.Driver,216.195.29.110,5432,tpcds,dc,nabil,10000
+2,file,file,NA,/demo/stitchr,,tpcds,dc,NA,
+3,gs,gs,NA,/demo/stitchr,,tpcds,dc,NA,
+4,jdbc,postgresql,org.postgresql.Driver,10.20.255.73,5432,tpcds,dc,tpcds,10000
+5,jdbc,postgresql,org.postgresql.Driver,localhost,5432,tpcds,dc,nabil,10000

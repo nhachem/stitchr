@@ -18,26 +18,26 @@
 package com.stitchr.sparkutil
 
 import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.EnvConfig.{ defaultTmpContainer, defaultFileType }
 
 object Utils {
 
-
-  import org.apache.spark.sql.{DataFrame, SparkSession}
+  import org.apache.spark.sql.{ DataFrame }
 
   import scala.util.Random
 
-  // need to fix this through config but using system env for now
-  val defaultOutput = sys.env.getOrElse("defaultOutputDir", System.getProperty("global.defaultOutputDir"))
-
   // provides a way to self checkpoint a DataFrame and return a new DF from the saved file
-  // object is plaed in the tmp persistence storage space (to be cleaned externally)
-  def selfCheckpoint(df: DataFrame, fileName: String = "tmp" + Random.nextInt(1000).toString, outDir: String = defaultOutput, fileType: String = "parquet"): DataFrame = {
-    val outputDir = outDir
-    val fileOut = outputDir + fileName
+  // object is placed in the tmp persistence storage space (to be cleaned externally)
+  def selfCheckpoint(
+      df: DataFrame,
+      fileName: String = "tmp" + Random.nextInt(1000).toString,
+      container: String = defaultTmpContainer,
+      fileType: String = defaultFileType
+  ): (String, DataFrame) = {
+    val fileUrl = s"$container/$fileName.$fileType"
     // log , s"writing ${fileType} temp checkpoint ${fileOut}")
-    df.write.format(fileType).mode("overwrite").save(fileOut + "." + fileType)
-    spark.read.format(fileType).load(fileOut + "." + fileType)
+    df.write.format(fileType).mode("overwrite").save(fileUrl)
+    (fileName, spark.read.format(fileType).load(fileUrl + "." + fileType))
   }
 
 }
-

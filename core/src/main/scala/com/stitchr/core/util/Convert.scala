@@ -20,12 +20,12 @@ package com.stitchr.core.util
 import com.stitchr.core.common.Encoders.{ Column, DataSource }
 import com.stitchr.sparkutil.SharedSession.spark
 import com.stitchr.core.dbapi.PostgresDialect
-
 import org.apache.spark.sql.{ DataFrame, Row }
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils.getSchema
-
 import java.sql.{ ResultSet, ResultSetMetaData, SQLException }
+
+import scala.util.parsing.json.JSONObject
 
 // import com.stitchr.core.common.Encoders.JdbcProps
 import com.stitchr.util.database.JdbcProps
@@ -68,12 +68,41 @@ object Convert {
         dataSource.driver,
         dataSource.host,
         dataSource.port,
-        dataSource.database,
+        dataSource.db,
         "jdbc",
         dataSource.user,
         dataSource.pwd,
         dataSource.fetchsize
     )
+
+  // inspired from https://stackoverflow.com/questions/1226555/case-class-to-map-in-scala
+  def caseClass2Map(cc: AnyRef): Map[String, String] =
+    (Map[String, String]() /: cc.getClass.getDeclaredFields) { (a, f) =>
+      f.setAccessible(true)
+      a + (f.getName -> f.get(cc).toString)
+    }
+
+  // or maybe simpler for now
+  import org.json4s.{ Extraction, _ }
+
+  def cC2Map(cc: AnyRef): Map[String, String] =
+    Extraction.decompose(cc)(DefaultFormats).values.asInstanceOf[Map[String, String]]
+// this does not seem right
+
+  def getCCParams(cc: Product) = {
+    val values = cc.productIterator
+    cc.getClass.getDeclaredFields.map(_.getName -> values.next).toMap
+  }
+
+  /*
+  This function is weak... not including for now
+
+  import scala.util.parsing.json.JSONType
+  def convertRowToJSONRow(row: Row): JSONObject = {
+    val m = row.getValuesMap(row.schema.fieldNames)
+    JSONObject(m)
+  }
+   */
 
   /**
    * warning the following converter are applied on result sets and are memory intensive as they generate lists and use memory linearly with the resultset cardinality

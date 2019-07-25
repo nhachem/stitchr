@@ -52,6 +52,35 @@
             <artifactId>stitchr-sparkutil</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.crealytics/spark-excel -->
+        <dependency>
+            <groupId>com.crealytics</groupId>
+            <artifactId>spark-excel_2.11</artifactId>
+            <version>0.12.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-avro -->
+        <!-- <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-avro_${scala.binary.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency> -->
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.9</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.scalaj</groupId>
+            <artifactId>scalaj-http_${scala.binary.version}</artifactId>
+            <version>${spark.version}</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.databricks/spark-avro -->
         <dependency>
             <groupId>com.databricks</groupId>

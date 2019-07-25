@@ -17,13 +17,15 @@
 
 package com.stitchr.core.dataflow
 
-import com.stitchr.core.common.Encoders.{datasetEncoder, extendedDependencyEncoder}
+import com.stitchr.core.common.Encoders.{ datasetEncoder, extendedDependencyEncoder }
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.core.dataflow.ComputeService.{computeDerivedObjects, getDependencySet, initializeObjects}
+import com.stitchr.core.dataflow.ComputeService.{ computeDerivedObjects, getDependencySet, initializeObjects }
 import com.stitchr.core.registry.RegistryService.initializeDataCatalogViews
 import com.stitchr.util.Util.time
 import com.stitchr.util.Logging
+import com.stitchr.core.registry.RegistrySchema.datasetDF
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.col
 
 /**
  * used to run a derivation of a query
@@ -34,26 +36,25 @@ object Runner {
   val logging = new Logging
 
   /**
-  *
-    * @param objectReference
-    * @param storageType
-    * @return SparkSession is not used, but we may need kit if we implement multiple sessions
-    */
-  def run(objectReference: String, storageType: String): SparkSession = {
+   *
+   * @param objectReference
+   * @return SparkSession is not used directly, but we need if we implement multiple sessions and to interface properly with Python
+   */
+  def run(objectReference: String): SparkSession = { // }, storageType: String): SparkSession = {
 
     println(spark.conf.getAll)
 
     // initialize 2 dc_ views
     initializeDataCatalogViews()
 
-    val datasetDF = spark.sql(s"select * from dc_datasets where storage_type = '$storageType'")
+    // val datasetDF = spark.sql(s"select * from dc_datasets where storage_type = '$storageType'")
     // val datasetDF = spark.sql(s"select * from dc_datasets")
 
     // using DataFrame is handy but has a lot of overhead
     val depSet = getDependencySet(List(getDependencySet(objectReference)))
-    depSet.show().toString
 
-    logging.log.info(s"dependency set is ${depSet.show()}")
+    // NH: just used if we need to debug or showcase
+    // depSet.show().toString
 
     // finally add self dependencies so that we can run asynchronously
     /**
@@ -66,12 +67,15 @@ object Runner {
      */
     // need to alias to disambiguate column names
     val df1 = depSet.select("object_name").distinct.as("left")
-    val df2 = depSet.select("object_name").distinct.toDF("depends_on")
+    val df2 = depSet.select("object_name", "data_source_id").distinct.toDF("depends_on", "data_source_id") // adding data_source_id
     val selfDS = df1.join(df2, df1("object_name") === df2("depends_on"))
 
     // this is the whole dependency graph covered in a table of edges
     val dependencyGraphDF = depSet.union(selfDS).distinct()
-    logging.log.info(s"dependency graph is \n ${dependencyGraphDF.show(false)}")
+
+    dependencyGraphDF.foreach(r => logging.log.info(s"dependency is $r"))
+
+    dependencyGraphDF.show(false)
 
     // dependencyGraphDF.printSchema()
 
@@ -86,28 +90,35 @@ object Runner {
     // step 1 initialize all base objects
     // select depends_on from dependency_graph join with datasets where mode = 'base'
     // in this system datasets are already filtered on files only
+
+    //NH IMPORTANT (BUG): usisng data_source_id disables cross file storage containers (and this is not a good idea... this is a BUG!
+    // works if we do not have a fully federated environment
     val baseObjectsDF = datasetDF
       .filter(s"mode = 'base'") // and storage_type = '$storageType' ")
-      .join(dependencyGraphDF, datasetDF("object_name") === dependencyGraphDF("depends_on"), "leftsemi")
+      .join(
+          dependencyGraphDF,
+          datasetDF("object_name") === dependencyGraphDF("depends_on") and datasetDF("data_source_id") === dependencyGraphDF("data_source_id"),
+          "leftsemi"
+      ) // NH IMPORTANT: here we need to also include the  data_source_id in the join...
       .select(
           "id",
-          "object_ref",
+          "object_ref", // NH: 7/10/2019... need to deprecate the use of object_ref...
           "format",
           "storage_type",
           "mode",
           "container",
           "object_type",
           "object_name",
-          "data_source_ref",
-          "schema_ref",
           "query",
           "partition_key",
           "number_partitions",
           "priority_level",
-          "dataset_state_id"
+          "dataset_state_id",
+          "schema_id",
+          "data_source_id",
+          "data_destination_id"
       )
       .as(datasetEncoder)
-
 
     // initializes objects as views...
     // we may need to extend to return a Map of DataFrame references (object_name --> dataFrame)
@@ -128,15 +139,16 @@ object Runner {
     val dfl = derivedDF.as("dfl")
     val dfr = datasetDF.as("dfr")
     val derivedDependencyQueriesDS = dfl
-      .join(dfr, dfl("depends_on") === dfr("object_name"))
-      .select(col("dfl.object_name"), col("dfl.depends_on"), col("dfr.query"), col("dfr.data_source_ref"))
+      .join(dfr, dfl("depends_on") === dfr("object_name") and dfl("data_source_id") === dfr("data_source_id"))
+      .select(col("dfl.object_name"), col("dfl.depends_on"), col("dfr.storage_type"), col("dfr.query"), col("dfr.schema_id"), col("dfr.data_source_id"))
       .as(extendedDependencyEncoder)
 
     // testing the derivation
     // get results
     val derivedSet = derivedDependencyQueriesDS.collect
 
-    time(computeDerivedObjects(derivedSet, storageType), "timing the run")
+    //   time(computeDerivedObjects(derivedSet, storageType), "timing the run")
+    time(computeDerivedObjects(derivedSet), "timing the run")
     spark
   }
 

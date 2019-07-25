@@ -21,8 +21,7 @@ import com.stitchr.sparkutil.SharedSession.spark
 import com.stitchr.core.registry.RegistrySchema._
 import com.stitchr.sparkutil.database.Schema.toSqlType
 import com.stitchr.core.common.Encoders._
-import com.stitchr.core.dbapi.SparkJdbcImpl
-import com.stitchr.core.util.Convert.config2JdbcProp
+import com.stitchr.util.Logging
 import org.apache.spark.sql.DataFrame
 
 object RegistryService {
@@ -53,17 +52,17 @@ object RegistryService {
     val dataSourceProps: org.apache.spark.sql.Row = dataFrame.filter("index = '" + indexLookup + "'").collectAsList().get(0)
     dataSourceProps
   }
-  */
+   */
 
   /**
-    *
-    *
-    */
-  def getDataSource(dataFrame: DataFrame, indexLookup: String): com.stitchr.core.common.Encoders.DataSource = {
+   *
+   *
+   */
+  def getDataSource(dataFrame: DataFrame, idLookup: Integer): com.stitchr.core.common.Encoders.DataSource = {
     // get the row for the data source properties as a DataSourceNode
     val dataSourceProps = dataFrame
-      .filter("index = '" + indexLookup + "'")
-      .select("id", "source_type", "storage_type", "driver", "host", "port", "database", "user", "pwd", "index", "fetchsize")
+      .filter("id = '" + idLookup + "'")
+      .select("id", "source_type", "storage_type", "driver", "host", "port", "db", "user", "pwd", "fetchsize")
       .as(dataSourceEncoder)
       .collectAsList()
       .get(0)
@@ -72,18 +71,18 @@ object RegistryService {
 
   /**
    * schema_columns.csv looks
-   * [schema_id, object_ref,column_name,ordinal_position,data_type,numeric_precision,character_maximum_length,is_nullable]
-   * deprecate object_ref and use schema_id
+   * [id, object_ref,column_name,ordinal_position,data_type,numeric_precision,character_maximum_length,is_nullable]
+   * deprecate object_ref and use id
    */
-  def getSchema(objectRef: String): StructType = {
+  def getSchema(schemaId: Integer): StructType = {
 
     val schemaMap =
-      schemasDF.filter(s"object_ref = '$objectRef' ").orderBy("column_position").select("column_name", "column_type", "precision", "string_length")
+      schemasDF.filter(s"id = '$schemaId' ").orderBy("column_position").select("column_name", "column_type", "column_precision", "string_length")
 
     // test first if we have a schemaMap by for example counting */
     if (schemaMap.count == 0) { return null } // return a null schema value if the query returns nothing  else proceed
     // NH: BUG?! not sure why this is failing.
-    // val sm = schemaMap.map(r => (r("column_name").toString, r("column_type").toString, r("precision").asInstanceOf[Int], r("character_length").asInstanceOf[Int]))
+    // val sm = schemaMap.map(r => (r("column_name").toString, r("column_type").toString, r("column_precision").asInstanceOf[Int], r("character_length").asInstanceOf[Int]))
     val sm = schemaMap.map(r => (r(0).toString, r(1).toString, r(2).asInstanceOf[Int], r(3).asInstanceOf[Int]))
 
     // this works but does not reflect complete schema
@@ -95,6 +94,23 @@ object RegistryService {
     )
     schema
   }
+  import spark.implicits._
+  def getObjectRef(objectName: String): String =
+    datasetDF
+      .filter(s"object_name = '$objectName'")
+      .select("format", "data_source_id", "object_name")
+      .map { r =>
+        s"${r(0)}_${r(1)}_${r(2)}"
+      }
+      .take(1)(0)
+
+  /**
+   * getDataSet takes an object_ref and refers the first DataSet reference object (we need to make sure we have uniqueness
+   * @param objectRef
+   * @return
+   */
+  def getDataset(objectRef: String): DataSet =
+    datasetDS.filter(r => r.object_ref == objectRef).take(1)(0) // assumes one row back... need to out validation tests for dups
 
   /* stubs for api calls
   so those would be to register a new dataset and its schema

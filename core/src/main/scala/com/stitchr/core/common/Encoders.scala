@@ -17,12 +17,14 @@
 
 package com.stitchr.core.common
 
-import com.stitchr.util.database.JdbcProps
-import org.apache.spark.sql.Encoder
+import com.stitchr.sparkutil.SharedSession.spark
+import org.apache.spark.sql.{ DataFrame, Encoder }
+
+import spark.sqlContext.implicits._
 
 object Encoders {
   /* NH: 7/1/2019 will need to consolidate the classes */
-  case class QueryNode(object_name: String, query: String, mode: String)
+  case class QueryNode(object_name: String, query: String, mode: String, data_source_id: Int)
   // will need to rename maybe use DataSet
   case class DataSet(
       id: Int,
@@ -33,16 +35,33 @@ object Encoders {
       container: String,
       object_type: String,
       object_name: String,
-      data_source_ref: String,
-      schema_ref: String,
       query: String,
       partition_key: String,
       number_partitions: Int,
       priority_level: Int,
-      dataset_state_id: Int
+      dataset_state_id: Int,
+      schema_id: Int,
+      data_source_id: Int,
+      data_destination_id: Int // added to specify where we move an object -1 means don't move, 0 means temp space (should populate that in the data_source table)
   )
-  case class Dependency(object_name: String, depends_on: String)
-  case class ExtendedDependency(object_name: String, depends_on: String, query: String, data_source_ref: String)
+  /*
+  in prep to use with building the metadata as the computation progresses... Maybe we use Dataset Extended all the way see above?!
+  so may not need those
+   */
+  case class SourceDataSet(
+      datasetRef: DataSet,
+      sourceDF: DataFrame
+  )
+
+  case class ExtendedDatSet(
+      datasetRef: DataSet,
+      sourceDF: DataFrame,
+      targetDF: DataFrame
+  )
+
+  case class Dependency(object_name: String, depends_on: String, data_source_id: Int = -1)
+  // case class ExtendedDependency(object_name: String, depends_on: String, query: String, schema_id: Int = -1, data_source_id: Int = -1)
+  case class ExtendedDependency(object_name: String, depends_on: String, storage_type: String, query: String, schema_id: Integer, data_source_id: Integer)
   case class Column(position: Int, name: String, att_type: String)
 
   // jdbc: <sourceType>:<storageType>://<host>:<port>/<database> + user and password from system for now)
@@ -57,6 +76,20 @@ object Encoders {
       pwd: String = null,
       fetchsize: Int = 10000
   ) */
+  case class DataSourceOption(name: String, value: String) // value is a string to accommodate different types...
+  case class DataSource0(
+      id: Int,
+      source_type: String,
+      storage_type: String,
+      driver: String,
+      host: String,
+      port: Int,
+      db: String,
+      user: String = null,
+      pwd: String = null,
+      index: String,
+      options: Array[DataSourceOption] // fetchsize: Int
+  )
 
   // NH: 6/28/2019. need to adjust and rename columns if necessary
   case class DataSource(
@@ -66,15 +99,15 @@ object Encoders {
       driver: String,
       host: String,
       port: Int,
-      database: String,
+      db: String,
       user: String = null,
       pwd: String = null,
-      index: String,
+      // index: String,
       fetchsize: Int
   )
   case class SchemaColumn(
-      schema_id: String,
-      object_ref: String,
+      id: Int,
+      // object_ref: String,
       name: String,
       position: Int,
       att_type: String,
@@ -90,5 +123,5 @@ object Encoders {
   val extendedDependencyEncoder: Encoder[ExtendedDependency] = org.apache.spark.sql.Encoders.product[ExtendedDependency]
   val columnEncoder: Encoder[Column] = org.apache.spark.sql.Encoders.product[Column]
   val dataSourceEncoder: Encoder[DataSource] = org.apache.spark.sql.Encoders.product[DataSource]
-
+  val dataSourceEncoder0: Encoder[DataSource0] = org.apache.spark.sql.Encoders.product[DataSource0]
 }
