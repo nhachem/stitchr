@@ -137,6 +137,10 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
 
   /* we should try to abstract further with a common api?!
    * to do we would use DS and not DF to enforce proper typing?! */
+  /*
+  NH: 7/26/2019. the schema_column.string_length is also used to capture the decimal precision of a numeric.
+  We need to adjust the names of the attributes as the current naming is wrong and leads to confusion
+   */
   val (datasetDF, schemasDF, dataSourceDF): (DataFrame, DataFrame, DataFrame) = dataCatalogPersistence match {
     case "dc" =>
       val jdbc = SparkJdbcImpl(config2JdbcProp(props, "dc"))
