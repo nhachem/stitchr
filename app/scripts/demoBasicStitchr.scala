@@ -31,10 +31,11 @@
   */
 
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.app.{DataIngestService, DerivationService}
+import com.stitchr.app.{DataIngestService, DerivationService, Derivation}
 import com.stitchr.core.dbapi.SparkJdbcImpl
+import com.stitchr.core.dataflow.ComputeService.runQueries
 import com.stitchr.core.registry.RegistrySchema.{dataSourceDF, datasetDF}
-import com.stitchr.core.registry.RegistryService.{getDataSource, getDataset}
+import com.stitchr.core.registry.RegistryService.{getDataSource, getDataset, getObjectRef}
 import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
 import com.stitchr.util.Logging
 import com.stitchr.util.Properties.configS3
@@ -47,37 +48,6 @@ spark.sparkContext.setLogLevel("INFO")
 
 // just list the session info
 val configMap:Map[String, String] = spark.conf.getAll
-// println(configMap)
-import spark.implicits._
-def getObjectRef(objectName: String, objectType: String = "database"): String = {
-  objectType match {
-    case "database" => datasetDF
-      .filter(s"object_name = '$objectName'")
-      .select("format", "data_source_id", "object_name")
-      .map { r =>
-        s"${r(0)}_${r(1)}_${r(2)}"
-      }
-      .take(1)(0)
-    case _ => objectName
-  }
-}
-// run the target queries only if storage type is file.
-// for target database connect to the db and verify. will cover in next iteration of the demo
-def runQueries (ql: List[String], st: String): Unit = {
-  st match {
-    case "file" => {
-      ql.foldLeft()(
-        (_, next) => {
-
-          val qr = spark.sql(s"select * from ${getObjectRef(next, st)}") // .cache()
-          time(qr.show(false), "running  the query")
-          time(println(s"total records returned is ${qr.count()}"), "running the count query")
-        }
-      )
-    }
-    case _ => println("querying the db directly is supported but interfaces are not completely developed yet")
-  }
-}
 
 /**
   * edit the parameters below to go against a target dbms or files. By default we run q2 on files (on yr laptop)
@@ -87,6 +57,8 @@ def runQueries (ql: List[String], st: String): Unit = {
 val stFile = "file"
 val ql0 = List("q2","q4")
 //val ql0 = List("web_sales_m")
+
+Derivation.run(ql0)
 
 // database based example
 // q21 is the same as q2 in the registry but associated with a database schema
@@ -115,16 +87,6 @@ spark.sql("select * from q4").show(50)
 
 val q21DF = spark.table("postgresql_1_q21")
 q21DF.show(50,false)
-
-/* test write back to postgres.
-this would be an api call for persistence
-
- */
-val dsn = getDataSource(dataSourceDF, 1)
-val jdbc = SparkJdbcImpl(dataSourceNode2JdbcProp(dsn))
-// may not need to specify sc hema and rely on default schema
-time(jdbc.writeTable(q21DF, "postgresql_1_q21", 2), "writing to postgres")
-
 
 // NH: 7/11/2019 ... need to add the write use cases. ephemeral to tmp and persistence to target container using data sources
 // import spark.sqlContext.implicits._
@@ -177,6 +139,10 @@ println(s"viewname is $viewName1")
 time(dfm1.count, "counting the rows in the materialized object")
 dfm1.printSchema()
 */
+// adding web_sales as a direct example
+val (viewName, dfm) = getDataset(getObjectRef("web_sales", "file")).materialize
+
+// adding web_sales in the db as an exaple (of write to DB)
 
 // show all
 spark.catalog.listTables.show(false)

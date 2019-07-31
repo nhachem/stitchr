@@ -29,9 +29,14 @@
  */
 package com.stitchr.app
 
+import com.stitchr.app.Derivation.{args, run}
 import com.stitchr.core.api.DataSet.Implicits
-import com.stitchr.core.registry.RegistryService.{ getDataset, getObjectRef }
+import com.stitchr.core.dbapi.SparkJdbcImpl
+import com.stitchr.core.registry.RegistrySchema.dataSourceDF
+import com.stitchr.core.registry.RegistryService.{getDataSource, getDataset, getObjectRef}
+import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
 import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.Logging
 import com.stitchr.util.Properties.configS3
 import com.stitchr.util.Util.time
 
@@ -68,4 +73,54 @@ object DataIngestService {
         }
     )
   }
+}
+
+/*
+may replace the DataIngestService (or be merged with it)
+ */
+object IngestDataSet extends App {
+
+  def load2DataLake(ql: List[String]): Unit = { // , st: String = "file"): Unit = {
+
+    val _ = configS3() // needed for AWS ... will have to extend to include GS amd  make conditional based on config or metadata
+
+    // instantiate the derived views
+    ql.foldLeft()(
+      (_, next) => {
+        println(s"loading to data lake $next") // for storage_type $st")
+        getDataset(next).move2Lake
+
+      }
+    )
+    // show changes to catalog as we iterate.. will pull out
+    spark.catalog.listTables.show(50, false)
+    logging.log.info(s"number of table in the inSessionDB is ${spark.catalog.listTables.count()}")
+  }
+
+  val _ = configS3() // needed for AWS ... will have to extend to include GS amd  make conditional based on config or metadata
+
+  val logging = new Logging
+
+  spark.sparkContext.setLogLevel("INFO")
+
+  // just list the session info
+  val configMap:Map[String, String] = spark.conf.getAll
+  logging.log.info(s"configMap is $configMap")
+
+
+  spark.catalog.listTables.show(50, false)
+  val usage =
+    """
+    Usage: Derivation [commaDelimitedObjectRef] ]
+    """
+  // expect 2 arguments. first is a list of object references and the second is a storage type...
+  // we may better doing it as a list of list and decipher... but for now it is fine
+  if (args.length < 1) println(usage)
+  else {
+
+    val ql = args(0).toString.split(",").toList
+    println(s"list of queries is $ql")
+    load2DataLake(ql)
+  }
+
 }

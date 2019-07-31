@@ -18,15 +18,15 @@
 package com.stitchr.core.dataflow
 
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.core.common.Encoders.{ QueryNode, _ }
+import com.stitchr.core.common.Encoders.{QueryNode, _}
 import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.util.database.JdbcImpl
-import com.stitchr.core.registry.RegistryService.{ getDataSource, getSchema }
+import com.stitchr.core.registry.RegistryService.{getDataSource, getObjectRef, getSchema}
 import com.stitchr.core.registry.RegistrySchema.datasetDF
 import com.stitchr.core.registry.RegistrySchema.dataSourceDF
 import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
-
-import org.apache.spark.sql.{ DataFrame, Dataset, Row }
+import com.stitchr.util.Util.time
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
 import scala.annotation.tailrec
 
@@ -301,6 +301,24 @@ object ComputeService {
 
     dataset.createOrReplaceTempView(viewName)
     dataset
+  }
+
+  // run the target queries only if storage type is file.
+  // for target database connect to the db and verify. will cover in future iterations
+  def runQueries (ql: List[String], st: String): Unit = {
+    st match {
+      case "file" => {
+        ql.foldLeft()(
+          (_, next) => {
+
+            val qr = spark.sql(s"select * from ${getObjectRef(next, st)}") // .cache()
+            time(qr.show(false), "running  the query")
+            time(println(s"total records returned is ${qr.count()}"), "running the count query")
+          }
+        )
+      }
+      case _ => println("querying the db directly is supported but interfaces are not completely developed yet")
+    }
   }
 
 }

@@ -44,8 +44,13 @@ object EnvConfig {
   val defaultTmpContainer = props.getString("global.defaultTmpContainer") // sys.env.getOrElse("defaultTmpContainer", System.getProperty("global.defaultTmpContainer"))
   val defaultContainer = props.getString("global.defaultContainer") // sys.env.getOrElse("defaultContainer", System.getProperty("global.defaultContainer"))
   val defaultFileType = props.getString("global.defaultFileType") // sys.env.getOrElse("defaultFileType", System.getProperty("global.defaultFileType"))
+  val defaultWriteMode: String = props.getString("global.defaultWriteMode")
 
-  logging.log.warn(s"DC persistence source is $dataCatalogPersistence")
-  logging.log.warn(s"Default TMPContainer is $defaultTmpContainer")
-  logging.log.warn(s"Default file type is $defaultFileType")
+  val sessionRunTime: Long = System.nanoTime() // default long to use as a reference to identify all data for this session. This is incrementing but set once per session
+
+  logging.log.info(s"default write mode is $defaultWriteMode")
+  logging.log.info(s"session run time is $sessionRunTime")
+  logging.log.info(s"DC persistence source is $dataCatalogPersistence")
+  logging.log.info(s"Default TMPContainer is $defaultTmpContainer")
+  logging.log.info(s"Default file type is $defaultFileType")
 }

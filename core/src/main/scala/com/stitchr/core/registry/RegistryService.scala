@@ -29,6 +29,8 @@ object RegistryService {
   import org.apache.spark.sql.types._
   import spark.implicits._
 
+  val logging = new Logging
+
   // we will modify to return reference to dataframes if necessary but also could just assume theviews and use spark sql....
   // this is purely based on a registry through files.... we need to make it portable (file/s3/hdfs...)
   // 2 files are dataset.csv and schema_columns.csv
@@ -94,24 +96,43 @@ object RegistryService {
     )
     schema
   }
+
+  // NH: 7/26/2019. We need to merge the 2
   import spark.implicits._
-  def getObjectRef(objectName: String): String =
+  def getObjectRef(objectRef: String): String =
     datasetDF
-      .filter(s"object_name = '$objectName'")
+      .filter(s"object_ref = '$objectRef'")
       .select("format", "data_source_id", "object_name")
       .map { r =>
         s"${r(0)}_${r(1)}_${r(2)}"
       }
       .take(1)(0)
 
+  def getObjectRef(objectName: String, objectType: String = "database"): String =
+    objectType match {
+      case "database" =>
+        datasetDF
+          .filter(s"object_name = '$objectName'")
+          .select("format", "data_source_id", "object_name")
+          .map { r =>
+            s"${r(0)}_${r(1)}_${r(2)}"
+          }
+          .take(1)(0)
+      case _ => objectName
+    }
+
   /**
    * getDataSet takes an object_ref and refers the first DataSet reference object (we need to make sure we have uniqueness
    * @param objectRef
    * @return
    */
-  def getDataset(objectRef: String): DataSet =
-    datasetDS.filter(r => r.object_ref == objectRef).take(1)(0) // assumes one row back... need to out validation tests for dups
+  def getDataset(objectRef: String): DataSet = {
 
+    if (datasetDS.filter(r => r.object_ref == objectRef).count() > 1)
+      logging.log.warn("number of dataset rows returned is greater than 1 and is " + datasetDS.filter(r => r.object_ref == objectRef).count().toString)
+
+    datasetDS.filter(r => r.object_ref == objectRef).take(1)(0) // assumes one row back... need to out validation tests for dups
+  }
   /* stubs for api calls
   so those would be to register a new dataset and its schema
    */
