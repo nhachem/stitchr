@@ -46,11 +46,18 @@ object EnvConfig {
   val defaultFileType = props.getString("global.defaultFileType") // sys.env.getOrElse("defaultFileType", System.getProperty("global.defaultFileType"))
   val defaultWriteMode: String = props.getString("global.defaultWriteMode")
 
-  val sessionRunTime: Long = System.nanoTime() // default long to use as a reference to identify all data for this session. This is incrementing but set once per session
+  val sessionRunTime
+    : Long = System.nanoTime() // default long to use as a reference to identify all data for this session. This is incrementing but set once per session
 
   logging.log.info(s"default write mode is $defaultWriteMode")
   logging.log.info(s"session run time is $sessionRunTime")
   logging.log.info(s"DC persistence source is $dataCatalogPersistence")
   logging.log.info(s"Default TMPContainer is $defaultTmpContainer")
   logging.log.info(s"Default file type is $defaultFileType")
+
+  // NH 8/1/2019 EXPERIMENTAL: adding threading support ... may change to using cats library and or scala Future
+  // val threadCount: Int = props.getInt("concurrent.threadcount")
+  val semaphores: Int = props.getInt("concurrent.semaphores")
+  val sem: java.util.concurrent.Semaphore = new java.util.concurrent.Semaphore(semaphores)
+  logging.log.info(s"number of semaphores is $sem")
 }
