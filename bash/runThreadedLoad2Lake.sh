@@ -37,7 +37,7 @@ MASTER=local[4]
 
     
 echo $@
-STITCHR_CLASS="com.stitchr.app.ThreadedIngest"
+STITCHR_CLASS="com.stitchr.app.ThreadedIngestService"
 
 # for a cluster deployment better use deploy_mode
 #    --deploy-mode client \
