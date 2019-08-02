@@ -30,71 +30,40 @@
     </parent>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/com.typesafe.scala-logging/scala-logging -->
-		<dependency>
-			<groupId>com.typesafe.scala-logging</groupId>
-			<artifactId>scala-logging_${scala.binary.version}</artifactId>
-			<version>3.9.2</version>
-		</dependency>
-        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>0.9.19</version>
-        </dependency>
+	<!-- all dependencies are in the parent pom -->
 
-        <!-- spark -->
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_${scala.binary.version}</artifactId>
-			<version>${spark.version}</version>
-			<scope>provided</scope>
-		</dependency>
-        <dependency>
-        	<groupId>org.apache.spark</groupId>
-        	<artifactId>spark-sql_${scala.binary.version}</artifactId>
-        	<version>${spark.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.binary.version}</artifactId>
-            <version>3.0.4</version>
-        </dependency>
-		<!-- scala -->
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-library</artifactId>
-			<version>${scala.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-compiler</artifactId>
-			<version>${scala.version}</version>
-		</dependency>
-		<!-- others -->
-		<dependency>
-		    <groupId>com.typesafe</groupId>
-		    <artifactId>config</artifactId>
-		    <version>1.2.1</version>
-		</dependency>
-		<!-- test -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.4</version>
-			<scope>test</scope>
-		</dependency>
-        <dependency> 
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <version>1.7.12</version>
-          </dependency>
 	</dependencies>
 
 	<build>
-		<sourceDirectory>src/main/scala</sourceDirectory>
-		<testSourceDirectory>src/test/scala</testSourceDirectory>
 		<plugins>
+			<!-- disable surefire -->
+			<plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-surefire-plugin</artifactId>
+			  <version>2.7</version>
+			  <configuration>
+				<skipTests>true</skipTests>
+			  </configuration>
+			</plugin>
+			<!-- enable scalatest -->
+			<plugin>
+			  <groupId>org.scalatest</groupId>
+			  <artifactId>scalatest-maven-plugin</artifactId>
+			  <version>1.0</version>
+			  <configuration>
+				<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+				<junitxml>.</junitxml>
+				<filereports>WDF TestSuite.txt</filereports>
+			  </configuration>
+			  <executions>
+				<execution>
+				  <id>test</id>
+				  <goals>
+					<goal>test</goal>
+				  </goals>
+				</execution>
+			  </executions>
+			</plugin>
 			<plugin>
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>
