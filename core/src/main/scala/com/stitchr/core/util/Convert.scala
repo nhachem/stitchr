@@ -17,15 +17,16 @@
 
 package com.stitchr.core.util
 
-import com.stitchr.core.common.Encoders.{ Column, DataSource }
+import com.stitchr.core.common.Encoders.{Column, DataPersistence, QueryNode, SchemaColumn}
 import com.stitchr.sparkutil.SharedSession.spark
 import com.stitchr.core.dbapi.PostgresDialect
-import org.apache.spark.sql.{ DataFrame, Row }
+import com.stitchr.util.EnvConfig.logging
+import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils.getSchema
-import java.sql.{ ResultSet, ResultSetMetaData, SQLException }
+import java.sql.{ResultSet, ResultSetMetaData, SQLException}
 
-import scala.util.parsing.json.JSONObject
+// import scala.util.parsing.json.JSONObject
 
 // import com.stitchr.core.common.Encoders.JdbcProps
 import com.stitchr.util.database.JdbcProps
@@ -61,7 +62,7 @@ object Convert {
         c.getString(s"$dbIndex.pwd")
     )
 
-  def dataSourceNode2JdbcProp(dataSource: DataSource): JdbcProps =
+  def dataSourceNode2JdbcProp(dataSource: DataPersistence): JdbcProps =
     // here we retrieve the url (jdbc connection or other) for the datasource
     JdbcProps(
         dataSource.storage_type,
@@ -69,7 +70,7 @@ object Convert {
         dataSource.host,
         dataSource.port,
         dataSource.db,
-        "jdbc",
+        dataSource.persistence_type, // "jdbc"
         dataSource.user,
         dataSource.pwd,
         dataSource.fetchsize
@@ -96,7 +97,6 @@ object Convert {
 
   /*
   This function is weak... not including for now
-
   import scala.util.parsing.json.JSONType
   def convertRowToJSONRow(row: Row): JSONObject = {
     val m = row.getValuesMap(row.schema.fieldNames)
@@ -171,4 +171,58 @@ object Convert {
     spark.createDataFrame(spark.sparkContext.parallelize(r), sc) // we run parallelize to create an RDD[Row]
   }
 
+  // NH to work on... This is not pure btut ojk for this version  0.1
+
+  /**
+   * This function is needed as we need to make sure objects of the same name do not clash in the inSessionDB
+   * (we can only use the default spark db so this is critical in this version)
+   * It assumes a tag to the sql query ... That is all tables default to stitchr_table_name
+   * @param q
+   * @param dpId
+   * @return
+   */
+  // NH to work on... This is not pure btut ok for this version  0.1
+  def query2InSessionRep(q: String, dpId: Int): String = {
+    import com.stitchr.core.util.Parse.logicalPlan
+    import com.hubspot.jinjava._
+    import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
+    import scala.collection.JavaConversions._
+   // logging.log.info(s"query is $q")
+    val t = stripCurlyBrace(q)
+   // logging.log.info(s"stripped query is $t")
+    val plan = logicalPlan(t)
+
+
+    // (V0.1) we assume all tables are aliased already so when we replace using jinja we do not need to alias
+    val context = plan.collect{case r: UnresolvedRelation => (r.tableName, s"${r.tableName}_${dpId}")}.toMap
+    val jinjava = new Jinjava
+    val q0 = jinjava.render(q, context)
+
+    // logging.log.info(s"query rewriting $q0")
+    q0
+  }
+
+  val REGEX_OPEN_CURLY_BRACE = """\{"""
+  val REGEX_CLOSED_CURLY_BRACE = """\}"""
+  // val REGEX_INLINE_DOUBLE_QUOTES = """\\\"""".r
+ //  val REGEX_NEW_LINE = """\\\n""".r
+  def stripCurlyBrace(s: String): String =
+    s.replaceAll(REGEX_OPEN_CURLY_BRACE, "").replaceAll(REGEX_CLOSED_CURLY_BRACE, "")
+
+  // NH under dev not needed for now
+  case class ScColumn(name: String, data_type: String, nullable: String)
+  def fromStructType2JsonSchema(s: StructType): Unit = {
+
+
+    // As of Spark 2.4.0, StructField can be converted to DDL format using toDDL method.
+
+    s.toList.foldLeft() ((_,next) => {
+      val n = ScColumn(next.name, next.dataType.toString, next.nullable.toString).toString
+      println(n)
+      // println(next.dataType)
+      // println(next.nullable)
+      //  println(next.toDDL)
+    })
+
+  }
 }

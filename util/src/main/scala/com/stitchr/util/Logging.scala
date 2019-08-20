@@ -17,18 +17,11 @@
 
 package com.stitchr.util
 
-import org.apache.log4j.{Level, LogManager}
-import org.apache.log4j.spi.{Filter, LoggingEvent}
-// import org.apache.spark.internal.Logging
-
-import org.slf4j.impl.StaticLoggerBinder
-// import org.slf4j.{Logger, LoggerFactory}
-
 import com.typesafe.scalalogging.LazyLogging
 
-/**
-* 7/8/2019 logging place holder
-  */
+/*
+ * 7/8/2019 logging place holder
+ */
 class Logging extends LazyLogging {
   // logger.debug("This is a test")
   val log = logger

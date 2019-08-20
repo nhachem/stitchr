@@ -49,7 +49,7 @@ trait SparkJdbc {
     readDF(query: String)
 
   // untested
-  def writeTable(dataframe: DataFrame, tableName: String, numberPartitions: Int ): Unit
+  def writeTable(dataframe: DataFrame, tableName: String, numberPartitions: Int, saveMode: String ): Unit
 }
 
 case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
@@ -123,9 +123,9 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
         .load()
 
   // to be implemented
-  override def writeTable(dataFrame: DataFrame, tableName: String, numberPartitions: Int = 32 ): Unit =
+  override def writeTable(dataFrame: DataFrame, tableName: String, numberPartitions: Int = 32, saveMode: String = "append"): Unit =
   dataFrame.write.format("jdbc")
-    .mode("overwrite")
+    .mode(saveMode)
     .option("driver", jdbcProps.driver)
     .option("dbTable", tableName)
     .option("url", url)

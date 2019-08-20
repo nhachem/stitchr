@@ -19,13 +19,14 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>stitchr-util</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<name>stitchr-util</name>
+	<version>${stitchr.version}</version>
 	<inceptionYear>2017</inceptionYear>
 
     <parent>
       <groupId>com.stitchr</groupId>
       <artifactId>stitchr</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>${stitchr.version}</version>
       <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -64,6 +65,7 @@
 				</execution>
 			  </executions>
 			</plugin>
+			<!-- end of add on for testing -->
 			<plugin>
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>

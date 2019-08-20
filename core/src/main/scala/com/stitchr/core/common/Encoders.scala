@@ -17,18 +17,45 @@
 
 package com.stitchr.core.common
 
-import com.stitchr.sparkutil.SharedSession.spark
-import org.apache.spark.sql.{ DataFrame, Encoder }
+import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.Encoder
 
-import spark.sqlContext.implicits._
-
+/**
+ * Encoders are used to add stronger typing to the code and encourage Dataset vs DataFrame
+ */
 object Encoders {
-  /* NH: 7/1/2019 will need to consolidate the classes */
-  case class QueryNode(object_name: String, query: String, mode: String, data_source_id: Int)
-  // will need to rename maybe use DataSet
+
+  /**
+   *
+   * @param id
+   * @param object_ref key to the DataSet
+   * @param object_name is usnique within a data paersistence l;ayer (albeit within a container
+   * @param query
+   * @param mode
+   * @param data_persistence_id
+   */
+  case class QueryNode(id: Int, object_ref: String, object_name: String, query: String, mode: String, data_persistence_id: Int)
+
+  /**
+   * Captures the metadata used to characterize a Stitchr DataSet
+   * @param id
+   * @param object_ref
+   * @param format
+   * @param storage_type
+   * @param mode
+   * @param container
+   * @param object_type
+   * @param object_name
+   * @param query
+   * @param partition_key
+   * @param number_partitions
+   * @param schema_id
+   * @param data_persistence_src_id
+   * @param data_persistence_dest_id
+   */
   case class DataSet(
       id: Int,
-      object_ref: String,
+      object_ref: String, // computed as obj
       format: String,
       storage_type: String,
       mode: String,
@@ -38,30 +65,30 @@ object Encoders {
       query: String,
       partition_key: String,
       number_partitions: Int,
-      priority_level: Int,
-      dataset_state_id: Int,
       schema_id: Int,
-      data_source_id: Int,
-      data_destination_id: Int // added to specify where we move an object -1 means don't move, 0 means temp space (should populate that in the data_source table)
+      data_persistence_src_id: Int,
+      data_persistence_dest_id: Int = -1 // added to specify where we move an object -1 means don't move, 0 means temp space (should populate that in the data_persistence table)
   )
-  /*
-  in prep to use with building the metadata as the computation progresses... Maybe we use Dataset Extended all the way see above?!
-  so may not need those
+
+  // case class ExtendedDependency(object_name: String, depends_on: String, query: String, schema_id: Int = -1, data_persistence_id: Int = -1)
+  /**
+   * A Dependency relation captures lineage between (sets of) DatSets. It captures every From object in a sql query
+   * @param object_name
+   * @param depends_on
+   * @param dataset_id
+   * @param storage_type
+   * @param query
+   * @param schema_id
+   * @param data_persistence_id
    */
-  case class SourceDataSet(
-      datasetRef: DataSet,
-      sourceDF: DataFrame
-  )
+  case class Dependency(object_name: String, depends_on: String, dataset_id: Int, storage_type: String, query: String, schema_id: Int, data_persistence_id: Int)
 
-  case class ExtendedDatSet(
-      datasetRef: DataSet,
-      sourceDF: DataFrame,
-      targetDF: DataFrame
-  )
-
-  case class Dependency(object_name: String, depends_on: String, data_source_id: Int = -1)
-  // case class ExtendedDependency(object_name: String, depends_on: String, query: String, schema_id: Int = -1, data_source_id: Int = -1)
-  case class ExtendedDependency(object_name: String, depends_on: String, storage_type: String, query: String, schema_id: Integer, data_source_id: Integer)
+  /**
+   *
+   * @param position
+   * @param name
+   * @param att_type
+   */
   case class Column(position: Int, name: String, att_type: String)
 
   // jdbc: <sourceType>:<storageType>://<host>:<port>/<database> + user and password from system for now)
@@ -76,25 +103,25 @@ object Encoders {
       pwd: String = null,
       fetchsize: Int = 10000
   ) */
-  case class DataSourceOption(name: String, value: String) // value is a string to accommodate different types...
-  case class DataSource0(
-      id: Int,
-      source_type: String,
-      storage_type: String,
-      driver: String,
-      host: String,
-      port: Int,
-      db: String,
-      user: String = null,
-      pwd: String = null,
-      index: String,
-      options: Array[DataSourceOption] // fetchsize: Int
-  )
 
-  // NH: 6/28/2019. need to adjust and rename columns if necessary
-  case class DataSource(
+  /**
+   * catptures the attributes characterizing a data persistence layer (persistence zone)
+   * @param id
+   * @param name
+   * @param persistence_type
+   * @param storage_type
+   * @param driver
+   * @param host
+   * @param port
+   * @param db
+   * @param user
+   * @param pwd
+   * @param fetchsize
+   */
+  case class DataPersistence(
       id: Int,
-      source_type: String,
+      name: String,
+      persistence_type: String,
       storage_type: String,
       driver: String,
       host: String,
@@ -105,23 +132,71 @@ object Encoders {
       // index: String,
       fetchsize: Int
   )
+
+  // id, position are unique
+  /**
+   * id, column_position are unique
+   * @param id
+   * @param column_name
+   * @param column_position
+   * @param column_type
+   * @param column_precision
+   * @param string_length
+   * @param is_nullable
+   */
   case class SchemaColumn(
       id: Int,
-      // object_ref: String,
-      name: String,
-      position: Int,
-      att_type: String,
+      column_name: String,
+      column_position: Int,
+      column_type: String,
       column_precision: Int,
       string_length: Int,
       is_nullable: Boolean
   )
 
+  /**
+   * currently really unused but decided to keep around for now. It replaces ids with the instance objects they reference
+   * schema, dataSourcePersistence and dataDestinationPersistence
+   * @param id
+   * @param format
+   * @param storage_type
+   * @param mode
+   * @param container
+   * @param object_type
+   * @param object_name
+   * @param query
+   * @param partition_key
+   * @param number_partitions
+   * @param schema
+   * @param dataSourcePersistence
+   * @param dataDestinationPersistence
+   */
+  case class ExtendedDataSet(
+      id: Int,
+      format: String,
+      storage_type: String,
+      mode: String,
+      container: String,
+      object_type: String,
+      object_name: String,
+      query: String,
+      partition_key: String,
+      number_partitions: Int,
+      schema: StructType, // = getSchema(schema_id),
+      dataSourcePersistence: DataPersistence,
+      dataDestinationPersistence: DataPersistence // added to specify where we move an object -1 means don't move, 0 means temp space (should populate that in the data_persistence table)
+  )
+
   // encoders...
-  val datasetEncoder: Encoder[DataSet] = org.apache.spark.sql.Encoders.product[DataSet]
+  val dataSetEncoder: Encoder[DataSet] = org.apache.spark.sql.Encoders.product[DataSet]
+  // val extendedDataSetEncoder: Encoder[ExtendedDataSet] = org.apache.spark.sql.Encoders.product[ExtendedDataSet]
   val queryNodeEncoder: Encoder[QueryNode] = org.apache.spark.sql.Encoders.product[QueryNode]
   val dependencyEncoder: Encoder[Dependency] = org.apache.spark.sql.Encoders.product[Dependency]
-  val extendedDependencyEncoder: Encoder[ExtendedDependency] = org.apache.spark.sql.Encoders.product[ExtendedDependency]
-  val columnEncoder: Encoder[Column] = org.apache.spark.sql.Encoders.product[Column]
-  val dataSourceEncoder: Encoder[DataSource] = org.apache.spark.sql.Encoders.product[DataSource]
-  val dataSourceEncoder0: Encoder[DataSource0] = org.apache.spark.sql.Encoders.product[DataSource0]
+  val schemaColumnEncoder: Encoder[SchemaColumn] = org.apache.spark.sql.Encoders.product[SchemaColumn]
+  val dataPersistenceEncoder: Encoder[DataPersistence] = org.apache.spark.sql.Encoders.product[DataPersistence]
+
+  // empty structures
+  val emptyDs = new DataSet(-1, "EmptyDataSet_0", "", "", "", "", "", "EmptyDataSet", "", "", -1, -1, 0, -1)
+  val emptyDp: DataPersistence = new DataPersistence(-1, "EmptyDataPersistence", "", "", "", "", -1, "", "", "", -1)
+  val emptyDependency: Dependency = Dependency(null, null, null.asInstanceOf[Int], null, null, null.asInstanceOf[Int], null.asInstanceOf[Int])
 }

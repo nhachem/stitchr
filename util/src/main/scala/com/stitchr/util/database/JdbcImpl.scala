@@ -76,8 +76,11 @@ case class JdbcImpl(jdbcProps: JdbcProps) extends Jdbc {
   def executeQuery(query: String): ResultSet =
     conn.createStatement().executeQuery(query)
 
-  def executeDDL(ddl: String): Unit =
+  def executeDDL(ddl: String): Boolean =
     conn.createStatement().execute(ddl)
+
+  def executeUpdate(sql: String): Int =
+    conn.createStatement().executeUpdate(sql)
 
   def countResultSet(resultset: ResultSet): Long = {
     var cnt = 0
@@ -86,6 +89,16 @@ case class JdbcImpl(jdbcProps: JdbcProps) extends Jdbc {
     }
     resultset.close()
     cnt
+  }
+
+  def getQueryResult(rs: ResultSet): (IndexedSeq[String],Iterator[IndexedSeq[String]])  = {
+    val columnCnt: Int = rs.getMetaData.getColumnCount
+
+    val columns: IndexedSeq[String] = 1 to columnCnt map rs.getMetaData.getColumnName
+    // get all results
+    val queryResults: Iterator[IndexedSeq[String]] = Iterator.continually(rs).takeWhile(_.next()).map { r => columns map r.getString }
+
+    (columns, queryResults)
   }
 
   // metadata
@@ -100,7 +113,7 @@ case class JdbcImpl(jdbcProps: JdbcProps) extends Jdbc {
   def getTablesMetadata(
       schemaPattern: String = "%",
       tableNamePattern: String = "%",
-      objectTypes: scala.Array[String] = List("TABLE", "VIEW").toArray
+      objectTypes: scala.Array[String] = Array("TABLE", "VIEW")
   ): ResultSet =
     databaseMetadata.getTables(conn.getCatalog(), schemaPattern, tableNamePattern, objectTypes)
 

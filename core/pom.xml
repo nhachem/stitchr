@@ -19,34 +19,34 @@
   <modelVersion>4.0.0</modelVersion>
     <artifactId>stitchr-core</artifactId>
     <packaging>jar</packaging>
-   <!-- <version>0.1-SNAPSHOT</version> -->
+    <version>${stitchr.version}</version>
     <name>stitchr-core</name>
 
     <parent>
         <groupId>com.stitchr</groupId>
         <artifactId>stitchr</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>${stitchr.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-   <!-- <repositories>
+    <repositories>
         <repository>
             <id>bintray</id>
             <name>bintray</name>
             <url>https://dl.bintray.com/sbcd90/org.apache.spark/</url>
         </repository>
-    </repositories> -->
+    </repositories>
     <dependencies>
         <!-- multi-module build dependencies -->
         <dependency>
             <groupId>com.stitchr</groupId>
             <artifactId>stitchr-util</artifactId>
-            <version>0.1-SNAPSHOT</version>
+          <version>${stitchr.version}</version>
         </dependency>
         <dependency>
             <groupId>com.stitchr</groupId>
             <artifactId>stitchr-sparkutil</artifactId>
-            <version>0.1-SNAPSHOT</version>
+           <version>${stitchr.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.crealytics/spark-excel -->
         <dependency>
@@ -69,7 +69,8 @@
         <dependency>
             <groupId>org.scalaj</groupId>
             <artifactId>scalaj-http_${scala.binary.version}</artifactId>
-            <version>${spark.version}</version>
+            <version>2.4.2</version>
+           <!-- 2.4.3 does not exist as of 8/9/2019 <version>${spark.version}</version> -->
         </dependency>
         <!-- note this is not for 4.3 ...https://mvnrepository.com/artifact/com.databricks/spark-avro -->
         <dependency>
@@ -91,25 +92,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.memsql</groupId>
-            <artifactId>memsql-connector_${scala.binary.version}</artifactId>
-            <version>2.0.2</version>
-        </dependency>
-        <!-- if we add to the local maven using
-             mvn install:install-file -DgroupId=com.hp-vertica -DartifactId=vertica-8.1.1_spark2.1_scala2.11 -Dversion=8.1.1 -Dpackaging=jar -Dfile=jars/vertica-8.1.1_spark2.1_scala2.11-20170623.jar -DgeneratePom=true
-             mvn install:install-file -DgroupId=com.hp-vertica -DartifactId=vertica-jdbc-8.1.1-0 -Dversion=8.1.1 -Dpackaging=jar -Dfile=jars/vertica-jdbc-8.1.1-0.jar -DgeneratePom=true
-        -->
-        <dependency>
-            <groupId>com.hp-vertica</groupId>
-            <artifactId>vertica-8.1.1_spark2.1_scala${scala.binary.version}</artifactId>
-            <version>8.1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.hp-vertica</groupId>
-            <artifactId>vertica-jdbc-8.1.1-0</artifactId>
-            <version>8.1.1</version>
         </dependency>
         <!-- end databases -->
       <dependency>
@@ -168,6 +150,7 @@
          <version>2.11.11-bin-typelevel-4</version>
        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <!-- disable surefire -->
@@ -204,7 +187,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>3.0</version>
-        <configuration>
+       <configuration>
           <reportPlugins>
             <plugin>
               <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -238,62 +221,12 @@
                             <goal>compile</goal>
                         </goals>
                     </execution>
-<!--                    <execution>
+                    <execution>
                         <id>scala-test-compile</id>
                         <phase>process-test-resources</phase>
                         <goals>
                             <goal>testCompile</goal>
                         </goals>
-                    </execution>-->
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <skipTests>true</skipTests>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.scalatest</groupId>
-                <artifactId>scalatest-maven-plugin</artifactId>
-                <version>1.0</version>
-                <configuration>
-                    <!-- NOTE add to argLine for master heap dumps -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/master -->
-                 <argLine>-Xmx2g -Xms2g -XX:MaxPermSize=512m</argLine>
-                    <filereports>StitchrTestSuite.txt</filereports>
-                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-                    <htmlreporters>${project.build.directory}/html-reports</htmlreporters>
-                    <junitxml>.</junitxml>
-                    <systemProperties>
-                        <buildDirectory>${project.basedir}</buildDirectory>
-                        <StitchrFramework>${project.basedir}</StitchrFramework>
-                        <SparkTestMaster>${StitchrSparkTestMaster}</SparkTestMaster>
-                    </systemProperties>
-                </configuration>
-                <executions>
-                    <execution>
-                      <!-- <id>stitchrTest</id> -->
-                      <id>test</id>
-                      <phase>test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                           <!--  <tagsToInclude>${stitchrTagsToInclude}</tagsToInclude>
-                            <tagsToExclude>${stitchrTagsToExclude}</tagsToExclude> -->
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>clusterTest</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <tagsToInclude>com.stitchr.tags.SlowTest</tagsToInclude>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -317,30 +250,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.1.1</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-<!--                    <archive>
-                        <manifest>
-                            <mainClass>com.stitchr.core.Runner</mainClass>
-                        </manifest>
-                    </archive> -->
-                    <descriptors>
-                        <descriptor>src/assembly/jarWithDep.xml</descriptor>
-                        <descriptor>src/assembly/jarWithWrapperDep.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                        <phase>package</phase> <!-- bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -380,35 +289,4 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <StitchrTagsToExclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToExclude>
-                <StitchrTagsToInclude />
-                <StitchrSparkTestMaster>local-cluster[2,1,1024]</StitchrSparkTestMaster>
-            </properties>
-        </profile>
-        <profile>
-            <id>runJustClusterTests</id>
-            <properties>
-                <StitchrTagsToInclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToInclude>
-            </properties>
-        </profile>
-        <profile>
-            <id>runAllTests</id>
-            <!-- not overriding everything, assumes default behavior is nothing set for incl/excl tags -->
-        </profile>
-        <profile>
-            <id>localMaster</id>
-            <properties>
-                <StitchrTagsToExclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToExclude>
-                <StitchrTagsToInclude />
-                <StitchrSparkTestMaster>local</StitchrSparkTestMaster>
-            </properties>
-        </profile>
-    </profiles>
 </project>

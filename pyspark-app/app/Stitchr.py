@@ -22,7 +22,7 @@ This module will be used for holding all functions which relate to invoking stit
 to run interactively using pyspark:
 in the directory where the run_demo.py is located run
 
-pyspark --jars $STITCHR_ROOT/core/target/stitchr-core-0.1-SNAPSHOT-jar-with-dependencies.jar
+pyspark --jars $STITCHR_ROOT/app/target/stitchr-app-0.1-SNAPSHOT-jar-with-dependencies.jar
 
 then at the prompt type
 
@@ -44,7 +44,7 @@ class Stitchr:
         self.jvm = self.spark_context._jvm
         self.jcatalog = spark_session._jsparkSession.catalog()
 
-    def derive_query(self, query, storage_type):
-        return self.jvm.com.stitchr.core.dataflow.Runner.run(query, storage_type)
+    def derive_query(self, query):
+        return self.jvm.com.stitchr.core.dataflow.Runner.run(query)
 
 

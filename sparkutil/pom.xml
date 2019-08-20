@@ -19,13 +19,12 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>stitchr-sparkutil</artifactId>
-	<!-- <version>0.1-SNAPSHOT</version> -->
 	<name>stitchr-sparkutil</name>
 
     <parent>
       <groupId>com.stitchr</groupId>
       <artifactId>stitchr</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>${stitchr.version}</version>
       <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -33,9 +32,8 @@
 		<dependency>
 			<groupId>com.stitchr</groupId>
 			<artifactId>stitchr-util</artifactId>
-			<version>0.1-SNAPSHOT</version>
+			<version>${stitchr.version}</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -70,17 +68,6 @@
 			</plugin>
 			<!-- end of add on for testing -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.7.1</version>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.0.0</version>
-			</plugin>
-			<plugin>
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>
 				<version>2.15.2</version>
@@ -95,7 +82,7 @@
 				<configuration>
 					<scalaVersion>${scala.version}</scalaVersion>
 					<args>
-					  <arg>-target:jvm-${maven.compiler.target}</arg>
+						<arg>-target:jvm-${maven.compiler.target}</arg>
 					</args>
 				</configuration>
 			</plugin>

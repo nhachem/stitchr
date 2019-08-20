@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.stitchr</groupId>
         <artifactId>stitchr</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>${stitchr.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -34,12 +34,12 @@
         <dependency>
             <groupId>com.stitchr</groupId>
             <artifactId>stitchr-core</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${stitchr.version}</version>
         </dependency>
         <dependency>
             <groupId>com.stitchr</groupId>
             <artifactId>stitchr-util</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${stitchr.version}</version>
         </dependency>
     </dependencies>
 
@@ -68,7 +68,6 @@
                     <systemProperties>
                         <buildDirectory>${project.basedir}</buildDirectory>
                         <StitchrFramework>${project.basedir}</StitchrFramework>
-                        <SparkTestMaster>${StitchrSparkTestMaster}</SparkTestMaster>
                     </systemProperties>
                 </configuration>
                 <executions>
@@ -79,10 +78,6 @@
                         <goals>
                             <goal>test</goal>
                         </goals>
-                        <configuration>
-                           <!--  <tagsToInclude>${stitchrTagsToInclude}</tagsToInclude>
-                            <tagsToExclude>${stitchrTagsToExclude}</tagsToExclude> -->
-                        </configuration>
                     </execution>
                     <execution>
                         <id>clusterTest</id>
@@ -201,35 +196,5 @@
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <StitchrTagsToExclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToExclude>
-                <StitchrTagsToInclude />
-                <StitchrSparkTestMaster>local-cluster[2,1,1024]</StitchrSparkTestMaster>
-            </properties>
-        </profile>
-        <profile>
-            <id>runJustClusterTests</id>
-            <properties>
-                <StitchrTagsToInclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToInclude>
-            </properties>
-        </profile>
-        <profile>
-            <id>runAllTests</id>
-            <!-- not overriding everything, assumes default behavior is nothing set for incl/excl tags -->
-        </profile>
-        <profile>
-            <id>localMaster</id>
-            <properties>
-                <StitchrTagsToExclude>com.stitchr.core.tags.ClusterTest</StitchrTagsToExclude>
-                <StitchrTagsToInclude />
-                <StitchrSparkTestMaster>local</StitchrSparkTestMaster>
-            </properties>
-        </profile>
-    </profiles>
+
 </project>

@@ -17,13 +17,11 @@
 
 package com.stitchr.core.registry
 
-import com.stitchr.core.common.Encoders.{ datasetEncoder, DataSet }
+import com.stitchr.core.common.Encoders.{ DataSet, dataSetEncoder }
 import com.stitchr.util.EnvConfig.{ baseRegistryFolder, dataCatalogPersistence, props }
 import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.core.util.Convert.config2JdbcProp
 import com.stitchr.sparkutil.SharedSession.spark
-// import com.stitchr.util.Logging
-
 import org.apache.spark.sql.{ DataFrame, Dataset }
 
 object RegistrySchema {
@@ -31,8 +29,8 @@ object RegistrySchema {
   import org.apache.spark.sql.types._
 
   /**
-   * schema_columns.csv looks
-   * [object_ref,column_name,ordinal_position,data_type,numeric_precision,character_maximum_length,is_nullable]
+   * schema_column.csv looks
+   * [id, column_name,ordinal_position,data_type,numeric_precision,character_maximum_length,is_nullable]
    */
   // NH: need to use?!
   val schemaDef: StructType = new StructType()
@@ -54,30 +52,9 @@ object RegistrySchema {
       storage: String,
       relative_url: String,
       description: String,
-      data_source_id: String
+      data_persistence_src_id: String
   )
 
-  /**
-    case class DataSet(
-                      id: Int,
-                      object_ref: String,
-                      format: String,
-                      storage_type: String,
-                      mode: String,
-                      container: String,
-                      object_type: String,
-                      object_name: String,
-                      schema_ref: String,
-                      query: String,
-                      partition_key: String,
-                      number_partitions: Int,
-                      priority_level: Int,
-                      dataset_state_id: Int
-                      schema_id: Int
-                      data_source_id: Int
-                      schema_id: Int
-                    )
-   */
 // may use later
   val datasetSchema: StructType = new StructType()
     .add("id", IntegerType)
@@ -91,24 +68,21 @@ object RegistrySchema {
     .add("query", StringType)
     .add("partition_key", StringType)
     .add("number_partitions", IntegerType)
-    .add("priority_level", IntegerType)
-    .add("dataset_state_id", IntegerType)
     .add("schema_id", IntegerType)
-    .add("data_source_id", IntegerType)
-    .add("data_destination_id", IntegerType)
+    .add("data_persistence_src_id", IntegerType)
+    .add("data_persistence_dest_id", IntegerType)
 
-  /* schemas column defs */
-  /*    .add("object_ref", StringType)
+  /* schemas column defs
+     .add("id", IntegerType)
     .add("column_name", StringType)
     .add("column_position", IntegerType)
     .add("column_type", StringType)
     .add("column_precision", IntegerType)
     .add("string_length", IntegerType)
-    .add("is_nullable", BooleanType) */
-
+    .add("is_nullable", BooleanType)
+   */
   val schemasSchema: StructType = new StructType()
     .add("id", IntegerType, false)
-    //  .add("object_ref", StringType, false)
     .add("column_name", StringType, false)
     .add("column_position", IntegerType, false)
     .add("column_type", StringType, false)
@@ -141,96 +115,202 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
   NH: 7/26/2019. the schema_column.string_length is also used to capture the decimal precision of a numeric.
   We need to adjust the names of the attributes as the current naming is wrong and leads to confusion
    */
-  val (datasetDF, schemasDF, dataSourceDF): (DataFrame, DataFrame, DataFrame) = dataCatalogPersistence match {
-    case "dc" =>
-      val jdbc = SparkJdbcImpl(config2JdbcProp(props, "dc"))
-      (
-          jdbc
-            .readDF(
-                s"""select id,
-               | object_ref,
+  val (dataSetDF, schemasDF, dataPersistenceDF, batchGroupDF, batchGroupMembersDF): (DataFrame, DataFrame, DataFrame, DataFrame, DataFrame) =
+    dataCatalogPersistence match {
+      case "dc" =>
+        val jdbc = SparkJdbcImpl(config2JdbcProp(props, "dc"))
+        (
+            jdbc
+              .readDF(
+                  s"""select id,
+               | CONCAT(object_name, '_', data_persistence_src_id) as object_ref,
                | format,
                | storage_type, mode,
                | container, object_type,
-               | object_name, query, partition_key,
-               | number_partitions, priority_level,
-               | dataset_state_id,
+               | object_name, query,
+               | partition_key,
+               | number_partitions,
                | schema_id,
-               | data_source_id,
-               | data_destination_id
+               | data_persistence_src_id,
+               | data_persistence_dest_id
                | from public.dataset""".stripMargin
-            )
-            .cache(),
-          jdbc.readDF("select * from public.schema_column").cache(),
-          jdbc.readDF("select * from public.data_source").cache()
-      )
-    case "registry" =>
-      (
-          spark.read
-            .schema(datasetSchema)
-            .format("csv")
-            .option("header", true)
-            .option("quote", "\"")
-            .option("multiLine", true)
-            .option("inferSchema", "false")
-            .option("delimiter", ",")
-            .load(baseRegistryFolder + "dataset.csv")
-            .cache(),
-          spark.read
-            .schema(schemasSchema)
-            .format("csv")
-            .option("header", "true")
-            .option("inferSchema", "false")
-            .option("delimiter", ",")
-            .load(baseRegistryFolder + "schema_column.csv")
-            .cache(),
-          spark.read
-            .format("csv")
-            .option("header", "true")
-            .option("inferSchema", "true")
-            .option("delimiter", ",")
-            .load(baseRegistryFolder + "data_source.csv")
-            .cache()
-      )
-    case _ => // assumes default to jdbc
-      val jdbc = SparkJdbcImpl(config2JdbcProp(props, "dc"))
-      (
-          jdbc
-            .readDF(
-                s"""select id,
-               | object_ref,
-               | format,
-               | storage_type, mode,
-               | container, object_type,
-               | object_name, query, partition_key,
-               | number_partitions, priority_level,
-               | dataset_state_id,
-               | schema_id,
-               | data_source_id,
-               | data_destination_id
-               | from public.dataset""".stripMargin
-            )
-            .cache(),
-          jdbc
-            .readDF(
-                s"""select id, column_name,
+              )
+              .cache(),
+            jdbc
+              .readDF(
+                  s"""select id,
+               | column_name,
                | column_position,
                | column_type,
                | column_precision,
                | string_length,
                | is_nullable
                | from public.schema_column""".stripMargin
+              )
+              .cache(),
+            jdbc
+              .readDF(
+                  s"""select id,
+                | name,
+                | persistence_type,
+                | storage_type ,
+                | host,
+                | port,
+                | db,
+                | "user",
+                | pwd,
+                | driver,
+                | fetchsize
+                | from public.data_persistence""".stripMargin
+              )
+              .cache(),
+            jdbc.readDF(
+                s"""select
+                   | g.id,
+               | g.name
+               | from batch_group g
+               | """.stripMargin
+            ),
+            jdbc.readDF(
+                s"""select
+                   | bgm.group_id,
+               | bgm.dataset_id
+               | from
+               | batch_group_members bgm
+               | """.stripMargin
             )
-            .cache(),
-          jdbc.readDF(s"""select *
-               | from public.data_source""".stripMargin).cache()
-      )
-  }
+            // better to read the tables in and join with  datsetdf?!
+            /*  jdbc.readDF(
+                s"""select bgm.group_id,
+                     | g.name,
+                     | bgm.dataset_id,
+                     | d.object_name || '_' || data_persistence_src_id as object_ref
+                     | from
+                     | batch_group g,
+                     | batch_group_members bgm,
+                     | dataset d
+                     | where d.id = bgm.dataset_id
+                     | and g.id = bgm.group_id
+                     | """.stripMargin
+            ) */
+        )
+      // to fix to use data_persistence
+      case "registry" =>
+        (
+            spark.read
+              .schema(datasetSchema)
+              .format("csv")
+              .option("header", true)
+              .option("quote", "\"")
+              .option("multiLine", true)
+              .option("inferSchema", "false")
+              .option("delimiter", ",")
+              .load(baseRegistryFolder + "dataset.csv")
+              .cache(),
+            spark.read
+              .schema(schemasSchema)
+              .format("csv")
+              .option("header", "true")
+              .option("inferSchema", "false")
+              .option("delimiter", ",")
+              .load(baseRegistryFolder + "schema_column.csv")
+              .cache(),
+            spark.read
+              .format("csv")
+              .option("header", "true")
+              .option("inferSchema", "true")
+              .option("delimiter", ",")
+              .load(baseRegistryFolder + "data_source.csv")
+              .cache(),
+            // NH: maybe will add in V0.2 but files are only for demo purposes and are not transactional
+            // this is a placeholder for now...
+            spark.read
+              .format("csv")
+              .option("header", "true")
+              .option("inferSchema", "true")
+              .option("delimiter", ",")
+              .load(baseRegistryFolder + "batch_group.csv")
+              .cache(),
+            spark.read
+              .format("csv")
+              .option("header", "true")
+              .option("inferSchema", "true")
+              .option("delimiter", ",")
+              .load(baseRegistryFolder + "batch_group_members.csv")
+              .cache()
+        )
+      case _ => // assumes default to jdbc
+        val jdbc = SparkJdbcImpl(config2JdbcProp(props, "dc"))
+        (
+            jdbc
+              .readDF(
+                  s"""select id,
+               | CONCAT(object_name, '_', data_persistence_src_id) as object_ref,
+               | format,
+               | storage_type,
+               | mode,
+               | container,
+               | object_type,
+               | object_name,
+               | query,
+               | partition_key,
+               | number_partitions,
+               | schema_id,
+               | data_persistence_src_id,
+               | data_persistence_dest_id
+               | from public.dataset""".stripMargin
+              )
+              .cache(),
+            jdbc
+              .readDF(
+                  s"""select id,
+                   | column_name,
+                   | column_position,
+               | column_type,
+               | column_precision,
+               | string_length,
+               | is_nullable
+               | from public.schema_column""".stripMargin
+              )
+              .cache(),
+            jdbc
+              .readDF(
+                  s"""select id,
+                         | name,
+                         | persistence_type,
+                         | storage_type ,
+                         | host,
+                         | port,
+                         | db,
+                         | "user",
+                         | pwd,
+                         | driver,
+                         | fetchsize
+                         | from public.data_persistence""".stripMargin
+              )
+              .cache(),
+            jdbc.readDF(
+                s"""select
+                   | g.id,
+               | g.name
+               | from batch_group g
+               | """.stripMargin
+            ),
+            jdbc.readDF(
+                s"""select
+                   | bgm.group_id,
+             | bgm.dataset_id
+             | from
+             | batch_group_members bgm
+             | """.stripMargin
+            )
+        )
+    }
 // Dataset[Encoders.DataSet]
-  val datasetDS: Dataset[DataSet] = datasetDF
+  val dataSetDS: Dataset[DataSet] = dataSetDF
     .select(
         "id",
-        "object_ref", // NH: 7/10/2019... need to deprecate the use of object_ref...
+        "object_ref",
         "format",
         "storage_type",
         "mode",
@@ -240,11 +320,17 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
         "query",
         "partition_key",
         "number_partitions",
-        "priority_level",
-        "dataset_state_id",
         "schema_id",
-        "data_source_id",
-        "data_destination_id"
+        "data_persistence_src_id",
+        "data_persistence_dest_id"
     )
-    .as(datasetEncoder)
+    .as(dataSetEncoder)
+
+  val groupListDF = batchGroupDF
+    .join(batchGroupMembersDF, batchGroupDF.col("id") === batchGroupMembersDF.col("group_id"))
+    .join(dataSetDF, dataSetDF.col("id") === batchGroupMembersDF.col("dataset_id"))
+    .select("group_id", "name", "dataset_id", "object_name", "data_persistence_src_id")
+  //val extendedDataSetDs: Dataset[ExtendedDataSet] =
+  //  dataSetDS.map{ r: DataSet => extendedFromDataSet(r) }
+
 }

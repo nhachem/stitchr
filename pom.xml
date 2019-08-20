@@ -18,23 +18,43 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.stitchr</groupId>
-  <artifactId>stitchr</artifactId>
-  <version>0.1-SNAPSHOT</version>
-  <inceptionYear>2018</inceptionYear>
-  <name>stitchr</name>
-  <packaging>pom</packaging>
 
   <properties>
+    <stitchr.version>0.1-SNAPSHOT</stitchr.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <zinc.enabled>false</zinc.enabled>
     <zinc.port>7919</zinc.port>
     <scala.binary.version>2.11</scala.binary.version>
-    <scala.version>${scala.binary.version}.12</scala.version>
+    <scala.version>${scala.binary.version}.8</scala.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <spark.version>2.2.2</spark.version>
-    <hadoop.version>2.7.3</hadoop.version>
+    <spark.version>2.4.3</spark.version>
+    <hadoop.version>2.7.4</hadoop.version>
+    <yarn.version>${hadoop.version}</yarn.version>
+    <maven.version>3.6.0</maven.version>
+
+    <test.java.home>${java.home}</test.java.home>
+    <test.exclude.tags></test.exclude.tags>
+    <test.include.tags></test.include.tags>
+
+    <!-- Package to use when relocating shaded classes. -->
+    <spark.shade.packageName>org.spark_project</spark.shade.packageName>
+
+    <!-- Modules that copy jars to the build directory should do so under this location. -->
+    <jars.target.dir>${project.build.directory}/scala-${scala.binary.version}/jars</jars.target.dir>
+
+    <!-- Allow modules to enable / disable certain build plugins easily. -->
+    <build.testJarPhase>prepare-package</build.testJarPhase>
+    <build.copyDependenciesPhase>none</build.copyDependenciesPhase>
+
   </properties>
+
+  <groupId>com.stitchr</groupId>
+  <artifactId>stitchr</artifactId>
+  <version>${stitchr.version}</version>
+  <inceptionYear>2018</inceptionYear>
+  <name>stitchr</name>
+  <packaging>pom</packaging>
 
   <modules>
     <!-- <module>benchmark</module> -->
@@ -44,7 +64,81 @@
     <module>app</module>
   </modules>
 
+  <repositories>
+
+    <repository>
+      <id>central</id>
+      <!-- This should be at top, it makes maven try the central repo first and then others and hence faster dep resolution -->
+      <name>Maven Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
+
   <dependencies>
+    <!-- https://mvnrepository.com/artifact/com.hubspot.jinjava/jinjava -->
+    <dependency>
+      <groupId>com.hubspot.jinjava</groupId>
+      <artifactId>jinjava</artifactId>
+      <version>2.5.2</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/net.liftweb/lift-json -->
+    <dependency>
+      <groupId>net.liftweb</groupId>
+      <artifactId>lift-json_2.11</artifactId>
+      <version>3.3.0</version>
+    </dependency>
+   <!-- Doobie stuff experimental
+   <dependency>
+          <groupId>org.tpolecat</groupId>
+          <artifactId>doobie-core_2.11</artifactId>
+          <version>0.8.0-M3</version>
+      </dependency>
+   <dependency>
+      <groupId>org.tpolecat</groupId>
+      <artifactId>doobie-postgres_2.11</artifactId>
+      <version>0.8.0-M3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tpolecat</groupId>
+      <artifactId>doobie-specs2_2.11</artifactId>
+      <version>0.8.0-M3</version>
+      <scope>test</scope>
+    </dependency>
+   <dependency>
+      <groupId>org.tpolecat</groupId>
+      <artifactId>doobie-specs2-cats_2.11</artifactId>
+      <version>0.4.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tpolecat</groupId>
+      <artifactId>doobie-scalatest_2.11</artifactId>
+      <version>0.8.0-M3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.tpolecat</groupId>
+      <artifactId>doobie-core-cats_2.11</artifactId>
+      <version>0.4.4</version>
+    </dependency>
+    -->
     <!-- spark -->
     <dependency>
       <groupId>org.apache.spark</groupId>
@@ -102,6 +196,14 @@
       <version>3.0.8</version>
       <scope>test</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.scalatest/scalatest-funspec -->
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest-funspec_2.11</artifactId>
+      <version>3.0.0-SNAP13</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>org.pegdown</groupId>
       <artifactId>pegdown</artifactId>
@@ -114,7 +216,16 @@
       <artifactId>scala-logging_${scala.binary.version}</artifactId>
       <version>3.9.2</version>
     </dependency>
-    <dependency>
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+    <!-- <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.26</version>
+      <scope>test</scope>
+    </dependency> -->
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-jdk14 -->
+
+    <!-- <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.7.12</version>
@@ -123,7 +234,7 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-api</artifactId>
       <version>2.3</version>
-    </dependency>
+    </dependency> -->
   </dependencies>
 
   <build>
@@ -135,20 +246,54 @@
         <plugin>
           <groupId>net.alchim31.maven</groupId>
           <artifactId>scala-maven-plugin</artifactId>
-          <version>3.2.2</version>
+          <version>4.1.1</version>
           <configuration>
             <scalaCompatVersion>${scala.binary.version}</scalaCompatVersion>
             <scalaVersion>${scala.version}</scalaVersion>
             <recompileMode>incremental</recompileMode>
-            <useZincServer>${zinc.enabled}</useZincServer>
-            <zincPort>${zinc.port}</zincPort>
+            <!-- <useZincServer>${zinc.enabled}</useZincServer>
+            <zincPort>${zinc.port}</zincPort> -->
             <args>
               <arg>-target:jvm-1.8</arg>
               <arg>-Xlint</arg>
               <arg>-deprecation</arg>
-              <arg>${project.build.directory}/.scala_dependencies</arg>
+            <!--  <arg>${project.build.directory}/.scala_dependencies</arg> -->
             </args>
           </configuration>
+          <executions>
+            <execution>
+              <id>Scaladoc</id>
+              <goals>
+                <goal>doc</goal>
+              </goals>
+              <phase>prepare-package</phase>
+              <configuration>
+                <args>
+                  <arg>-no-link-warnings</arg>
+                </args>
+              </configuration>
+            </execution>
+            <execution>
+              <id>attach-scaladocs</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>doc-jar</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>Compile</id>
+              <goals>
+                <goal>compile</goal>
+                <goal>testCompile</goal>
+              </goals>
+              <!-- <configuration>
+                <args>
+                  <arg>-dependencyfile</arg>
+                  <arg>${project.build.directory}/.scala_dependencies</arg>
+                </args>
+              </configuration> -->
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

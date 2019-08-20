@@ -21,7 +21,12 @@
 ## run from base of code
 ## add jars to the maven repo assumes you have the jars available under jars...
 
-## Vertica
-mvn install:install-file -DgroupId=com.hp-vertica -DartifactId=vertica-8.1.1_spark2.1_scala2.11 -Dversion=8.1.1 -Dpackaging=jar -Dfile=jars/vertica-8.1.1_spark2.1_scala2.11-20170623.jar -DgeneratePom=true
+## this is currently needed to compile the scala docs....
+VERSION=$1
+mvn install:install-file -DgroupId=com.stitchr -DartifactId=stitchr-util -Dversion=$VERSION -Dpackaging=jar -Dfile=util/target/stitchr-util-$VERSION.jar -DgeneratePom=true
 
-mvn install:install-file -DgroupId=com.hp-vertica -DartifactId=vertica-jdbc-8.1.1-0 -Dversion=8.1.1 -Dpackaging=jar -Dfile=jars/vertica-jdbc-8.1.1-0.jar -DgeneratePom=true
+mvn install:install-file -DgroupId=com.stitchr -DartifactId=stitchr-sparkutil -Dversion=$VERSION -Dpackaging=jar -Dfile=sparkutil/target/stitchr-sparkutil-$VERSION.jar -DgeneratePom=true
+
+mvn install:install-file -DgroupId=com.stitchr -DartifactId=stitchr-core -Dversion=$VERSION -Dpackaging=jar -Dfile=core/target/stitchr-core-$VERSION.jar -DgeneratePom=true
+
+

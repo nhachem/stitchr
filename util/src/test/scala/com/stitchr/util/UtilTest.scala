@@ -8,15 +8,7 @@ class UtilTest extends FunSpec {
   describe("UtilTest") {
     describe("time") {
       it("TODO: should pass through and log the time...") {}
-    //
-    }
-    describe("getRunTime") {
-      it("TODO: get run time") {}
       //
     }
-  }
-  describe("annotateRunTime") {
-    it("TODO: annotate run time") {}
-    //
   }
 }

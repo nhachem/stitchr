@@ -18,35 +18,22 @@
 #
 
 ## example run
-# nohup $STITCHR_ROOT/bash/runLoad2Lake.sh web_sales,postgresql_1_store_sales,postgresql_1_q21  > /tmp/logs/load2Lake.log &
+# nohup $STITCHR_ROOT/bash/runMoveDataSetList.sh web_sales_1,stores_sales_1,q21_1  > /tmp/logs/moveDataSetList.log &
 
-## note this sets you to invoke the shell script from the stitchr root We need to fix
+## note this sets you to invoke the shell script from the stitchr root We need to fix...
+## setup the environment
+## source bash/stitchr_env.sh
 
+source ./bash/stitchr_env.sh
 
-## you need to change those parameters
-USER_ROOT=/Users/nabilhachem
-STITCHR_ROOT=$USER_ROOT/repo/stitchr
-
-source $STITCHR_ROOT/bash/env_demo.sh
-
-## set it up if JAVA_HOME is not set export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_211.jdk/Contents/Home
-
-SPARK_HOME=/Users/nabilhachem/sparkBin/spark-2.4.3-bin-hadoop2.7
-STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-0.1-SNAPSHOT-jar-with-dependencies.jar
-MASTER=local[4]
-
-    
 echo $@
-STITCHR_CLASS="com.stitchr.app.ThreadedIngestService"
+STITCHR_CLASS="com.stitchr.app.MoveDataSetList"
 
 # for a cluster deployment better use deploy_mode
 #    --deploy-mode client \
-## --num-executors 3 \
-## --conf core-per-executor=4 \
 $SPARK_HOME/bin/spark-submit \
      --master $MASTER \
      --packages org.apache.spark:spark-avro_2.11:2.4.3 \
      --class $STITCHR_CLASS\
      "$STITCHR_JAR" \
      "$@"
-

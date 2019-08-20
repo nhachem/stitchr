@@ -17,15 +17,13 @@
 
 package com.stitchr.app
 
-import com.stitchr.util.EnvConfig.props
 import com.stitchr.core.dataflow.ComputeService.runQueries
-import com.stitchr.util.Properties.configS3
 import com.stitchr.sparkutil.SharedSession.spark
 import com.stitchr.core.dataflow.Runner
-import com.stitchr.util.Logging
+import com.stitchr.sparkutil.database.CatalogUtil._
+import com.stitchr.util.EnvConfig.logging
 
 class DerivationService {
-  val logging = new Logging
 
   spark.sparkContext.setLogLevel("INFO")
 
@@ -38,42 +36,36 @@ class DerivationService {
   /**
    * edit the parameters below to go against a target dbms or files.
    */
-  def deriveQueryList(ql: List[String]): Unit = { // , st: String = "file"): Unit = {
+  def deriveQueryList(ql: List[String]): Unit = {
 
-    val _ = configS3() // needed for AWS ... will have to extend to include GS amd  make conditional based on config or metadata
-
-// instantiate the derived views
+    // instantiate the derived views
     ql.foldLeft()(
         (_, next) => {
-          println(s"computing the derived query $next") // for storage_type $st")
-          Runner.run(next) // , st)
-          // show changes to catalog as we iterate.. will pull out
-          spark.catalog.listTables.show(50, false)
-          spark.catalog.listTables.count()
+          logging.log.info(s"computing the derived query $next") // for storage_type $st")
+          Runner.run(next)
         }
     )
-
+    // show changes to catalog as a result if appLogLevl is info
+    infoListTables()
+    println(s"catalog table count is $infoListTablesCount")
   }
 }
 
-// limited to 22... but will work for most of our needs
-// case class configParam(globalPartitions: Int = 8, globalFileName: String = null, outDir: String = null)
 // note the current version just initializes the runtime db so at the end of the run everything goes away (we do not materialise....
 // will modify to have it part of ingest
 object Derivation extends App {
 
   def run(ql: List[String], st: String = "file") = {
-    val logging = new Logging
-    spark.sparkContext.setLogLevel("INFO")
+
     val ds = new DerivationService
     logging.log.info(s"starting the derivation of  $ql")
     ds.deriveQueryList(ql)
     runQueries(ql, st)
 
-    // clear all catalog cache for reruns with updated data catalog files
+    // NH: clear all catalog cache for reruns with updated data catalog files move to stitchrutil.Catalog
     spark.sql("clear cache").show()
 
-    spark.catalog.listTables.show(50, false)
+    infoListTables()
 
     logging.log.info(s"done with the derivation of  $ql")
 

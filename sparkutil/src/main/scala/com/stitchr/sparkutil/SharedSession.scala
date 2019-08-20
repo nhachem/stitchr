@@ -17,7 +17,9 @@
 
 package com.stitchr.sparkutil
 
-import com.stitchr.util.EnvConfig.hiveSupport
+import com.stitchr.util.EnvConfig.{ hiveSupport, logLevel }
+import com.stitchr.util.Properties.configHadoop
+
 object SharedSession {
 
   import org.apache.spark.sql.SparkSession
@@ -26,32 +28,40 @@ object SharedSession {
   def initSparkSession(hiveSupport: Boolean = false): SparkSession = {
     val warehouseLocation = "file:${system:user.dir}/spark-warehouse"
     SparkSession.clearDefaultSession()
+
     // always session before context starting from Spark 2.3
-    if (hiveSupport)
-      SparkSession.builder
-        .appName("Stitchr with hive support")
-       // .config("hive.exec.dynamic.partition", "true")
-        //.config("hive.exec.dynamic.partition.mode", "nonstrict")
-        //.config("spark.sql.catalogImplementation", "hive")
-        //.config("spark.sql.warehouse.dir", warehouseLocation) // new File("spark-warehouse").getAbsolutePath())
-        //.config("spark.driver.allowMultipleContexts", "true")
-        //.enableHiveSupport
-        .getOrCreate
-    else
-      SparkSession.builder
-        .appName("Stitchr")
-        // .master("local[*]")// avoid hardcoding the deployment environment
-       // .config("spark.sql.warehouse.dir", warehouseLocation)
-        // .config("spark.sql.warehouse.dir", new File("spark-warehouse").getAbsolutePath())
-        // .config("spark.driver.allowMultipleContexts", "true")
-        // .config("spark.driver.allowMultipleContexts", value = true)
-        .config("spark.sql.parquet.filterPushdown", value = true)
-        .config("spark.sql.parquet.mergeSchema", value = false)
-        .config("spark.speculation", value = false)
-        .getOrCreate
+    val ss =
+      if (hiveSupport)
+        SparkSession.builder
+          .appName("Stitchr with hive support")
+          .config("hive.exec.dynamic.partition", "true")
+          .config("hive.exec.dynamic.partition.mode", "nonstrict")
+          .config("spark.sql.catalogImplementation", "hive")
+          .config("spark.sql.warehouse.dir", warehouseLocation) // new File("spark-warehouse").getAbsolutePath())
+          .config("spark.driver.allowMultipleContexts", "true")
+          .enableHiveSupport
+          .getOrCreate
+      else
+        SparkSession.builder
+          .appName("Stitchr")
+          // .master("local[*]")// avoid hardcoding the deployment environment
+          // .config("spark.sql.warehouse.dir", warehouseLocation)
+          // .config("spark.sql.warehouse.dir", new File("spark-warehouse").getAbsolutePath())
+          // .config("spark.driver.allowMultipleContexts", "true")
+          // .config("spark.driver.allowMultipleContexts", value = true)
+          .config("spark.sql.parquet.filterPushdown", value = true)
+          .config("spark.sql.parquet.mergeSchema", value = false)
+          .config("spark.speculation", value = false)
+          .getOrCreate
+
+    // we set up the hadoop config for the session here
+    val _ = configHadoop()
+    // set log level
+    ss.sparkContext.setLogLevel(logLevel)
+    ss
   }
 
-  // setting spark configs... nmeed to merge within the initialization
+  // setting spark configs... need to merge within the initialization
   def configSpark(): SparkSession =
     /* those are spark config add ons. Many may be actually defaults but we want to ensure that they are set */
     /* spark.sqlContext.setConf("spark.sql.parquet.filterPushdown", "true")
@@ -64,15 +74,15 @@ object SharedSession {
     // .enableHiveSupport() // self-explanatory, isn't it?
     // .config("spark.sql.warehouse.dir", "target/spark-warehouse")
       .config("spark.sql.catalogImplementation", "in-memory")
-    .config("spark.sql.parquet.filterPushdown", true)
-      .config("spark.sql.parquet.mergeSchema", false)
-      .config("spark.speculation", false)
+      .config("spark.sql.parquet.filterPushdown", value = true)
+      .config("spark.sql.parquet.mergeSchema", value = false)
+      .config("spark.speculation", value = false)
       //  .config("spark.driver.extraClassPath", "/home/hadoop/code/edap-poc/jars/...")
       //  .config("spark.executor.extraClassPath", "/home/hadoop/code/edap-poc/jars/...")
       .getOrCreate()
 
   /* this is shared everywhere as the spark session
   forcing to non hive for now */
-  val spark: SparkSession = initSparkSession(false)
+  val spark: SparkSession = initSparkSession(hiveSupport)
 
 }

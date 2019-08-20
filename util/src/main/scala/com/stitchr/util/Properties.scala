@@ -19,7 +19,8 @@ package com.stitchr.util
 
 import java.io.File
 
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.stitchr.util.EnvConfig.cloudStorage
+import com.typesafe.config.{Config, ConfigFactory}
 
 object Properties {
 
@@ -35,7 +36,7 @@ object Properties {
     ConfigFactory.parseFile(configFile).withFallback(ConfigFactory.parseFile(new File(configFilePath + commonConfigFile)))
   }
 
-  def configS3(): Configuration = {
+  def _configHadoop(): Configuration = {
     // example of config
     // import java.util.Map.Entry
 
@@ -74,4 +75,6 @@ object Properties {
     }
     hadoopConfig
   }
+
+  def configHadoop(): Configuration =  if (cloudStorage) _configHadoop() else null.asInstanceOf[Configuration]
 }

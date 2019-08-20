@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
@@ -17,33 +17,27 @@
 # limitations under the License.
 #
 
-## example run
-# nohup $STITCHR_ROOT/bash/runLoad2Lake.sh web_sales,postgresql_1_store_sales,postgresql_1_q21  > /tmp/logs/load2Lake.log &
+## set the environments per your's
+export USER_ROOT=/Users/nabilhachem
+export USER_PERSIST_ROOT=$USER_ROOT/data
+export STITCHR_ROOT=$USER_ROOT/repo/stitchr
+export CONFIG_DIR=$USER_ROOT/demo
+export DATA_DIR=$USER_PERSIST_ROOT/demo
+export REGISTRY_DIR=$USER_ROOT/demo
 
-## note this sets you to invoke the shell script from the stitchr root We need to fix
+export baseRegistryFolder=$REGISTRY_DIR/registry/
+export baseConfigFolder=$CONFIG_DIR/config/
+## using tpcds generated and adjusted data
+export baseDataFolder=$DATA_DIR/tpcds/ ## for the demo
 
 
-## you need to change those parameters
-USER_ROOT=/Users/nabilhachem
-STITCHR_ROOT=$USER_ROOT/repo/stitchr
+export defaultOutputDir=/tmp
 
-source $STITCHR_ROOT/bash/env_demo.sh
-
+## spark
+# export SPARK_HOME="<spark home>"
+## export SPARK_HOME=/Users/nabilhachem/sparkBin/spark-2.4.3-bin-hadoop2.7
+export VERSION=0.1-SNAPSHOT
+export MASTER=local[4]
+export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
 ## set it up if JAVA_HOME is not set export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_211.jdk/Contents/Home
-
-SPARK_HOME=/Users/nabilhachem/sparkBin/spark-2.4.3-bin-hadoop2.7
-STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-0.1-SNAPSHOT-jar-with-dependencies.jar
-MASTER=local[4]
-
-echo $@
-STITCHR_CLASS="com.stitchr.app.IngestDataSet"
-
-# for a cluster deployment better use deploy_mode
-#    --deploy-mode client \
-$SPARK_HOME/bin/spark-submit \
-     --master $MASTER \
-     --packages org.apache.spark:spark-avro_2.11:2.4.3 \
-     --class $STITCHR_CLASS\
-     "$STITCHR_JAR" \
-     "$@"
-
+## export PATH=$SPARK_HOME/bin:$PATH

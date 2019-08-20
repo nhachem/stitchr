@@ -1,0 +1,6 @@
+id,name
+1,tpcds_postgres
+2,tpcds_file
+3,mixed
+4,tpcds_base_files
+5,mixed_base

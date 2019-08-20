@@ -17,7 +17,7 @@
 
 // make sure you have the env variables set to your environment in env.sh and that env.sh is sourced
 // we use avro as a default for materialization and need to add the package
-// spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-0.1-SNAPSHOT-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
+//
 
 /**
   * Used to demo use cases
@@ -27,22 +27,20 @@
   * The data is based on tpcds.
   * data files are stripped from the last | to make them directly readable and are stored under demo/data/tpcds
   * generate the data using tpcds tools and place in that directory before the demo.
+  *
+  * Avro  before 2.4 is part of the distribution
+  * spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-<VERSION>-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
+  *
   * You can find a copy ready to use under nhachem/stitchr-demo
   */
 
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.app.{DataIngestService, DerivationService, Derivation}
-import com.stitchr.core.dbapi.SparkJdbcImpl
-import com.stitchr.core.dataflow.ComputeService.runQueries
-import com.stitchr.core.registry.RegistrySchema.{dataSourceDF, datasetDF}
-import com.stitchr.core.registry.RegistryService.{getDataSource, getDataset, getObjectRef}
-import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
-import com.stitchr.util.Logging
-import com.stitchr.util.Properties.configS3
-import com.stitchr.util.Util.time
-import com.stitchr.core.api.DataSet.Implicits
-
-val logging = new Logging
+import com.stitchr.app.DerivationService
+import com.stitchr.app.DataMoveService.instantiateQueryList
+import com.stitchr.core.registry.RegistryService.{getDataSet, getObjectRef}
+import com.stitchr.util.EnvConfig.logging
+import com.stitchr.core.api.DataSetApi.Implicits
+import com.stitchr.sparkutil.database.CatalogUtil.infoListTables
 
 spark.sparkContext.setLogLevel("INFO")
 
@@ -56,9 +54,6 @@ val configMap:Map[String, String] = spark.conf.getAll
 // file based example
 val stFile = "file"
 val ql0 = List("q2","q4")
-//val ql0 = List("web_sales_m")
-
-Derivation.run(ql0)
 
 // database based example
 // q21 is the same as q2 in the registry but associated with a database schema
@@ -68,83 +63,49 @@ val stDatabase = "database"
 
 val ds = new DerivationService
 
-ds.deriveQueryList(ql0) // ,stFile)
-runQueries (ql0, stFile)
-
-ds.deriveQueryList(ql1) // ,stDatabase)
-runQueries (ql1, stDatabase)
-
-// clear all catalog cache for reruns with updated data catalog files
-spark.sql("clear cache").show()
-
-spark.catalog.listTables.show(50, false)
+println("start derivation")
+ds.deriveQueryList(ql0)
+ds.deriveQueryList(ql1)
 
 
-// temporary out to speed up dev
-spark.sql("select * from q2").show(50)
-spark.sql("select * from postgresql_1_q21").show(50)
-spark.sql("select * from q4").show(50)
+// println("start running queries")
+// runQueries (ql0, stFile)
+// runQueries (ql1, stDatabase)
 
-val q21DF = spark.table("postgresql_1_q21")
-q21DF.show(50,false)
+infoListTables()
 
-// NH: 7/11/2019 ... need to add the write use cases. ephemeral to tmp and persistence to target container using data sources
-// import spark.sqlContext.implicits._
-// spark.sparkContext.emptyRDD.toDF()
+/* persistence  id = 3 is file system,  pipe delimited
+ and 1 is for postgres tpcds
+ */
+spark.sql("select * from q2_3").show(50)
+spark.sql("select * from q21_1").show(50)
+spark.sql("select * from q4_3").show(50)
+
+val q21DF = spark.table("q21_1")
+q21DF.show(10, truncate = false)
+
+//import spark.sqlContext.implicits._
+//spark.sparkContext.emptyRDD.toDF()
+
 // change logging to warn
-spark.catalog.listTables.show(50, false)
+infoListTables()
 
-def instantiateQueryList(ql: List[String], dataType: String = "database"): Unit = { // , st: String = "file"): Unit = {
+// DataIngestService
+instantiateQueryList(ql0, "file")
 
-  val _ = configS3() // needed for AWS ... may make conditional based on config or metadata
-
-  // assumed to be not needed
-  // val ds = new DerivationService
-  // ds.deriveQueryList(ql)
-
-  // Then run the actual materialization of the target objects
-  ql.foldLeft()(
-    (_, next) => {
-      println(s"instantiating the target for $next")
-      val (viewName, dfm) = getDataset(getObjectRef(next, dataType)).materialize
-      println(s"viewname is $viewName")
-      spark.sparkContext.setLogLevel("INFO")
-      time(dfm.count, "counting the rows in the materialized object")
-      dfm.printSchema()
-
-    }
-  )
-}
-spark.sparkContext.setLogLevel("WARN")
+logging.log.info("done with q2 and q4")
 // DataIngestService.
-  instantiateQueryList(ql0, "file")
-// DataIngestService.
-  instantiateQueryList(ql1, "database")
+instantiateQueryList(ql1, "database")
+logging.log.info("done with q21")
 
-/*
-spark.sparkContext.setLogLevel("WARN")
-import com.stitchr.core.api.Helpers._
-import com.stitchr.core.registry.RegistryService._
-
-
-
-val (viewName, dfm) = getDataset("q2").materialize
-println(s"viewname is $viewName")
-spark.sparkContext.setLogLevel("INFO")
-time(dfm.count, "counting the rows in the materialized object")
-dfm.printSchema()
-
-val (viewName1, dfm1) = getDataset("postgresql_1_q21").materialize
-println(s"viewname is $viewName1")
-time(dfm1.count, "counting the rows in the materialized object")
-dfm1.printSchema()
-*/
+// store in data lake
+print(s"storing web_sales in the data lake ")
 // adding web_sales as a direct example
-val (viewName, dfm) = getDataset(getObjectRef("web_sales", "file")).materialize
+val (viewName, dfm) = getDataSet(getObjectRef("web_sales", "file")).materialize
+val (viewName3, dfm3) = getDataSet("web_sales_3").materialize
+val (viewName1, dfm1) = getDataSet("web_sales_1").materialize
 
-// adding web_sales in the db as an exaple (of write to DB)
+// show all tables assumes applogLevel = INFO
+infoListTables()
 
-// show all
-spark.catalog.listTables.show(false)
-// show only the datalake contents
-spark.catalog.listTables.filter("name like 'datalake%'").show(false)
+

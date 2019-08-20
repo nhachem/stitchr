@@ -17,14 +17,17 @@
 
 package com.stitchr.util
 
-import java.util.concurrent.Semaphore
+import net.liftweb.json.Serialization.write
+import net.liftweb.json._
 
-class Threaded2(sem: Semaphore, objectRef: String, f: (Semaphore, String) => Unit) extends Thread {
-
-  override def run() {
-    sem.acquire() // acquire semaphore or wait if none available
-    f(sem, objectRef)
-    sem.release // give back the semaphore for other blocked threads
+object JsonConverter {
+  def toJson[T](t: T): String = {
+    implicit val formats = net.liftweb.json.DefaultFormats
+    write[T](t)
   }
 
+  def fromJson[T](j: String)(implicit m: Manifest[T]): T = {
+    implicit val formats = net.liftweb.json.DefaultFormats
+    parse(j).extract[T]
+  }
 }
