@@ -30,7 +30,7 @@ alter table dataset add constraint name_ds_uk unique using index uk_name_datasou
 -- end of add FKs
 -- important adjust the sequence if you prepopulate
 -- ALTER SEQUENCE [ IF EXISTS ] dataset_id_seq restart
-ALTER SEQUENCE dataset_id_seq restart with 70
+ALTER SEQUENCE dataset_id_seq restart with 70;
 
 -- comments
 comment on table dataset is 'holds all the dataset metadata that are managed by the system. core data catalog table'
