@@ -1,0 +1,13 @@
+basic tables used in the postgres DC.
+
+dataset
+data_persistense
+schema_column
+
+batch_group
+batch_group_members
+
+
+also seed data is for testing and demo purposes
+
+
