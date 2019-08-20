@@ -16,14 +16,11 @@
  */
 
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.app.{Derivation, DerivationService}
-import com.stitchr.app.DataMoveService.instantiateQueryList
 import com.stitchr.core.registry.RegistryService.{getJsonSchema, putJsonSchema, getSchemaArray}
 import com.stitchr.util.EnvConfig.logging
 import com.stitchr.util.JsonConverter._
-import com.stitchr.core.api.DataSet.Implicits
-import com.stitchr.core.common.Encoders.{DataSource0, SchemaColumn}
-import org.apache.spark.sql.{DataFrame, Dataset, Encoder}
+import com.stitchr.core.common.Encoders.SchemaColumn
+import org.apache.spark.sql.Encoder
 
 spark.sparkContext.setLogLevel("INFO")
 

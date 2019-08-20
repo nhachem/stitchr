@@ -29,7 +29,7 @@
   * generate the data using tpcds tools and place in that directory before the demo.
   *
   * Avro  before 2.4 is part of the distribution
-  * spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-<VERSION>-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
+  * spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
   *
   * You can find a copy ready to use under nhachem/stitchr-demo
   */
