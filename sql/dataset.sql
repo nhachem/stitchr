@@ -21,7 +21,7 @@ CREATE TABLE
         log_timestamp TIMESTAMP(6) WITH TIME ZONE DEFAULT now() NOT NULL -- log on inserts only for now 
     );
     
--- ALTER TABLE dataset ALTER COLUMN id SET DEFAULT nextval('dataset_id_seq');
+ALTER TABLE dataset ALTER COLUMN id SET DEFAULT nextval('dataset_id_seq');
 alter table dataset add constraint dataset_pk primary key (id);
 create unique index concurrently uk_name_datasource_idx  on dataset(object_name, data_persistence_src_id);
 alter table dataset add constraint name_ds_uk unique using index uk_name_datasource_idx;

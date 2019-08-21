@@ -74,7 +74,9 @@ object Runner {
     // this is the whole dependency graph covered in a table of edges
     val dependencyGraphDF = depSet.union(selfDS).distinct()
 
-    dependencyGraphDF.foreach(r => logging.log.info(s"dependency is $r"))
+    // BUG NH: logging is not serializable and while did not show up on the MAC broke in Google Dataproc cluster.
+    // Have a fix but will be in the next version
+    // dependencyGraphDF.foreach(r => logging.log.info(s"dependency is $r"))
 
     dependencyGraphDF.show(false)
 
