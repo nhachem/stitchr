@@ -56,7 +56,8 @@ object DataSetApi {
         case "file" =>
           val fileUrl =
             if (overrideDefaultContainer)
-              s"${destPersistence.storage_type}/${destPersistence.host}/${destPersistence.db}/${dataSet.object_ref}.$fileType"
+              // note: examp,e url is of the form {gsORs3ORfileORhdfs}://bucket/folder/file.filetype 
+              s"${destPersistence.storage_type}${destPersistence.host}/${destPersistence.db}/${dataSet.object_ref}.$fileType"
             else s"$defaultContainer/${dataSet.object_ref}.$fileType"
 
           logging.log.info(s"fileUrl is $fileUrl for object ref ${dataSet.object_ref}")
