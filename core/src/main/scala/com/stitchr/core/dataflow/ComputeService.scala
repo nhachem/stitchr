@@ -48,17 +48,7 @@ object ComputeService {
     val dependencySet: DataFrame = queryNode.mode match {
       case "derived" =>
         import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
-        import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
-        // val plan: LogicalPlan = spark.sessionState.sqlParser.parsePlan(queryNode.query)
 
-        //import spark.implicits._
-        /*
-        NH: This is critical to fix later... what comes back from the parse is typically container.object_name
-        but the keying in the dataset is on object_name only.... We need to include the format and container
-         */
-        // val dependsOn =
-        // val p = plan
-         // .collect { case r: UnresolvedRelation => (queryNode.object_name, r.tableName, queryNode.data_persistence_id) }
         // 1st pass into rewrite to strip {{ and }} jinja templates if any. We use Jinja in some cases to rewrite the dependencies from dataset.object_name to dataset.object_ref
         // hack for V0.1
         val q: String = stripCurlyBrace(queryNode.query)
@@ -71,26 +61,6 @@ object ComputeService {
 
     }
     dependencySet.distinct // distinct is needed as dependencies may have multiple occurrences in the logical plan
-  }
-
-  def getQueryDependencies(query: String): DataFrame = {
-    import spark.implicits._
-
-    // https://stackoverflow.com/questions/49785796/how-to-get-table-names-from-sql-query
-    import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
-    import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
-    val plan: LogicalPlan = spark.sessionState.sqlParser.parsePlan(query)
-
-    //import spark.implicits._
-    /*
-        NH: This is critical to fix later... what comes back from the parse is typically container.object_name
-        but the keying in the dataset is on object_name only.... We need to include the format and container
-     */
-    // val dependsOn =
-    val p = plan
-      .collect { case r: UnresolvedRelation => r.tableName }
-
-    p.toDF("dependsOn").distinct
   }
 
   /**
@@ -120,10 +90,10 @@ object ComputeService {
       /*  make it tail recursive until no new objects need to compute dependencies */
       //  TC is intended to be  naive here
       val dependsOnDS = dependenciesDF
-        .select("depends_on")
+        .select("depends_on", "data_persistence_id")
         .distinct
         // NH: we force the objects to be from the same datasource but this is not a long term requirement as we enable true federation
-        .join(dataSetDF, dependenciesDF("depends_on") === dataSetDF("object_name"))
+        .join(dataSetDF, dependenciesDF("depends_on") === dataSetDF("object_name") and dependenciesDF("data_persistence_id") === dataSetDF("data_persistence_src_id"))
         // .filter(s"object_type = '$objectType' and mode in ('derived')")
         .filter(s" mode in ('derived')")
         .select("id", "object_ref", "object_name", "query", "mode", "data_persistence_src_id")
@@ -170,7 +140,7 @@ object ComputeService {
          | mode,
          | data_persistence_src_id as data_persistence_id
          | from dc_datasets
-         | where object_name in ('$objectReference')""".stripMargin // need to use object_ref or object_name + source
+         | where object_ref in ('$objectReference')""".stripMargin // need to use object_ref or object_name + source
     val qs = spark
       .sql(
           sqltest

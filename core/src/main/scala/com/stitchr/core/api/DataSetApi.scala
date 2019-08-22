@@ -186,7 +186,7 @@ object DataSetApi {
                 (jdbc.readDF(q, partitionKey, numberOfPartitions), dataSet.object_ref)
             }
           case "derived" =>
-            Runner.run(dataSet.object_name)
+            Runner.run(dataSet.object_ref)
             // NH testing (spark.table(dataset.object_ref), dataset.object_name)
             (spark.table(dataSet.object_ref), dataSet.object_ref)
         }

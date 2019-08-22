@@ -22,7 +22,7 @@ so to run a new derivation one would need to use run_demo.s....
 to run interactively using pyspark:
 in the directory where the run_demo.py is located run
 
-pyspark --jars $STITCHR_ROOT/app/target/stitchr-app-0.1-SNAPSHOT-jar-with-dependencies.jar
+pyspark --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
 
 then at the prompt type
 
@@ -49,17 +49,17 @@ s = Stitchr(spark, spark.sparkContext)
 
 """
 note that the calls return a spark session. Which is the scala spark session. It is shared between the same calls on the stitchr class
-as well as if we invoke different oinstances of Stitchr 
+as well as if we invoke different instances of Stitchr 
 
 """
 
-ss2 = s.derive_query('q2')
+ss2 = s.derive_query('q2_3')
 
 sc2 = ss2.catalog.container.sqlContext()
 sc2.tables().show()
 ss2.catalog.container.table("q2_3").show(False)
 
-ss4 = s.derive_query('q4')
+ss4 = s.derive_query('q4_3')
 
 sc4 = ss4.catalog.container.sqlContext()
 
@@ -85,3 +85,5 @@ ss = s1.derive_query('q2_3')
 sc = ss.catalog.container.sqlContext()
 sc.tables().show()
 ss.catalog.container.table("q2_3").show(False)
+
+ss.catalog.container.table("q4_3").show(False)

@@ -51,22 +51,21 @@ val configMap:Map[String, String] = spark.conf.getAll
   * edit the parameters below to go against a target dbms or files. By default we run q2 on files (on yr laptop)
   */
 // For postgres tests, Expects the tpcds schema is deployed
-// file based example
-val stFile = "file"
-val ql0 = List("q2","q4")
+/* persistence  id = 3 is file system,  pipe delimited
+ and 1 is for postgres tpcds
+ */
+// files
+val ql0 = List("q2_3","q4_3")
 
 // database based example
 // q21 is the same as q2 in the registry but associated with a database schema
-val ql1 = List("q21")
-// val ql1 = List("web_sales_m")
-val stDatabase = "database"
+val ql1 = List("q21_1")
 
 val ds = new DerivationService
 
 println("start derivation")
 ds.deriveQueryList(ql0)
 ds.deriveQueryList(ql1)
-
 
 // println("start running queries")
 // runQueries (ql0, stFile)
@@ -91,11 +90,11 @@ q21DF.show(10, truncate = false)
 infoListTables()
 
 // DataIngestService
-instantiateQueryList(ql0, "file")
+instantiateQueryList(ql0)
 
 logging.log.info("done with q2 and q4")
 // DataIngestService.
-instantiateQueryList(ql1, "database")
+instantiateQueryList(ql1)
 logging.log.info("done with q21")
 
 // store in data lake
