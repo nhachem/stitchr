@@ -3,7 +3,7 @@
 ## What is (Data)Stitchr? ###
 
 DataStitchr or Stitchr is a tool that helps move and transform data along all phases of a data processing pipeline.
-It can be placed at any place in the pipeline to help in the data loading, transformation and extraction process. 
+It can be deployed at any place in the pipeline to help in the data loading, transformation and extraction process. 
 
 The objective is to develop an open, extensible  and "simple-to-use" tool for data engineers.
 
@@ -88,12 +88,62 @@ This is supported by providing the select query in the  DataSet.query attribute 
      
 #### Automated Registration of a set of DataSet from a JDBC persistence source
 
-This is supported through `com.stitchr.app.AutoRegisterService`. Given that you register the data persistence container information in the DC data_persistence table, invoking this function will pull the metadata associated with the tables/views in the persistence container and auto-register them in the Data Catalog.
-The scala script  `$STITCHR_ROOT/app/scripts/testSchemaDiscovery` can be invoked from an interactive spark-shell to demo this feature.
+This is supported through `com.stitchr.app.AutoRegisterService`. 
+
+Given that you register the data persistence container information in the DC data_persistence table, invoking this function will pull the metadata associated with the tables/views in the persistence container and auto-register them in the Data Catalog.
+The scala script 
+
+```$STITCHR_ROOT/app/scripts/testSchemaDiscovery.scala``` 
+
+can be invoked from an interactive spark-shell to demo this feature.
 
 #### Registration of DataSet and DataPersistence with Json input
-This is supported with getters and putters associated with the DataSet, DataPersistence and Schema in the RegistryService. An Example is provided in `$STITCHR_ROOR/app/scripts/testJson.scala` and associated functions are found in `com.stitchr.core.registry.RegistryService`, 
-such as `putJsonDataset` and `putJsonDataPersistence`.
+This is supported with getters and putters associated with the DataSet, DataPersistence and Schema in the RegistryService. 
+An Example is provided in `$STITCHR_ROOR/app/scripts/testJson.scala` and associated functions are found in `com.stitchr.core.registry.RegistryService`, 
+such as `putJsonDataset` and `putJsonDataPersistence` and 
+
+An Example Json DataSet object is
+```
+{
+"id":-1,
+"object_ref":"date_dim_3,
+"format":"pipeDelimited",
+"storage_type":"file",
+"mode":"base",
+"container":"demo/data/tpcds",
+"object_type":"file",
+"object_name":"date_dim",
+"query":"date_dim.dat",
+"partition_key":null,
+"number_partitions":1,
+"schema_id":8,
+"data_persistence_src_id":3,
+"data_persistence_dest_id":0
+}
+```
+
+specifying -1 for id means it is a new entry and the systems adds a sequence id to the new object. If the object already exists the operation is to update the entry (upsert). Note that `object_ref` is `object_name_data`_`persistence_src_id`.
+
+A similar format (with the attributes of the data persistence container) is used to add a new container object. For a schema spec a Json array of schema_columns is generated and passed to the call.
+
+The api calls are
+```
+com.stitchr.core.registry.RegistryService.putJsonDataset
+com.stitchr.core.registry.RegistryService.putJsonDataPersistence
+com.stitchr.core.registry.RegistryService.putJsonSchema
+```
+Those call 
+```
+com.stitchr.core.api.DataSetApi.Implicits.upsertDataset
+com.stitchr.core.api.DataPersistenceApi.Implicits.registerDataPersistence
+com.stitchr.core.api.DataSetSchemaApi.registerDataSetSchema
+```
+Corresponding calls to generate Json strings out of the different objects (DataSet, DataPersistence and Schema Structure) are
+```
+com.stitchr.core.registry.RegistryService.getJsonDataset
+com.stitchr.core.registry.RegistryService.getJsonDataPersistence
+com.stitchr.core.registry.RegistryService.getJsonSchema
+```
 
 ### Data Transformation 
 In the current version, The constraint is that all objects that we transform come from the same source persistence layer. This constraint will be removed in upcoming versions so that one could use federated queries. 
@@ -105,10 +155,10 @@ Taking into account the above restriction, any transformation that can be suppor
  We are also working on adding UDF support through the Data Catalog metadata. 
 
 ### Miscelaneous Features
-#### tracking run_time
+#### Tracking run_time
 The parameter `global.addRunTimeRef` from global.properties when set to true implies adding a column `run_time_ref` of type timestamp to all objects. 
 It holds a session based timestamp which enables to compare the data moved during a session. This is strictly __EXPERIMENTAL__ as it has implications on the queries that are attached to the DataSet. 
-#### tracking incrementally or reloading
+#### Tracking incremental changes or reloading
 The way data is moved is controlled globally at runtime using the parameter `global.defaultWriteMode`. If it is set to append then data is added otherwise it is a full reload (overwrite).
 
 ## Stitchr Architecture and Patterns ##
