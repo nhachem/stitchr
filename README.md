@@ -167,35 +167,57 @@ The way data is moved is controlled globally at runtime using the parameter `glo
 Data loading, transformation, integration and extraction is based on computational and data processing patterns around  composable functional transformations, lazy evaluation and  immutable data. 
 The DataStitchr (or just Stitchr) architecture is viewed as a set of data transformations from a data  zone to another zone, going though any intermediate and necessary persistence zones. 
 It can serve as the tool used to implement any of the data processing phases in a data platform.
- 
-    (Figure to come).
+
+![Data Analytic Processing Platform](images/DataPlatformProcessingPipeline.jpg)
 
 We decided to base this implementation around well-established distributed data processing features of  [Apache Spark](https://spark.apache.org/ "Spark").
 
-... more to come ...
-In summary, all your data objects are mapped to tables or views and nested SQL constructs are logically parsed to determine dependencies.
-The derivation service applies the computations in the order of dependencies (following a DAG structure built as a table of edges).
-
-The derived objects can be views, tables or temporary tables and are configuration based through a metadata registry.
-
-in the current version, at each stage of the flow, the derivation works sequentially through a list of objects that can be instantiated (obviously using distributed processing on each object), future versions will target concurrent derivation of independent objects.
-
-
 ### Software Components
+The main software components are illustrated below
 
-    figure to come
+![Stitchr Software Components](images/StitchrSoftwareComponents.jpg)
+
+and are as follows:
+
+* Input: DataSet Extractor → service to pull the (SQL) Transformer associated with the targeted DataSet
+* Logical SQL Parser → parses and extracts the dependencies from the Transformation function if any (uses the Spark SQL parser) 
+* DAG Builder → builds the dependency set recursively down to all base DataSets (simple emi-naive transitive closure on the dependencies)
+* InitRuntimeDB Service → executes the instantiation of all dependencies as well as the target set as abstractions (DataFrames and Tables) in the Spark internal session-based DB
+* materilise2Target Service → physically materialising the target object in the associated target persistence container
+* Catalog Query Service → interface api to the MDC to retrieve metadata about DataSets, DataSetPersistence and DataSetSchema among other services
+* Catalog Registration Service→ interface api to the MDC to register or update DataSets and other artifacts as they are created or modified
 
 ### Data Transformation Patterns ###
 Stitchr relies on generating a DAG of data processing steps to derive the expected output DataSets. 
-The patterns for the different transformations are simple and follow a well-defined and uniform set of transformations steps that we describe next. 
+The patterns for the different transformations are simple and follow a well-defined and uniform set of transformations steps that we elaborate on next. 
 
-        Figures and write ups to come
-        
-... more to come ...
+![Data Analytic Processing Platform](images/StitchrDataTransformations.jpg)
 
-### SQL constructs as Composable Functional Transformations ###
-    
-    ... more to  come here ... 
+The underlying technical stack of Spark is very well tuned for such an application architecture. 
+The basis is that transformation functions have a well-defined (and well-designed) interface for input and output and can be composed in a computational asynchronous graph, with plug and play capabilities. Outputs of different transformation functions (or transformers) can be bundled together to be the input of the next function. In this way, functions become the core components in the graph.
+
+A black box view is that, given a set of SQL constructs applied on a set of base "sql objects" (tables/view abstracted artifacts), the output is a set of abstracted "sql objects."
+
+![Transformation Black Box](images/TransformFunctionBlackBox.jpg)
+
+Simple transformations examples are direct data moves or simple constraint checking as illustrated below as a sql join transformation.
+
+![Simple Transforms](images/SimpleTransforms.jpg)
+
+More complex manipulation as illustrated here takes a set of input artifacts applies multi step sql transforms resulting with a set of outputs.
+
+![Complex Transform](images/ComplexTransform.jpg)
+
+In summary, all your data objects are mapped to tables or views and nested SQL constructs are logically parsed to determine dependencies.
+The derivation service applies the computations in the order of dependencies (following a DAG structure built as a table of edges).
+The derived objects can be views, tables or temporary tables and are configuration based through a metadata registry.
+
+In the current version, at each stage of the flow, the derivation works sequentially through a list of objects that can be instantiated (obviously using distributed processing on each object), and future versions will be extended to handle  concurrent derivation of independent objects.
+The concurrent derivation of interdependent objects can be mapped to a bin packing problem on computational resources.
+
+![Bin Packing Problem](images/BinPackingProblem.jpg)
+
+One can run the transformation DAG in different ways: the simplest is purely sequential following dependencies. But one can easily observe that a bin-packing problem that can be optimized at run time with threads and parallel/pipeline processing. While Spark does not intrinsically provide us with bin-packing capabilities, we will extend Stitchr to enable parallel processing of large sets of small files; decreasing the overhead of startup and enabling full pipeline processing on top of the distributed processing capabilities of spark.
 
 ## How to setup and demo the tool? ###
 
