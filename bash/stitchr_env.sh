@@ -18,7 +18,7 @@
 #
 
 ## set the environments per your's
-export USER_ROOT=/Users/nabilhachem
+export USER_ROOT="<based-on-yr-environment>" ## change to your environment
 export USER_PERSIST_ROOT=$USER_ROOT/data
 export STITCHR_ROOT=$USER_ROOT/repo/stitchr
 export CONFIG_DIR=$USER_ROOT/demo
@@ -34,10 +34,10 @@ export baseDataFolder=$DATA_DIR/tpcds/ ## for the demo
 export defaultOutputDir=/tmp
 
 ## spark
-# export SPARK_HOME="<spark home>"
-## export SPARK_HOME=/Users/nabilhachem/sparkBin/spark-2.4.3-bin-hadoop2.7
-export VERSION=0.1-SNAPSHOT
-export MASTER=local[4]
-export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
+# export SPARK_HOME="<spark-home-if-not-set"
 ## set it up if JAVA_HOME is not set export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_211.jdk/Contents/Home
 ## export PATH=$SPARK_HOME/bin:$PATH
+
+export VERSION=0.1
+export MASTER=local[4]
+export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
