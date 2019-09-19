@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 id,format,storage_type,mode,container,object_type,object_name,query,partition_key,number_partitions,schema_id,data_persistence_src_id,data_persistence_dest_id,log_timestamp,add_run_time_ref,write_mode
 1,"postgresql","database","base","public","table","catalog_page","public.catalog_page",,1,2,1,2,"2019-08-14 15:20:33",false,"append"
 2,"postgresql","database","base","public","table","customer","public.customer",,1,5,1,2,"2019-08-14 15:20:33",false,"append"
@@ -51,61 +50,6 @@ id,format,storage_type,mode,container,object_type,object_name,query,partition_ke
 49,"pipeDelimited","file","base","tpcds","file","store","store.dat",,1,17,3,7,"2019-08-14 15:20:33",false,"append"
 50,"pipeDelimited","file","base","tpcds","file","store_returns","store_returns.dat",,1,18,3,7,"2019-08-14 15:20:33",false,"append"
 51,"parquet","file","derived","tpcds","file","q2","select d_week_seq1
-=======
-id,format,storage_type,mode,container,object_type,object_name,query,partition_key,number_partitions,schema_id,data_persistence_src_id,data_persistence_dest_id,log_timestamp
-60,"postgresql","database","base","public","view","wscs1_direct","(select sold_date_sk
-        ,sales_price
-  from (select ws_sold_date_sk sold_date_sk
-              ,ws_ext_sales_price sales_price
-        from web_sales
-        union all
-        select cs_sold_date_sk sold_date_sk
-              ,cs_ext_sales_price sales_price
-        from catalog_sales) v)",,1,-1,1,5,"2019-08-14 15:20:33"
-35,"pipeDelimited","file","base","tpcds","file","promotion","promotion.dat",,1,14,3,7,"2019-08-14 15:20:33"
-36,"pipeDelimited","file","base","tpcds","file","time_dim","time_dim.dat",,1,20,3,7,"2019-08-14 15:20:33"
-37,"pipeDelimited","file","base","tpcds","file","warehouse","warehouse.dat",,1,21,3,7,"2019-08-14 15:20:33"
-55,"parquet","file","derived","tpcds","file","q4","select   
-                  t_s_secyear.customer_id
-                 ,t_s_secyear.customer_first_name
-                 ,t_s_secyear.customer_last_name
-                 ,t_s_secyear.customer_birth_country
- from {{ year_total }} t_s_firstyear
-     ,{{ year_total }} t_s_secyear
-     ,{{ year_total }} t_c_firstyear
-     ,{{ year_total }} t_c_secyear
-     ,{{ year_total }} t_w_firstyear
-     ,{{ year_total }} t_w_secyear
- where t_s_secyear.customer_id = t_s_firstyear.customer_id
-   and t_s_firstyear.customer_id = t_c_secyear.customer_id
-   and t_s_firstyear.customer_id = t_c_firstyear.customer_id
-   and t_s_firstyear.customer_id = t_w_firstyear.customer_id
-   and t_s_firstyear.customer_id = t_w_secyear.customer_id
-   and t_s_firstyear.sale_type = 's'
-   and t_c_firstyear.sale_type = 'c'
-   and t_w_firstyear.sale_type = 'w'
-   and t_s_secyear.sale_type = 's'
-   and t_c_secyear.sale_type = 'c'
-   and t_w_secyear.sale_type = 'w'
-   and t_s_firstyear.dyear =  1999
-   and t_s_secyear.dyear = 1999+1
-   and t_c_firstyear.dyear =  1999
-   and t_c_secyear.dyear =  1999+1
-   and t_w_firstyear.dyear = 1999
-   and t_w_secyear.dyear = 1999+1
-   and t_s_firstyear.year_total > 0
-   and t_c_firstyear.year_total > 0
-   and t_w_firstyear.year_total > 0
-   and case when t_c_firstyear.year_total > 0 then t_c_secyear.year_total / t_c_firstyear.year_total else null end
-           > case when t_s_firstyear.year_total > 0 then t_s_secyear.year_total / t_s_firstyear.year_total else null end
-   and case when t_c_firstyear.year_total > 0 then t_c_secyear.year_total / t_c_firstyear.year_total else null end
-           > case when t_w_firstyear.year_total > 0 then t_w_secyear.year_total / t_w_firstyear.year_total else null end
- order by t_s_secyear.customer_id
-         ,t_s_secyear.customer_first_name
-         ,t_s_secyear.customer_last_name
-         ,t_s_secyear.customer_birth_country",,1,-1,3,2,"2019-08-14 15:20:33"
-57,"postgresql","database","derived","public","view","q21","select d_week_seq1
->>>>>>> bee5644aab2ea6462d31fe0b15096363a17019b4
        ,round(sun_sales1/sun_sales2,2) sun
        ,round(mon_sales1/mon_sales2,2) mon
        ,round(tue_sales1/tue_sales2,2) tue
@@ -138,31 +82,8 @@ id,format,storage_type,mode,container,object_type,object_name,query,partition_ke
   where date_dim.d_week_seq = wswscs.d_week_seq and
         d_year = 1998+1) z
  where d_week_seq1=d_week_seq2-53
-<<<<<<< HEAD
  order by d_week_seq1",,1,-1,3,2,"2019-08-14 15:20:33",false,"append"
 52,"parquet","file","derived","tpcds","file","wswscs","select d_week_seq,
-=======
- order by d_week_seq1",,1,-1,1,2,"2019-08-14 15:20:33"
-53,"parquet","file","derived","tpcds","file","wscs","select sold_date_sk
-        ,sales_price
-  from (select ws_sold_date_sk sold_date_sk
-              ,ws_ext_sales_price sales_price
-        from {{ web_sales }} web_sales
-        union all
-        select cs_sold_date_sk sold_date_sk
-              ,cs_ext_sales_price sales_price
-        from {{ catalog_sales }} catalog_sales) v",,1,-1,3,2,"2019-08-14 15:20:33"
-56,"postgresql","database","derived","public","view","wscs1","select sold_date_sk
-        ,sales_price
-  from (select ws_sold_date_sk sold_date_sk
-              ,ws_ext_sales_price sales_price
-        from web_sales
-        union all
-        select cs_sold_date_sk sold_date_sk
-              ,cs_ext_sales_price sales_price
-        from catalog_sales) v",,1,-1,1,2,"2019-08-14 15:20:33"
-58,"postgresql","database","derived","public","view","wswscs1","select d_week_seq,
->>>>>>> bee5644aab2ea6462d31fe0b15096363a17019b4
         sum(case when (d_day_name='Sunday') then sales_price else null end) sun_sales,
         sum(case when (d_day_name='Monday') then sales_price else null end) mon_sales,
         sum(case when (d_day_name='Tuesday') then sales_price else  null end) tue_sales,
@@ -173,7 +94,6 @@ id,format,storage_type,mode,container,object_type,object_name,query,partition_ke
  from {{ wscs }} wscs
      ,{{ date_dim }} date_dim
  where d_date_sk = sold_date_sk
-<<<<<<< HEAD
  group by d_week_seq",,1,-1,3,2,"2019-08-14 15:20:33",false,"append"
 53,"parquet","file","derived","tpcds","file","wscs","select sold_date_sk
         ,sales_price
@@ -184,54 +104,6 @@ id,format,storage_type,mode,container,object_type,object_name,query,partition_ke
         select cs_sold_date_sk sold_date_sk
               ,cs_ext_sales_price sales_price
         from {{ catalog_sales }} catalog_sales) v",,1,-1,3,2,"2019-08-14 15:20:33",false,"append"
-=======
- group by d_week_seq",,1,-1,1,2,"2019-08-14 15:20:33"
-1,"postgresql","database","base","public","table","catalog_page","public.catalog_page",,1,2,1,2,"2019-08-14 15:20:33"
-59,"postgresql","database","base","public","table","web_sales_m","public.web_sales","ws_sold_date_sk",4,-1,-1,2,"2019-08-14 15:20:33"
-27,"pipeDelimited","file","base","tpcds","file","customer","customer.dat",,1,5,3,7,"2019-08-14 15:20:33"
-28,"pipeDelimited","file","base","tpcds","file","customer_address","customer_address.dat",,1,6,3,7,"2019-08-14 15:20:33"
-26,"pipeDelimited","file","base","tpcds","file","catalog_page","catalog_page.dat",,1,2,3,7,"2019-08-14 15:20:33"
-2,"postgresql","database","base","public","table","customer","public.customer",,1,5,1,2,"2019-08-14 15:20:33"
-29,"pipeDelimited","file","base","tpcds","file","customer_demographics","customer_demographics.dat",,1,7,3,7,"2019-08-14 15:20:33"
-30,"pipeDelimited","file","base","tpcds","file","date_dim","date_dim.dat",,1,8,3,7,"2019-08-14 15:20:33"
-31,"pipeDelimited","file","base","tpcds","file","dbgen_version","dbgen_version.dat",,1,9,3,7,"2019-08-14 15:20:33"
-3,"postgresql","database","base","public","table","customer_address","public.customer_address",,1,6,1,2,"2019-08-14 15:20:33"
-4,"postgresql","database","base","public","table","customer_demographics","public.customer_demographics",,1,7,1,2,"2019-08-14 15:20:33"
-5,"postgresql","database","base","public","table","date_dim","public.date_dim",,1,8,1,2,"2019-08-14 15:20:33"
-6,"postgresql","database","base","public","table","dbgen_version","public.dbgen_version",,1,9,1,2,"2019-08-14 15:20:33"
-20,"postgresql","database","base","public","table","call_center","public.call_center",,1,1,1,2,"2019-08-14 15:20:33"
-21,"postgresql","database","base","public","table","reason","public.reason",,1,15,1,2,"2019-08-14 15:20:33"
-23,"postgresql","database","base","public","table","ship_mode","public.ship_mode",,1,16,1,2,"2019-08-14 15:20:33"
-22,"postgresql","database","base","public","table","web_sales","public.web_sales","ws_item_sk",4,24,1,2,"2019-08-14 15:20:33"
-32,"pipeDelimited","file","base","tpcds","file","household_demographics","household_demographics.dat",,1,10,3,7,"2019-08-14 15:20:33"
-33,"pipeDelimited","file","base","tpcds","file","income_band","income_band.dat",,1,11,3,7,"2019-08-14 15:20:33"
-34,"pipeDelimited","file","base","tpcds","file","item","item.dat",,1,13,3,7,"2019-08-14 15:20:33"
-38,"pipeDelimited","file","base","tpcds","file","web_page","web_page.dat",,1,22,3,7,"2019-08-14 15:20:33"
-39,"pipeDelimited","file","base","tpcds","file","web_site","web_site.dat",,1,25,3,7,"2019-08-14 15:20:33"
-40,"pipeDelimited","file","base","tpcds","file","catalog_returns","catalog_returns.dat",,1,3,3,7,"2019-08-14 15:20:33"
-24,"postgresql","database","base","public","table","store","public.store",,1,17,1,2,"2019-08-14 15:20:33"
-25,"postgresql","database","base","public","table","store_returns","public.store_returns",,1,18,1,2,"2019-08-14 15:20:33"
-41,"pipeDelimited","file","base","tpcds","file","catalog_sales","catalog_sales.dat",,1,4,3,7,"2019-08-14 15:20:33"
-42,"pipeDelimited","file","base","tpcds","file","inventory","inventory.dat",,1,12,3,7,"2019-08-14 15:20:33"
-7,"postgresql","database","base","public","table","household_demographics","public.household_demographics",,1,10,1,2,"2019-08-14 15:20:33"
-8,"postgresql","database","base","public","table","income_band","public.income_band",,1,11,1,2,"2019-08-14 15:20:33"
-9,"postgresql","database","base","public","table","item","public.item",,1,13,1,2,"2019-08-14 15:20:33"
-10,"postgresql","database","base","public","table","promotion","public.promotion",,1,14,1,2,"2019-08-14 15:20:33"
-11,"postgresql","database","base","public","table","time_dim","public.time_dim",,1,20,1,2,"2019-08-14 15:20:33"
-12,"postgresql","database","base","public","table","warehouse","public.warehouse",,1,21,1,2,"2019-08-14 15:20:33"
-13,"postgresql","database","base","public","table","web_page","public.web_page",,1,22,1,2,"2019-08-14 15:20:33"
-14,"postgresql","database","base","public","table","web_site","public.web_site",,1,25,1,2,"2019-08-14 15:20:33"
-15,"postgresql","database","base","public","table","catalog_returns","public.catalog_returns",,1,3,1,2,"2019-08-14 15:20:33"
-16,"postgresql","database","base","public","table","catalog_sales","public.catalog_sales",,1,4,1,2,"2019-08-14 15:20:33"
-43,"pipeDelimited","file","base","tpcds","file","store_sales","store_sales.dat",,1,19,3,7,"2019-08-14 15:20:33"
-44,"pipeDelimited","file","base","tpcds","file","web_returns","web_returns.dat",,1,23,3,7,"2019-08-14 15:20:33"
-45,"pipeDelimited","file","base","tpcds","file","call_center","call_center.dat",,1,1,3,7,"2019-08-14 15:20:33"
-46,"pipeDelimited","file","base","tpcds","file","reason","reason.dat",,1,15,3,7,"2019-08-14 15:20:33"
-50,"pipeDelimited","file","base","tpcds","file","store_returns","store_returns.dat",,1,18,3,7,"2019-08-14 15:20:33"
-17,"postgresql","database","base","public","table","inventory","public.inventory",,1,12,1,2,"2019-08-14 15:20:33"
-18,"postgresql","database","base","public","table","store_sales","public.store_sales",,1,19,1,2,"2019-08-14 15:20:33"
-19,"postgresql","database","base","public","table","web_returns","public.web_returns",,1,23,1,2,"2019-08-14 15:20:33"
->>>>>>> bee5644aab2ea6462d31fe0b15096363a17019b4
 54,"parquet","file","derived","tpcds","file","year_total","select c_customer_id customer_id
        ,c_first_name customer_first_name
        ,c_last_name customer_last_name
@@ -302,7 +174,6 @@ union all
          ,c_birth_country
          ,c_login
          ,c_email_address
-<<<<<<< HEAD
          ,d_year",,1,-1,3,2,"2019-08-14 15:20:33",false,"append"
 55,"parquet","file","derived","tpcds","file","q4","select   
                   t_s_secyear.customer_id
@@ -353,22 +224,6 @@ union all
               ,cs_ext_sales_price sales_price
         from catalog_sales) v",,1,-1,1,2,"2019-08-14 15:20:33",false,"append"
 57,"postgresql","database","derived","public","view","q21","select d_week_seq1
-=======
-         ,d_year",,1,-1,3,2,"2019-08-14 15:20:33"
-52,"parquet","file","derived","tpcds","file","wswscs","select d_week_seq,
-        sum(case when (d_day_name='Sunday') then sales_price else null end) sun_sales,
-        sum(case when (d_day_name='Monday') then sales_price else null end) mon_sales,
-        sum(case when (d_day_name='Tuesday') then sales_price else  null end) tue_sales,
-        sum(case when (d_day_name='Wednesday') then sales_price else null end) wed_sales,
-        sum(case when (d_day_name='Thursday') then sales_price else null end) thu_sales,
-        sum(case when (d_day_name='Friday') then sales_price else null end) fri_sales,
-        sum(case when (d_day_name='Saturday') then sales_price else null end) sat_sales
- from {{ wscs }} wscs
-     ,{{ date_dim }} date_dim
- where d_date_sk = sold_date_sk
- group by d_week_seq",,1,-1,3,2,"2019-08-14 15:20:33"
-51,"parquet","file","derived","tpcds","file","q2","select d_week_seq1
->>>>>>> bee5644aab2ea6462d31fe0b15096363a17019b4
        ,round(sun_sales1/sun_sales2,2) sun
        ,round(mon_sales1/mon_sales2,2) mon
        ,round(tue_sales1/tue_sales2,2) tue
@@ -401,7 +256,6 @@ union all
   where date_dim.d_week_seq = wswscs.d_week_seq and
         d_year = 1998+1) z
  where d_week_seq1=d_week_seq2-53
-<<<<<<< HEAD
  order by d_week_seq1",,1,-1,1,2,"2019-08-14 15:20:33",false,"append"
 58,"postgresql","database","derived","public","view","wswscs1","select d_week_seq,
         sum(case when (d_day_name='Sunday') then sales_price else null end) sun_sales,
@@ -425,9 +279,3 @@ union all
         select cs_sold_date_sk sold_date_sk
               ,cs_ext_sales_price sales_price
         from catalog_sales) v)",,1,-1,1,5,"2019-08-14 15:20:33",false,"append"
-=======
- order by d_week_seq1",,1,-1,3,2,"2019-08-14 15:20:33"
-47,"pipeDelimited","file","base","tpcds","file","web_sales","web_sales.dat",,1,24,3,7,"2019-08-14 15:20:33"
-48,"pipeDelimited","file","base","tpcds","file","ship_mode","ship_mode.dat",,1,16,3,7,"2019-08-14 15:20:33"
-49,"pipeDelimited","file","base","tpcds","file","store","store.dat",,1,17,3,7,"2019-08-14 15:20:33"
->>>>>>> bee5644aab2ea6462d31fe0b15096363a17019b4
