@@ -71,6 +71,8 @@ object RegistrySchema {
     .add("schema_id", IntegerType)
     .add("data_persistence_src_id", IntegerType)
     .add("data_persistence_dest_id", IntegerType)
+    .add("add_run_time_ref", BooleanType)
+    .add("write_mode", StringType)
 
   /* schemas column defs
      .add("id", IntegerType)
@@ -82,13 +84,13 @@ object RegistrySchema {
     .add("is_nullable", BooleanType)
    */
   val schemasSchema: StructType = new StructType()
-    .add("id", IntegerType, false)
-    .add("column_name", StringType, false)
-    .add("column_position", IntegerType, false)
-    .add("column_type", StringType, false)
-    .add("column_precision", IntegerType, true) // need to fix null representation
-    .add("string_length", IntegerType, true) // need to fix null representation
-    .add("is_nullable", StringType, false)
+    .add("id", IntegerType, nullable = false)
+    .add("column_name", StringType, nullable = false)
+    .add("column_position", IntegerType, nullable = false)
+    .add("column_type", StringType, nullable = false)
+    .add("column_precision", IntegerType, nullable = true) // need to fix null representation
+    .add("string_length", IntegerType, nullable = true) // need to fix null representation
+    .add("is_nullable", StringType, nullable = false)
   //.add("c_type", StringType)
   /* had problem decyphering nulls in integer fields and also boolean....
 had to edit and replace nulls with -q for now and bypass the use of boolean ype
@@ -132,7 +134,9 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | number_partitions,
                | schema_id,
                | data_persistence_src_id,
-               | data_persistence_dest_id
+               | data_persistence_dest_id,
+               | add_run_time_ref,
+               | write_mode
                | from public.dataset""".stripMargin
               )
               .cache(),
@@ -196,17 +200,36 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
         )
       // to fix to use data_persistence
       case "registry" =>
-        (
+        ( {
+        import org.apache.spark.sql.functions.{concat, lit}
+        val df =
             spark.read
-              .schema(datasetSchema)
+              // .schema(datasetSchema)
               .format("csv")
               .option("header", true)
               .option("quote", "\"")
               .option("multiLine", true)
-              .option("inferSchema", "false")
+              .option("inferSchema", "true")
               .option("delimiter", ",")
               .load(baseRegistryFolder + "dataset.csv")
-              .cache(),
+              .select("id",
+              "format",
+              "storage_type",
+              "mode",
+              "container",
+              "object_type",
+              "object_name",
+              "query",
+              "partition_key",
+              "number_partitions",
+              "schema_id",
+              "data_persistence_src_id",
+              "data_persistence_dest_id",
+              "add_run_time_ref",
+              "write_mode"
+            )
+              df.withColumn ("object_ref", concat (df.col ("object_name") , lit ("_"), df.col ("data_persistence_src_id"))).cache()
+        },
             spark.read
               .schema(schemasSchema)
               .format("csv")
@@ -220,7 +243,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               .option("header", "true")
               .option("inferSchema", "true")
               .option("delimiter", ",")
-              .load(baseRegistryFolder + "data_source.csv")
+              .load(baseRegistryFolder + "data_persistence.csv")
               .cache(),
             // NH: maybe will add in V0.2 but files are only for demo purposes and are not transactional
             // this is a placeholder for now...
@@ -257,7 +280,9 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | number_partitions,
                | schema_id,
                | data_persistence_src_id,
-               | data_persistence_dest_id
+               | data_persistence_dest_id,
+               | add_run_time_ref
+               | write_mode
                | from public.dataset""".stripMargin
               )
               .cache(),
@@ -322,7 +347,9 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
         "number_partitions",
         "schema_id",
         "data_persistence_src_id",
-        "data_persistence_dest_id"
+        "data_persistence_dest_id",
+        "add_run_time_ref",
+        "write_mode"
     )
     .as(dataSetEncoder)
 

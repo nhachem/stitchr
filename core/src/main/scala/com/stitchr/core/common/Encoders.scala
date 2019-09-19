@@ -52,6 +52,8 @@ object Encoders {
    * @param schema_id
    * @param data_persistence_src_id
    * @param data_persistence_dest_id
+   * @param add_run_time_ref
+   * @param write_mode
    */
   case class DataSet(
       id: Int,
@@ -68,6 +70,9 @@ object Encoders {
       schema_id: Int,
       data_persistence_src_id: Int,
       data_persistence_dest_id: Int = -1 // added to specify where we move an object -1 means don't move, 0 means temp space (should populate that in the data_persistence table)
+      ,
+      add_run_time_ref: Boolean = false
+      , write_mode: String = "append"
   )
 
   // case class ExtendedDependency(object_name: String, depends_on: String, query: String, schema_id: Int = -1, data_persistence_id: Int = -1)

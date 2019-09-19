@@ -59,38 +59,38 @@ object EnvConfig {
   val defaultTmpContainer: String = props.getString("global.defaultTmpContainer")
   val defaultContainer: String = props.getString("global.defaultContainer")
   val defaultFileType: String = props.getString("global.defaultFileType")
-  val defaultWriteMode: String = props.getString("global.defaultWriteMode")
 
   val logLevel: String = props.getString("spark.logLevel")
   val appLogLevel: String = props.getString("app.logLevel")
 
   /**
-  * each processed object gets a run_time_ref log column associated with each record if addRunTImeRef is true
+  * each processed object gets a run_time_ref log column associated with each record if the add_run_time_ref column is set to  true in the corresponding dataset metadata
     */
-  val addRunTimeRef: Boolean = props.getBoolean("global.addRunTimeRef")
   val sessionRunTime: Long = System.nanoTime()
-
-  logging.log.info(s"default write mode is $defaultWriteMode")
-  logging.log.info(s"session run time is $sessionRunTime")
-  logging.log.info(s"DC persistence source is $dataCatalogPersistence")
-  logging.log.info(s"Default TMPContainer is $defaultTmpContainer")
-  logging.log.info(s"Default file type is $defaultFileType")
 
   val cloudStorage: Boolean = props.getBoolean("global.cloudStorage")
 
   // NH EXPERIMENTAL 8/9/2019
   val globalTempDbEnabled: Boolean = props.getBoolean("global.globalTempDbEnabled")
-  logging.log.info(s"global_temp database enabled is $globalTempDbEnabled")
 
   // val inSessionDB: String = { if (globalTempDbEnabled) "global_temp." else ""}
   /**
   * must be set to true to use the metadata associated with datasets
     */
   val overrideDefaultContainer: Boolean = props.getBoolean("global.overrideDefaultContainer")
-  logging.log.info(s"destination persistence is associated with the dataset $overrideDefaultContainer")
 
   // NH 8/1/2019 EXPERIMENTAL: adding threading support ... may change to using cats library and or scala Future
   // val threadCount: Int = props.getInt("concurrent.threadcount")
   val semaphores: Int = props.getInt("concurrent.semaphores")
   val sem: java.util.concurrent.Semaphore = new java.util.concurrent.Semaphore(semaphores)
+
+  // logging the environment
+  logging.log.info(s"session run time is $sessionRunTime")
+  logging.log.info(s"DC persistence source is $dataCatalogPersistence")
+  logging.log.info(s"Default TMPContainer is $defaultTmpContainer")
+  logging.log.info(s"Default file type is $defaultFileType")
+
+  logging.log.info(s"global_temp database enabled is $globalTempDbEnabled")
+
+  logging.log.info(s"destination persistence is associated with the dataset $overrideDefaultContainer")
 }

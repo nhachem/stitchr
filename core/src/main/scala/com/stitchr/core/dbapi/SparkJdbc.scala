@@ -123,7 +123,7 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
         .load()
 
   // to be implemented
-  override def writeTable(dataFrame: DataFrame, tableName: String, numberPartitions: Int = 32, saveMode: String = "append"): Unit =
+  override def writeTable(dataFrame: DataFrame, tableName: String, numberPartitions: Int = 32, saveMode: String): Unit =
   dataFrame.write.format("jdbc")
     .mode(saveMode)
     .option("driver", jdbcProps.driver)

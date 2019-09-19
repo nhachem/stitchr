@@ -18,9 +18,10 @@
 #
 
 ## set the environments per your's
-export USER_ROOT="<based-on-yr-environment>" ## change to your environment
+export USER_ROOT=$HOME ## change to your environment
 export USER_PERSIST_ROOT=$USER_ROOT/data
-export STITCHR_ROOT=$USER_ROOT/repo/stitchr
+## run it from the root code directory
+export STITCHR_ROOT=`pwd`
 export CONFIG_DIR=$USER_ROOT/demo
 export DATA_DIR=$USER_PERSIST_ROOT/demo
 export REGISTRY_DIR=$USER_ROOT/demo
@@ -38,6 +39,6 @@ export defaultOutputDir=/tmp
 ## set it up if JAVA_HOME is not set export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_211.jdk/Contents/Home
 ## export PATH=$SPARK_HOME/bin:$PATH
 
-export VERSION=0.1
+export VERSION=0.2-SNAPSHOT
 export MASTER=local[4]
 export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar

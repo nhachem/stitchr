@@ -20,7 +20,7 @@
 
 
   <properties>
-    <stitchr.version>0.1</stitchr.version>
+    <stitchr.version>0.2-SNAPSHOT</stitchr.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <zinc.enabled>false</zinc.enabled>
     <zinc.port>7919</zinc.port>

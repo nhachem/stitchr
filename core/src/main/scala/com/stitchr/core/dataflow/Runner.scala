@@ -19,13 +19,14 @@ package com.stitchr.core.dataflow
 
 import com.stitchr.core.common.Encoders.{ dataSetEncoder, dependencyEncoder }
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.core.dataflow.ComputeService.{ computeDerivedObjects, getDependencySet, getDataSetQueryNode, initializeObjects }
+import com.stitchr.core.dataflow.ComputeService.{ computeDerivedObjects, getDataSetQueryNode, getDependencySet, initializeObjects }
 import com.stitchr.core.registry.RegistryService.initializeDataCatalogViews
 import com.stitchr.util.Util.time
 import com.stitchr.sparkutil.database.CatalogUtil._
 import com.stitchr.util.EnvConfig.logging
 import com.stitchr.core.registry.RegistrySchema.dataSetDF
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.col
 
 /**
  * used to run a derivation of a query
@@ -117,7 +118,9 @@ object Runner {
           "number_partitions",
           "schema_id",
           "data_persistence_src_id",
-          "data_persistence_dest_id"
+          "data_persistence_dest_id",
+          "add_run_time_ref",
+          "write_mode"
       )
       .as(dataSetEncoder)
 
@@ -148,7 +151,9 @@ object Runner {
           col("dfr.storage_type"),
           col("dfr.query"),
           col("dfr.schema_id"),
-          col("dfl.data_persistence_id")
+          col("dfl.data_persistence_id"),
+          col("dfr.add_run_time_ref"),
+          col("dfr.write_mode")
       )
       .as(dependencyEncoder)
 

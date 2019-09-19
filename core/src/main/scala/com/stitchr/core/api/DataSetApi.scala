@@ -23,11 +23,9 @@ import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.core.registry.RegistryService.{ getDataPersistence, getDataSet, getSchema }
 import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.util.EnvConfig.{ addRunTimeRef, baseDataFolder, dataCatalogPersistence, defaultContainer, defaultFileType, defaultWriteMode, logging, overrideDefaultContainer }
+import com.stitchr.util.EnvConfig.{ baseDataFolder, dataCatalogPersistence, defaultContainer, defaultFileType, logging, overrideDefaultContainer }
 import com.stitchr.core.api.ExtendedDataframe._
 import com.stitchr.core.registry.DataCatalogObject.DcDataSet
-import com.stitchr.core.registry.RegistrySchema.dataSetDF
-import com.stitchr.util.Util.time
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.StructType
 
@@ -47,9 +45,8 @@ object DataSetApi {
     def save2Target(
         fileType: String = defaultFileType // will need to specify as well
     ): (DataSet, String, DataFrame) = {
-      // NH: 7/26/2019
-      // use default write mode for now...
-      val dfExtended = if (addRunTimeRef) spark.table(dataSet.object_ref).addRunTimeRef else spark.table(dataSet.object_ref)
+     // add session run time column if enabled
+      val dfExtended = if (dataSet.add_run_time_ref) spark.table(dataSet.object_ref).addRunTimeRef else spark.table(dataSet.object_ref)
       val destPersistence = getDataPersistence(dataSet.data_persistence_dest_id)
 
       val (dfResult, newDS) = destPersistence.persistence_type match {
@@ -61,7 +58,7 @@ object DataSetApi {
             else s"$defaultContainer/${dataSet.object_ref}.$fileType"
 
           logging.log.info(s"fileUrl is $fileUrl for object ref ${dataSet.object_ref}")
-          dfExtended.write.format(fileType).mode(defaultWriteMode).save(fileUrl)
+          dfExtended.write.format(fileType).mode(dataSet.write_mode).save(fileUrl)
           logging.log.info(s"reference object count is ${spark.table(dataSet.object_ref).count}")
           (
               spark.read.format(fileType).load(fileUrl),
@@ -85,7 +82,7 @@ object DataSetApi {
             else getDataPersistence(1)
 
           val jdbc = SparkJdbcImpl(dataSourceNode2JdbcProp(dsn))
-          jdbc.writeTable(dfExtended, dataSet.object_ref, dataSet.number_partitions)
+          jdbc.writeTable(dfExtended, dataSet.object_ref, dataSet.number_partitions, dataSet.write_mode)
           // TODO update need a dummy table all the time
           (
               spark.table(dataSet.object_ref),

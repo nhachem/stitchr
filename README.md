@@ -156,10 +156,10 @@ Taking into account the above restriction, any transformation that can be suppor
 
 ### Miscelaneous Features
 #### Tracking run_time
-The parameter `global.addRunTimeRef` from global.properties when set to true implies adding a column `run_time_ref` of type timestamp to all objects. 
-It holds a session based timestamp which enables to compare the data moved during a session. This is strictly __EXPERIMENTAL__ as it has implications on the queries that are attached to the DataSet. 
+The attribute `add_run_time_ref` in `DataSet`, when set to true implies adding a column `run_time_ref` of type timestamp to the target dataset object (if that column is not already added). 
+That column holds a session-based timestamp which enables to compare the data moved during a session. This is strictly __EXPERIMENTAL__ as it has implications on the queries that are attached to the DataSet. 
 #### Tracking incremental changes or reloading
-The way data is moved is controlled globally at runtime using the parameter `global.defaultWriteMode`. If it is set to append then data is added otherwise it is a full reload (overwrite).
+The way data is moved is controlled at runtime using the `dataset` attribute `write_mode`. It is the spark api write mode which specifies append or full reload (overwrite).
 
 ## Stitchr Architecture and Patterns ##
 
@@ -300,7 +300,7 @@ Important annotations include
 * `schema_id` is the handle to join with the `schema_column` table  to get a list of column metadata associated with the dataset. This is not a clean normalized representation. We may address it in future releases 
 * `dataset.data_persietnce_src_id` is not null and should hold the association of the DataSet object to the source persistence container. The `data_persistence_dest_id` holds the target persistence of the moved object. We handle one target in this version. 
 * When an object is moved to a target, a new dataset is created with the new object associated with the destination persistence as its source persistence container.
-* Finbally, In the `schema_column` table, the Primary Key  is `(id, position)`, but we enforce an alternate unique constraint on `(id, column_name)`. 
+* Finally, In the `schema_column` table, the Primary Key  is `(id, position)`, but we enforce an alternate unique constraint on `(id, column_name)`. 
     
 ## Contribution guidelines ###
  
