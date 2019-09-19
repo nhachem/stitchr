@@ -196,17 +196,39 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
         )
       // to fix to use data_persistence
       case "registry" =>
-        (
+        ( {
+          import org.apache.spark.sql.functions._ // {concat, lit, }
+          val df =
             spark.read
-              .schema(datasetSchema)
+              // .schema(datasetSchema)
               .format("csv")
               .option("header", true)
               .option("quote", "\"")
               .option("multiLine", true)
-              .option("inferSchema", "false")
+              .option("inferSchema", "true")
               .option("delimiter", ",")
               .load(baseRegistryFolder + "dataset.csv")
-              .cache(),
+              .select( "id",
+                "format",
+                "storage_type",
+                "mode",
+                "container",
+                "object_type",
+                "object_name",
+                "query",
+                "partition_key",
+                "number_partitions",
+                "schema_id",
+                "data_persistence_src_id",
+                "data_persistence_dest_id"
+              )
+          // convoluted but fine for now... maybe better to use cast straight in the select above?
+           df.withColumn("id_", df.col("id")
+             .cast(IntegerType)).drop("id")
+             .withColumnRenamed("id_", "id")
+             .withColumn ("object_ref", concat (df.col ("object_name") , lit ("_"), df.col ("data_persistence_src_id")))
+             .cache()
+        },
             spark.read
               .schema(schemasSchema)
               .format("csv")
@@ -220,7 +242,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               .option("header", "true")
               .option("inferSchema", "true")
               .option("delimiter", ",")
-              .load(baseRegistryFolder + "data_source.csv")
+              .load(baseRegistryFolder + "data_persistence.csv")
               .cache(),
             // NH: maybe will add in V0.2 but files are only for demo purposes and are not transactional
             // this is a placeholder for now...

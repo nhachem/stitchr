@@ -18,9 +18,10 @@
 #
 
 ## set the environments per your's
-export USER_ROOT="<based-on-yr-environment>" ## change to your environment
+export USER_ROOT=$HOME ## change to your environment
 export USER_PERSIST_ROOT=$USER_ROOT/data
-export STITCHR_ROOT=$USER_ROOT/repo/stitchr
+## run it from the root code directory
+export STITCHR_ROOT=`pwd`
 export CONFIG_DIR=$USER_ROOT/demo
 export DATA_DIR=$USER_PERSIST_ROOT/demo
 export REGISTRY_DIR=$USER_ROOT/demo
