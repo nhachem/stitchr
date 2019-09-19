@@ -201,13 +201,8 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
       // to fix to use data_persistence
       case "registry" =>
         ( {
-<<<<<<< HEAD
         import org.apache.spark.sql.functions.{concat, lit}
         val df =
-=======
-          import org.apache.spark.sql.functions._ // {concat, lit, }
-          val df =
->>>>>>> bee5644aab2ea6462d31fe0b15096363a17019b4
             spark.read
               // .schema(datasetSchema)
               .format("csv")
@@ -217,7 +212,6 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               .option("inferSchema", "true")
               .option("delimiter", ",")
               .load(baseRegistryFolder + "dataset.csv")
-<<<<<<< HEAD
               .select("id",
               "format",
               "storage_type",
@@ -234,29 +228,12 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               "add_run_time_ref",
               "write_mode"
             )
-              df.withColumn ("object_ref", concat (df.col ("object_name") , lit ("_"), df.col ("data_persistence_src_id"))).cache()
-=======
-              .select( "id",
-                "format",
-                "storage_type",
-                "mode",
-                "container",
-                "object_type",
-                "object_name",
-                "query",
-                "partition_key",
-                "number_partitions",
-                "schema_id",
-                "data_persistence_src_id",
-                "data_persistence_dest_id"
-              )
           // convoluted but fine for now... maybe better to use cast straight in the select above?
            df.withColumn("id_", df.col("id")
              .cast(IntegerType)).drop("id")
              .withColumnRenamed("id_", "id")
              .withColumn ("object_ref", concat (df.col ("object_name") , lit ("_"), df.col ("data_persistence_src_id")))
              .cache()
->>>>>>> bee5644aab2ea6462d31fe0b15096363a17019b4
         },
             spark.read
               .schema(schemasSchema)
