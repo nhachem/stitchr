@@ -160,6 +160,11 @@ The attribute `add_run_time_ref` in `DataSet`, when set to true implies adding a
 That column holds a session-based timestamp which enables to compare the data moved during a session. This is strictly __EXPERIMENTAL__ as it has implications on the queries that are attached to the DataSet. 
 #### Tracking incremental changes or reloading
 The way data is moved is controlled at runtime using the `dataset` attribute `write_mode`. It is the spark api write mode which specifies append or full reload (overwrite).
+#### Threaded data movement
+We introduced a threaded implementation for moving a group of datasets using simple threads with semaphores based on `java.util.concurrent`. This is purely EXPERIMENTAL as concurrency 
+issues may arise when updating the metadata in the data catalog.  
+Tests show possible improvements of over 25% in runtime with 2 concurrent threads (running spark on a high end laptop)
+To enable parallel threads set `concurrent.threaded` to tr `true` and the number of semaphores by setting `concurrent.semaphores`
 
 ## Stitchr Architecture and Patterns ##
 
@@ -212,7 +217,7 @@ In summary, all your data objects are mapped to tables or views and nested SQL c
 The derivation service applies the computations in the order of dependencies (following a DAG structure built as a table of edges).
 The derived objects can be views, tables or temporary tables and are configuration based through a metadata registry.
 
-In the current version, at each stage of the flow, the derivation works sequentially through a list of objects that can be instantiated (obviously using distributed processing on each object), and future versions will be extended to handle  concurrent derivation of independent objects.
+In the current version, at each stage of the flow, the derivation works sequentially through a list of objects that can be instantiated (obviously using distributed processing on each object), and future versions will be extended to handle concurrent derivation of independent objects.
 The concurrent derivation of interdependent objects can be mapped to a bin packing problem on computational resources.
 
 ![Bin Packing Problem](images/BinPackingProblem.jpg)

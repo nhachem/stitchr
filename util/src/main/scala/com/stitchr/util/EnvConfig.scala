@@ -81,6 +81,7 @@ object EnvConfig {
 
   // NH 8/1/2019 EXPERIMENTAL: adding threading support ... may change to using cats library and or scala Future
   // val threadCount: Int = props.getInt("concurrent.threadcount")
+  val threaded: Boolean = props.getBoolean("concurrent.threaded")
   val semaphores: Int = props.getInt("concurrent.semaphores")
   val sem: java.util.concurrent.Semaphore = new java.util.concurrent.Semaphore(semaphores)
 
