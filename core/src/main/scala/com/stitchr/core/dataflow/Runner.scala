@@ -23,7 +23,7 @@ import com.stitchr.core.dataflow.ComputeService.{ computeDerivedObjects, getData
 import com.stitchr.core.registry.RegistryService.initializeDataCatalogViews
 import com.stitchr.util.Util.time
 import com.stitchr.sparkutil.database.CatalogUtil._
-import com.stitchr.util.EnvConfig.logging
+import com.stitchr.util.EnvConfig.{ appLogLevel, logging }
 import com.stitchr.core.registry.RegistrySchema.dataSetDF
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col
@@ -48,7 +48,7 @@ object Runner {
     // initialize the dc_ views
     initializeDataCatalogViews()
 
-    infoListTables()
+    if (appLogLevel == "INFO") infoListTables()
 
     // using DataFrame is handy but has a lot of overhead
     val depSet = getDependencySet(List(getDataSetQueryNode(objectReference)))
@@ -128,7 +128,7 @@ object Runner {
     // we may need to extend to return a Map of DataFrame references (object_name --> dataFrame)
     initializeObjects(baseObjectsDF)
 
-    infoListTables()
+    if (appLogLevel == "INFO") infoListTables()
 
     // delete base objects as they were initialized
     val derivedDF = dependencyGraphDF

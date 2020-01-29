@@ -21,11 +21,9 @@ import com.stitchr.core.dataflow.ComputeService.runQueries
 import com.stitchr.sparkutil.SharedSession.spark
 import com.stitchr.core.dataflow.Runner
 import com.stitchr.sparkutil.database.CatalogUtil._
-import com.stitchr.util.EnvConfig.logging
+import com.stitchr.util.EnvConfig.{ appLogLevel, logging }
 
 class DerivationService {
-
-  spark.sparkContext.setLogLevel("INFO")
 
   /**
    * expected parameters are
@@ -41,12 +39,14 @@ class DerivationService {
     // instantiate the derived views
     ql.foldLeft()(
         (_, next) => {
-          logging.log.info(s"computing the derived query $next") // for storage_type $st")
+          if (appLogLevel == "INFO") logging.log.info(s"computing the derived query $next") // for storage_type $st")
           Runner.run(next)
         }
     )
-    // show changes to catalog as a result if appLogLevl is info
-    infoListTables()
-    println(s"catalog table count is $infoListTablesCount")
+    // show changes to catalog as a result if appLogLevel is info
+    if (appLogLevel == "INFO") {
+      infoListTables()
+      println(s"catalog table count is $infoListTablesCount")
+    }
   }
 }

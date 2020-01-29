@@ -28,8 +28,6 @@ import org.apache.spark.sql.Dataset
 
 object AutoRegisterService {
 
-  spark.sparkContext.setLogLevel("INFO")
-
   /**
    * Note: in Postgres information_schema and pg_catalog seem to be hidden for JDBC metadata. A "feature" of Postgres
    * @param dataPersistence refers to the the id of the registered data persistence source in the data catalog (data_persistence table)

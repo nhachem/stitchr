@@ -9,8 +9,7 @@ object CatalogUtil {
 
   val catTables: Dataset[Table] = spark.catalog.listTables
 
-  def infoListTables(numRows: Int = 100, truncate: Boolean = false): Unit =
-  if (appLogLevel == "INFO") catTables.show(numRows, truncate)
+  def infoListTables(numRows: Int = 100, truncate: Boolean = false): Unit = catTables.show(numRows, truncate)
 
   def infoListTablesCount: Long = catTables.count()
 

@@ -28,9 +28,9 @@
 package com.stitchr.app
 
 import com.stitchr.core.api.DataSetApi.Implicits
-import com.stitchr.core.registry.RegistryService.{getDataSet, getObjectRef, getQueryReferenceList}
+import com.stitchr.core.registry.RegistryService.{ getDataSet, getQueryReferenceList }
 import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.util.EnvConfig.{logging, sem, threaded}
+import com.stitchr.util.EnvConfig.{ appLogLevel, logging, sem, threaded }
 import com.stitchr.util.Util.time
 import com.stitchr.sparkutil.database.CatalogUtil._
 import com.stitchr.util.Threaded
@@ -59,42 +59,43 @@ object DataMoveService {
         }
     )
 // NH: EXPERIMENTAL need to revisit. currently set in config
-  def move2TargetThreaded(q: String): Unit = {
+  def move2TargetThreaded(q: String): Unit =
     getDataSet(q).move2Target
-  }
 
   def runThreaded(ql: List[String]): Unit = {
     val t: Threaded = ql.foldLeft(null: Threaded)(
-      (_, next) => {
-        val t = new Threaded(sem, next, move2TargetThreaded)
-        t.start()
-        t
-      }
+        (_, next) => {
+          val t = new Threaded(sem, next, move2TargetThreaded)
+          t.start()
+          t
+        }
     )
     t.join() // have it wait for all threads to complete
   }
 
   // instantiate the derived views
-  def runSerial(ql: List[String]): Unit = {
+  def runSerial(ql: List[String]): Unit =
     ql.foldLeft()(
-      (_, next) => {
-        logging.log.info(s"loading to data target $next") // for storage_type $st")
-        getDataSet(next).move2Target
+        (_, next) => {
+          logging.log.info(s"loading to data target $next") // for storage_type $st")
+          getDataSet(next).move2Target
 
-      }
+        }
     )
-  }
+
   /** moveDataSetList takes a list of object_refs and moves them to the target persistence zone with DataSet.move2Target
    *
    * @param ql is a list of object_ref computed as <object_name>_<data_persistence_src_id> from the dataset DC table
    */
   def moveDataSetList(ql: List[String], threaded: Boolean = threaded): Unit = {
-  if ( threaded ) runThreaded(ql)
+    if (threaded) runThreaded(ql)
     else runSerial(ql)
 
-    // show changes to catalog as we iterate.. will pull out
-    infoListTables()
-    logging.log.info(s"number of table in the inSessionDB is $infoListTablesCount")
+    // show changes to catalog as we iterate.. if appLogLevel is INFO
+    if (appLogLevel == "INFO") {
+      infoListTables()
+      logging.log.info(s"number of table in the inSessionDB is $infoListTablesCount")
+    }
   }
 
 }
@@ -115,7 +116,7 @@ object MoveDataSetGroup extends App {
   else {
 
     val groupName = args(0).toString
-    val ql = getQueryReferenceList(groupName)
+    val ql: List[String] = getQueryReferenceList(groupName)
 
     logging.log.info(s"list of queries is $ql")
     DataMoveService.moveDataSetList(ql)
