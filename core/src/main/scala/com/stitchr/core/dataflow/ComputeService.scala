@@ -136,7 +136,7 @@ object ComputeService {
 
     // in 2.2.3 || is not supported in sparkSQL
     // table name not used
-    val sqltest =
+    /* val sqltest =
       s"""select id,
          | concat(container, '.',  object_name) as table_name,
          | object_ref,
@@ -147,6 +147,22 @@ object ComputeService {
          | data_persistence_src_id as data_persistence_id
          | from dc_datasets
          | where object_ref in ('$objectReference')""".stripMargin // need to use object_ref or object_name + source
+
+     */
+    // NH: 2/20/2020 had to replace as databricks was throwing an error with the use of concat
+    val sqltest =
+      s"""select d.id,
+       | d.container || '.' || d.object_name as table_name,
+       | d.object_ref,
+       | d.container,
+       | d.object_name,
+       | d.query,
+       | d.mode,
+       | d.data_persistence_src_id as data_persistence_id
+       | from dc_datasets d
+       | where 1=1 
+       | and d.object_ref in ('$objectReference')""".stripMargin
+
     val qs = spark
       .sql(
           sqltest
