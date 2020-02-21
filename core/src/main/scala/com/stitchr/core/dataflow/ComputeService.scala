@@ -22,14 +22,14 @@ import com.stitchr.util.SharedSession.spark
 import com.stitchr.core.common.Encoders.{ QueryNode, emptyDependency, _ }
 import com.stitchr.core.api.DataSetApi.Implicits
 import com.stitchr.util.database.JdbcImpl
-import com.stitchr.core.registry.RegistryService.{ getDataPersistence, getObjectRef, getDataSet }
+import com.stitchr.core.registry.RegistryService.{ getDataPersistence, getDataSet, getObjectRef }
 import com.stitchr.core.registry.RegistrySchema.dataSetDF
 import com.stitchr.util.Util.time
-import com.stitchr.util.EnvConfig.logging
+import com.stitchr.util.EnvConfig.{ appLogLevel, logging }
 import com.stitchr.core.util.Parse.logicalPlan
 import com.stitchr.core.util.Convert.stripCurlyBrace
-
 import org.apache.spark.sql.{ DataFrame, Dataset, Row }
+
 import scala.annotation.tailrec
 
 object ComputeService {
@@ -257,7 +257,7 @@ object ComputeService {
                 val dsn = getDataPersistence(next._2.data_persistence_id)
                 import com.stitchr.core.util.Convert._
                 // NH: use this to print the case class info
-                println(cC2Map(dsn))
+                if (appLogLevel == "INFO") println(cC2Map(dsn))
                 val jdbc = new JdbcImpl(dataSourceNode2JdbcProp(dsn))
 
                 jdbc.executeDDL(ddl)

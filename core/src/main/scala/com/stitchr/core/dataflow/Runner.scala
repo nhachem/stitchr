@@ -43,7 +43,7 @@ object Runner {
   // NH: potential for bugs... to fix objectReference is really object_name
   def run(objectReference: String): SparkSession = { // }, storageType: String): SparkSession = {
 
-    println(spark.conf.getAll)
+    if (appLogLevel == "INFO") println(spark.conf.getAll)
 
     // initialize the dc_ views
     initializeDataCatalogViews()
