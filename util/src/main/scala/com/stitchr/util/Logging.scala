@@ -17,8 +17,7 @@
 
 package com.stitchr.util
 
-import com.typesafe.scalalogging.LazyLogging
-
+import com.typesafe.scalalogging.slf4j.LazyLogging
 /*
  * 7/8/2019 logging place holder
  */
