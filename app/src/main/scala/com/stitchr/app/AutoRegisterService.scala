@@ -20,7 +20,7 @@ package com.stitchr.app
 import com.stitchr.core.common.Encoders.{ DataSet, DataPersistence, dataSetEncoder }
 import com.stitchr.core.api.DataSetApi.Implicits
 import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.util.database.JdbcImpl
 import com.stitchr.util.EnvConfig.logging
 import spark.implicits._

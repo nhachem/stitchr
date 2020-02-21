@@ -18,12 +18,12 @@
 package com.stitchr.core.dataflow
 
 import com.stitchr.core.common.Encoders.{ dataSetEncoder, dependencyEncoder }
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.core.dataflow.ComputeService.{ computeDerivedObjects, getDataSetQueryNode, getDependencySet, initializeObjects }
 import com.stitchr.core.registry.RegistryService.initializeDataCatalogViews
 import com.stitchr.util.Util.time
-import com.stitchr.sparkutil.database.CatalogUtil._
-import com.stitchr.util.EnvConfig.{ appLogLevel, logging }
+import com.stitchr.util.database.CatalogUtil._
+import com.stitchr.util.EnvConfig.{ appLogLevel }
 import com.stitchr.core.registry.RegistrySchema.dataSetDF
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col

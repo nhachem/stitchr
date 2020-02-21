@@ -1,7 +1,6 @@
-package com.stitchr.sparkutil.database
+package com.stitchr.util.database
 
-import com.stitchr.sparkutil.SharedSession.spark
-import com.stitchr.util.EnvConfig.appLogLevel
+import com.stitchr.util.SharedSession.spark
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.catalog.Table
 

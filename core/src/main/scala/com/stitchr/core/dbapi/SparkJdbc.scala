@@ -17,7 +17,7 @@
 
 package com.stitchr.core.dbapi
 
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.util.database.JdbcProps
 import java.util.Properties
 
@@ -49,7 +49,7 @@ trait SparkJdbc {
     readDF(query: String)
 
   // untested
-  def writeTable(dataframe: DataFrame, tableName: String, numberPartitions: Int, saveMode: String ): Unit
+  def writeTable(dataframe: DataFrame, tableName: String, numberPartitions: Int, saveMode: String): Unit
 }
 
 case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
@@ -124,14 +124,15 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
 
   // to be implemented
   override def writeTable(dataFrame: DataFrame, tableName: String, numberPartitions: Int = 32, saveMode: String): Unit =
-  dataFrame.write.format("jdbc")
-    .mode(saveMode)
-    .option("driver", jdbcProps.driver)
-    .option("dbTable", tableName)
-    .option("url", url)
-    .option("user", jdbcProps.user )
-    .option("password", jdbcProps.pwd)
-    .option("numPartitions", numberPartitions.toString)
-    .save()
+    dataFrame.write
+      .format("jdbc")
+      .mode(saveMode)
+      .option("driver", jdbcProps.driver)
+      .option("dbTable", tableName)
+      .option("url", url)
+      .option("user", jdbcProps.user)
+      .option("password", jdbcProps.pwd)
+      .option("numPartitions", numberPartitions.toString)
+      .save()
 
 }

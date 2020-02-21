@@ -17,10 +17,8 @@
 
 package com.stitchr.app
 
-import com.stitchr.core.dataflow.ComputeService.runQueries
-import com.stitchr.sparkutil.SharedSession.spark
 import com.stitchr.core.dataflow.Runner
-import com.stitchr.sparkutil.database.CatalogUtil._
+import com.stitchr.util.database.CatalogUtil._
 import com.stitchr.util.EnvConfig.{ appLogLevel, logging }
 
 class DerivationService {

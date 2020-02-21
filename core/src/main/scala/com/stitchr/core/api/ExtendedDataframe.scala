@@ -17,7 +17,7 @@
 
 package com.stitchr.core.api
 
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.util.EnvConfig._
 import org.apache.spark.sql.DataFrame
 

@@ -17,14 +17,13 @@
 
 package com.stitchr.core.util
 
-import com.stitchr.core.common.Encoders.{Column, DataPersistence, QueryNode, SchemaColumn}
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.core.common.Encoders.{ Column, DataPersistence, QueryNode, SchemaColumn }
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.core.dbapi.PostgresDialect
-import com.stitchr.util.EnvConfig.logging
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{ DataFrame, Row }
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.execution.datasources.jdbc.JdbcUtils.getSchema
-import java.sql.{ResultSet, ResultSetMetaData, SQLException}
+import java.sql.{ ResultSet, ResultSetMetaData, SQLException }
 
 // import scala.util.parsing.json.JSONObject
 
@@ -187,14 +186,13 @@ object Convert {
     import com.hubspot.jinjava._
     import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
     import scala.collection.JavaConversions._
-   // logging.log.info(s"query is $q")
+    // logging.log.info(s"query is $q")
     val t = stripCurlyBrace(q)
-   // logging.log.info(s"stripped query is $t")
+    // logging.log.info(s"stripped query is $t")
     val plan = logicalPlan(t)
 
-
     // (V0.1) we assume all tables are aliased already so when we replace using jinja we do not need to alias
-    val context = plan.collect{case r: UnresolvedRelation => (r.tableName, s"${r.tableName}_${dpId}")}.toMap
+    val context = plan.collect { case r: UnresolvedRelation => (r.tableName, s"${r.tableName}_${dpId}") }.toMap
     val jinjava = new Jinjava
     val q0 = jinjava.render(q, context)
 
@@ -205,24 +203,22 @@ object Convert {
   val REGEX_OPEN_CURLY_BRACE = """\{"""
   val REGEX_CLOSED_CURLY_BRACE = """\}"""
   // val REGEX_INLINE_DOUBLE_QUOTES = """\\\"""".r
- //  val REGEX_NEW_LINE = """\\\n""".r
+  //  val REGEX_NEW_LINE = """\\\n""".r
   def stripCurlyBrace(s: String): String =
     s.replaceAll(REGEX_OPEN_CURLY_BRACE, "").replaceAll(REGEX_CLOSED_CURLY_BRACE, "")
 
   // NH under dev not needed for now
   case class ScColumn(name: String, data_type: String, nullable: String)
-  def fromStructType2JsonSchema(s: StructType): Unit = {
-
-
+  def fromStructType2JsonSchema(s: StructType): Unit =
     // As of Spark 2.4.0, StructField can be converted to DDL format using toDDL method.
+    s.toList.foldLeft()(
+        (_, next) => {
+          val n = ScColumn(next.name, next.dataType.toString, next.nullable.toString).toString
+          println(n)
+          // println(next.dataType)
+          // println(next.nullable)
+          //  println(next.toDDL)
+        }
+    )
 
-    s.toList.foldLeft() ((_,next) => {
-      val n = ScColumn(next.name, next.dataType.toString, next.nullable.toString).toString
-      println(n)
-      // println(next.dataType)
-      // println(next.nullable)
-      //  println(next.toDDL)
-    })
-
-  }
 }

@@ -27,7 +27,7 @@ export DATA_DIR=$USER_PERSIST_ROOT/demo
 export REGISTRY_DIR=$USER_ROOT/demo
 
 export baseRegistryFolder=$REGISTRY_DIR/registry/
-export baseConfigFolder=$CONFIG_DIR/config/
+export baseConfigFolder=file://$CONFIG_DIR/config/
 ## using tpcds generated and adjusted data
 export baseDataFolder=$DATA_DIR/tpcds/ ## for the demo
 

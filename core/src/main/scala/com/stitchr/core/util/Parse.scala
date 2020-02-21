@@ -17,15 +17,13 @@
 
 package com.stitchr.core.util
 
-import com.stitchr.core.common.Encoders.QueryNode
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 
 import scala.collection.mutable.HashMap
 import com.hubspot.jinjava._
 
 import scala.collection.JavaConversions._
 import com.typesafe.config.Config
-import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
 object Parse {
@@ -43,7 +41,7 @@ object Parse {
 
   def logicalPlan(query: String): LogicalPlan = {
     // https://stackoverflow.com/questions/49785796/how-to-get-table-names-from-sql-query
-     val plan = spark.sessionState.sqlParser.parsePlan(query)
+    val plan = spark.sessionState.sqlParser.parsePlan(query)
     plan
   }
 

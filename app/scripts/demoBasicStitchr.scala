@@ -34,15 +34,15 @@
   * You can find a copy ready to use under nhachem/stitchr-demo
   */
 
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.app.DerivationService
 import com.stitchr.app.DataMoveService.instantiateQueryList
 import com.stitchr.core.registry.RegistryService.{getDataSet, getObjectRef}
 import com.stitchr.util.EnvConfig.logging
 import com.stitchr.core.api.DataSetApi.Implicits
-import com.stitchr.sparkutil.database.CatalogUtil.infoListTables
+import com.stitchr.util.database.CatalogUtil.infoListTables
 
-spark.sparkContext.setLogLevel("INFO")
+spark.sparkContext.setLogLevel("WARN")
 
 // just list the session info
 val configMap:Map[String, String] = spark.conf.getAll

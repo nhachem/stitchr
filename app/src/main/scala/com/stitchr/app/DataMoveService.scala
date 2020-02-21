@@ -29,10 +29,10 @@ package com.stitchr.app
 
 import com.stitchr.core.api.DataSetApi.Implicits
 import com.stitchr.core.registry.RegistryService.{ getDataSet, getQueryReferenceList }
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.util.EnvConfig.{ appLogLevel, logging, sem, threaded }
 import com.stitchr.util.Util.time
-import com.stitchr.sparkutil.database.CatalogUtil._
+import com.stitchr.util.database.CatalogUtil._
 import com.stitchr.util.Threaded
 
 object DataMoveService {

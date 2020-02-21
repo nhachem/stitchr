@@ -17,23 +17,25 @@
 
 package com.stitchr.util
 
-import java.io.File
-
 import com.stitchr.util.EnvConfig.cloudStorage
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory, ConfigParseOptions, ConfigSyntax }
+import com.stitchr.util.SharedSession.spark
 
 object Properties {
 
   import org.apache.hadoop.conf.Configuration
   import org.apache.spark.sql.SparkSession
 
-  // need to fix and test for config directory...
-  def readConfig(configurationFile: String = "defaults.properties", configRootPath: String = "config/"): Config = {
-    val configFilePath = configRootPath
-    val commonConfigFile = configurationFile
-    val configFile = new File(configRootPath + configurationFile)
-    println("Configuration file " + configFile.getAbsolutePath)
-    ConfigFactory.parseFile(configFile).withFallback(ConfigFactory.parseFile(new File(configFilePath + commonConfigFile)))
+  def readConfig(configurationFile: String, configRootPath: String) = {
+    import scala.io.Source
+    println(s"Configuration file is $configRootPath$configurationFile")
+    val configFile = Source.fromURL(configRootPath + configurationFile)
+    val configString = spark.sparkContext
+      .textFile(configRootPath + configurationFile)
+      .collect()
+      .mkString("\n")
+    // need to force syntax to follow properties and not conf and support special characters such as @
+    ConfigFactory.parseString(configString, ConfigParseOptions.defaults.setSyntax(ConfigSyntax.PROPERTIES))
   }
 
   def _configHadoop(): Configuration = {
@@ -76,5 +78,5 @@ object Properties {
     hadoopConfig
   }
 
-  def configHadoop(): Configuration =  if (cloudStorage) _configHadoop() else null.asInstanceOf[Configuration]
+  def configHadoop(): Configuration = if (cloudStorage) _configHadoop() else null.asInstanceOf[Configuration]
 }

@@ -21,7 +21,7 @@ import com.stitchr.core.common.Encoders.{ DataSet, dataSetEncoder }
 import com.stitchr.util.EnvConfig.{ baseRegistryFolder, dataCatalogPersistence, props }
 import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.core.util.Convert.config2JdbcProp
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import org.apache.spark.sql.{ DataFrame, Dataset }
 
 object RegistrySchema {

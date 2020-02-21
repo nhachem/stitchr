@@ -18,9 +18,9 @@
 package com.stitchr.core.registry
 
 import com.stitchr.core.api.ExtendedDataframe.DataFrameImplicits
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.core.registry.RegistrySchema._
-import com.stitchr.sparkutil.database.Schema.toSqlType
+import com.stitchr.util.database.Schema.toSqlType
 import com.stitchr.core.common.Encoders.{ DataPersistence, DataSet, SchemaColumn, dataPersistenceEncoder, ExtendedDataSet, emptyDp, emptyDs }
 import com.stitchr.util.EnvConfig.logging
 
@@ -57,7 +57,6 @@ object RegistryService {
    * general space
    *
    */
-
   /**
    *
    * @param groupName

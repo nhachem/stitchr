@@ -20,9 +20,9 @@ package com.stitchr.core.api
 import com.stitchr.core.common.Encoders.{ DataSet, emptyDs }
 import com.stitchr.core.dataflow.Runner
 import com.stitchr.core.dbapi.SparkJdbcImpl
-import com.stitchr.core.registry.RegistryService.{ getDataPersistence, getDataSet, getSchema }
+import com.stitchr.core.registry.RegistryService.{ getDataPersistence, getDataSet }
 import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.util.EnvConfig.{ baseDataFolder, dataCatalogPersistence, defaultContainer, defaultFileType, logging, overrideDefaultContainer }
 import com.stitchr.core.api.ExtendedDataframe._
 import com.stitchr.core.registry.DataCatalogObject.DcDataSet
@@ -45,7 +45,7 @@ object DataSetApi {
     def save2Target(
         fileType: String = defaultFileType // will need to specify as well
     ): (DataSet, String, DataFrame) = {
-     // add session run time column if enabled
+      // add session run time column if enabled
       val dfExtended = if (dataSet.add_run_time_ref) spark.table(dataSet.object_ref).addRunTimeRef else spark.table(dataSet.object_ref)
       val destPersistence = getDataPersistence(dataSet.data_persistence_dest_id)
 
@@ -122,9 +122,9 @@ object DataSetApi {
     def materializeInSessionDb(df: DataFrame): Unit = df.createTemporaryView(dataSet.object_ref)
 
     /**
-    *  init is the main function that takes any dataSet and associates a lazy eval dataframe object in the inSessionDB
-      * @return  (viewName object_ref of the inistanatiated object, DataFrame asociated with the object_ref in the inSessionDB)
-      */
+     *  init is the main function that takes any dataSet and associates a lazy eval dataframe object in the inSessionDB
+     * @return  (viewName object_ref of the inistanatiated object, DataFrame asociated with the object_ref in the inSessionDB)
+     */
     def init: (String, DataFrame) = {
       val partitionKey = dataSet.partition_key
       val numberOfPartitions = dataSet.number_partitions
@@ -217,15 +217,15 @@ object DataSetApi {
     }
 
     /**
-    * looks up DataSet attributes from the DC
-      * @return DataSet.id or -1 if object is not found
-      */
+     * looks up DataSet attributes from the DC
+     * @return DataSet.id or -1 if object is not found
+     */
     def lookupDataSet: Int =
       getDataSet(dataSet.object_ref).id
 
     /**
      * updates the DC dataset table with the dataSet info.
-      * THIS IS NOT THREAD SAFE. So it can't be used safely with multi-threaded data movement
+     * THIS IS NOT THREAD SAFE. So it can't be used safely with multi-threaded data movement
      *  we could make it thread safe by serializing its access (actually access to the unpersist call in the DataCatalogObject)
      */
     // [WARNING] DataSet.scala:209: side-effecting nullary methods are discouraged: suggest defining as `def upsertDataset()` instead
@@ -248,18 +248,18 @@ object DataSetApi {
       }
 
     /** applies dataSet.init.materialize
-      * @return no type returned. This is a function with side effect of instantiating the dataSet and moving it to target persistence layer
-      *         So there is a DB state change associated with applying this function
-      */
+     * @return no type returned. This is a function with side effect of instantiating the dataSet and moving it to target persistence layer
+     *         So there is a DB state change associated with applying this function
+     */
     def move2Target: (String, DataFrame) = {
       init
       materialize
     }
 
     /**
-    * Takes a dataSet from the inSessionDB and saves it  to the destination persistence layer and registers/updates the DC
-      * @return (viewName as object_ref, dataset dataframe associated with the saved object)
-      */
+     * Takes a dataSet from the inSessionDB and saves it  to the destination persistence layer and registers/updates the DC
+     * @return (viewName as object_ref, dataset dataframe associated with the saved object)
+     */
     def materialize: (String, DataFrame) = {
       val (newDS, viewName, datasetDF) = save2Target()
 
@@ -272,9 +272,9 @@ object DataSetApi {
     // API getters/setters
     // schema back may be empty... (if schema id = -1
     /**
-    * used to call the registry api to get the schema from the DC associated with a dataSet
-      * @return StrucType of the schema descrobing the dataSet. null if schema is not registered in the DC
-      */
+     * used to call the registry api to get the schema from the DC associated with a dataSet
+     * @return StrucType of the schema descrobing the dataSet. null if schema is not registered in the DC
+     */
     def getSchema: StructType = com.stitchr.core.registry.RegistryService.getSchema(dataSet.schema_id)
 
   }

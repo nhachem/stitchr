@@ -17,11 +17,10 @@
 
 package com.stitchr.core.registry
 
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.core.common.Encoders.{ DataPersistence, DataSet, SchemaColumn }
 import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.util.database.JdbcImpl
-import com.stitchr.core.registry.DataCatalogObject.{ insertDB, updateDB }
 import com.stitchr.core.registry.RegistrySchema.{ dataPersistenceDF, dataSetDF, schemasDF }
 import com.stitchr.core.registry.RegistryService.{ getDataPersistence, getDataSet }
 import com.stitchr.core.util.Convert.config2JdbcProp

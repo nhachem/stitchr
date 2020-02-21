@@ -18,7 +18,7 @@
 package com.stitchr.core.dataflow
 
 import com.stitchr.core.api.ExtendedDataframe.DataFrameImplicits
-import com.stitchr.sparkutil.SharedSession.spark
+import com.stitchr.util.SharedSession.spark
 import com.stitchr.core.common.Encoders.{ QueryNode, emptyDependency, _ }
 import com.stitchr.core.api.DataSetApi.Implicits
 import com.stitchr.util.database.JdbcImpl
@@ -35,6 +35,7 @@ import scala.annotation.tailrec
 object ComputeService {
 
   import spark.implicits._
+
   /**
    * gets the list of table dependencies by logically parsing the query and extracting the unresolved rel
    * @param queryNode
@@ -53,7 +54,9 @@ object ComputeService {
         // hack for V0.1
         val q: String = stripCurlyBrace(queryNode.query)
         val plan = logicalPlan(q)
-        plan.collect { case r: UnresolvedRelation => (queryNode.object_name, r.tableName, queryNode.data_persistence_id) }.toDF("objectName", "dependsOn", "data_persistence_id")
+        plan
+          .collect { case r: UnresolvedRelation => (queryNode.object_name, r.tableName, queryNode.data_persistence_id) }
+          .toDF("objectName", "dependsOn", "data_persistence_id")
 
       // NH to revisit in V0.2
       // we should not get here as all are filtered to be derived unless one calls this independently...
@@ -93,7 +96,10 @@ object ComputeService {
         .select("depends_on", "data_persistence_id")
         .distinct
         // NH: we force the objects to be from the same datasource but this is not a long term requirement as we enable true federation
-        .join(dataSetDF, dependenciesDF("depends_on") === dataSetDF("object_name") and dependenciesDF("data_persistence_id") === dataSetDF("data_persistence_src_id"))
+        .join(
+            dataSetDF,
+            dependenciesDF("depends_on") === dataSetDF("object_name") and dependenciesDF("data_persistence_id") === dataSetDF("data_persistence_src_id")
+        )
         // .filter(s"object_type = '$objectType' and mode in ('derived')")
         .filter(s" mode in ('derived')")
         .select("id", "object_ref", "object_name", "query", "mode", "data_persistence_src_id")
@@ -191,15 +197,15 @@ object ComputeService {
         .map(p => p._2)
     })
   }
-import com.stitchr.core.util.Convert._
+  import com.stitchr.core.util.Convert._
 
   /**
-  * This function takes the dependy set and groups by the object_name counting its dependencies ...
-    * It then recursively iterate to establish those objects that have all their dependencies initialized.
-    * It stops
-    * @param derivedSet array of objects with all its dependencies
-    * @return
-    */
+   * This function takes the dependy set and groups by the object_name counting its dependencies ...
+   * It then recursively iterate to establish those objects that have all their dependencies initialized.
+   * It stops
+   * @param derivedSet array of objects with all its dependencies
+   * @return
+   */
   def computeDerivedObjects(derivedSet: Array[Dependency]): Row = {
 
     @tailrec
@@ -226,7 +232,9 @@ import com.stitchr.core.util.Convert._
               // case "file" => spark.sql(next._2.query).createTemporaryView(next._2.object_name)
               // we rewrite only for files as they are computed from the
               case "file" =>
-                spark.sql(query2InSessionRep(next._2.query, next._2.data_persistence_id)).createTemporaryView(next._2.depends_on + "_" + next._2.data_persistence_id)
+                spark
+                  .sql(query2InSessionRep(next._2.query, next._2.data_persistence_id))
+                  .createTemporaryView(next._2.depends_on + "_" + next._2.data_persistence_id)
               case "database" => // assume here that we have one target engine with full pushdown (we use straight jdbc)
                 val ddl = generateDDL(next._2.object_name)
                 // need to use the data source info!!

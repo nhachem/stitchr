@@ -43,11 +43,6 @@
             <artifactId>stitchr-util</artifactId>
           <version>${stitchr.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.stitchr</groupId>
-            <artifactId>stitchr-sparkutil</artifactId>
-           <version>${stitchr.version}</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/com.crealytics/spark-excel -->
         <dependency>
             <groupId>com.crealytics</groupId>
