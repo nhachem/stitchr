@@ -53,13 +53,14 @@ case class JdbcImpl(jdbcProps: JdbcProps) extends Jdbc {
   def setupConnectionProperties(): Properties = {
     val connectionProperties = new Properties()
     connectionProperties.put("driver", jdbcProps.driver)
-    /*
-    // for now until I come up with pwd encryption in the data source file (from the registry)
-    connectionProperties.put("user", sys.env.getOrElse(s"${jdbcprops.dbIndex}Username", jdbcprops.user))
-    connectionProperties.put("password", sys.env.getOrElse(s"${jdbcprops.dbIndex}Password", jdbcprops.pwd))
-     */
+
+    // NH: not safe... we need to reconsider
     connectionProperties.put("user", jdbcProps.user)
     connectionProperties.put("password", jdbcProps.pwd)
+
+    // may generalize with a map of key/value pairs
+    connectionProperties.put("sslmode", jdbcProps.sslmode)
+
     connectionProperties
   }
 
@@ -91,12 +92,14 @@ case class JdbcImpl(jdbcProps: JdbcProps) extends Jdbc {
     cnt
   }
 
-  def getQueryResult(rs: ResultSet): (IndexedSeq[String],Iterator[IndexedSeq[String]])  = {
+  def getQueryResult(rs: ResultSet): (IndexedSeq[String], Iterator[IndexedSeq[String]]) = {
     val columnCnt: Int = rs.getMetaData.getColumnCount
 
     val columns: IndexedSeq[String] = 1 to columnCnt map rs.getMetaData.getColumnName
     // get all results
-    val queryResults: Iterator[IndexedSeq[String]] = Iterator.continually(rs).takeWhile(_.next()).map { r => columns map r.getString }
+    val queryResults: Iterator[IndexedSeq[String]] = Iterator.continually(rs).takeWhile(_.next()).map { r =>
+      columns map r.getString
+    }
 
     (columns, queryResults)
   }

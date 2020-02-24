@@ -217,7 +217,7 @@ object RegistryService {
     // get the row for the data source properties as a DataPersistenceNode
     val ds = dataPersistenceDF
       .filter("id = '" + idLookup + "'")
-      .select("id", "name", "persistence_type", "storage_type", "driver", "host", "port", "db", "user", "pwd", "fetchsize")
+      .select("id", "name", "persistence_type", "storage_type", "driver", "host", "port", "db", "user", "pwd", "fetchsize", "sslmode")
       .as(dataPersistenceEncoder)
 
     if (ds.count >= 1)
@@ -232,7 +232,7 @@ object RegistryService {
     // get the row for the data source properties as a DataPersistenceNode
     val ds = dataPersistenceDF
       .filter("name = '" + name + "'")
-      .select("id", "name", "persistence_type", "storage_type", "driver", "host", "port", "db", "user", "pwd", "fetchsize")
+      .select("id", "name", "persistence_type", "storage_type", "driver", "host", "port", "db", "user", "pwd", "fetchsize", "sslmode")
       .as(dataPersistenceEncoder)
 
     if (ds.count >= 1)

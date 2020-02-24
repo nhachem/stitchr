@@ -58,7 +58,10 @@ object Convert {
         c.getString(s"$dbIndex.db"),
         dbIndex,
         c.getString(s"$dbIndex.user"),
-        c.getString(s"$dbIndex.pwd")
+        c.getString(s"$dbIndex.pwd"),
+        // NH: 2/21/2020 will need to make more robust
+        100,
+        c.getString("jdbc.sslmode")
     )
 
   def dataSourceNode2JdbcProp(dataSource: DataPersistence): JdbcProps =
@@ -72,7 +75,8 @@ object Convert {
         dataSource.persistence_type, // "jdbc"
         dataSource.user,
         dataSource.pwd,
-        dataSource.fetchsize
+        dataSource.fetchsize,
+        dataSource.sslmode
     )
 
   // inspired from https://stackoverflow.com/questions/1226555/case-class-to-map-in-scala

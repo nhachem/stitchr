@@ -13,7 +13,8 @@ CREATE TABLE
         "user" CHARACTER VARYING(64),
         pwd CHARACTER VARYING(64),
         driver CHARACTER VARYING(64),
-        fetchsize INTEGER
+        fetchsize INTEGER,
+        sslmode CHARACTER VARYING(16) DEFAULT 'prefer'::CHARACTER VARYING
     );
 
 

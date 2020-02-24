@@ -32,24 +32,26 @@ object EnvConfig {
    * baseConfigFolder is the location of the config file coming from the associated environment variable see env.sh
    */
   val baseConfigFolder: String = sys.env.getOrElse("baseConfigFolder", System.getProperty("user.dir") + "/config/")
+
   /**
-    * baseRegistryFolder is the location of the registry files if we use a file-based registry (for dev purposes and demo only). see env.sh
-    */
+   * baseRegistryFolder is the location of the registry files if we use a file-based registry (for dev purposes and demo only). see env.sh
+   */
   val baseRegistryFolder: String = sys.env.getOrElse("baseRegistryFolder", System.getProperty("user.dir") + "/registry/")
+
   /**
-    * baseDataFolder is the location of the data files if we use a file-based registry (for dev purposes and demo only). see env.sh determine its use with overrideDefaultContainer
-    */
+   * baseDataFolder is the location of the data files if we use a file-based registry (for dev purposes and demo only). see env.sh determine its use with overrideDefaultContainer
+   */
   val baseDataFolder: String = sys.env.getOrElse("baseDataFolder", System.getProperty("user.dir") + "/data/")
 
   /**
-  * read all config properties in props. It assumes a default.properties file in the baseConfigFolder
-    */
+   * read all config properties in props. It assumes a default.properties file in the baseConfigFolder
+   */
   val props: Config = readConfig(s"defaults.properties", baseConfigFolder)
   val globalLogging: Boolean = props.getBoolean("global.logging")
   // if we have a postgres catalog initialize the jdbc connection?
   /**
-  * a value of dc means a postgres-based data catalog
-    */
+   * a value of dc means a postgres-based data catalog
+   */
   val dataCatalogPersistence: String = props.getString("dc.persistence")
   // if we want hive support set hiveSupport to true
   val hiveSupport: Boolean = props.getBoolean("global.hiveSupport")
@@ -64,8 +66,8 @@ object EnvConfig {
   val appLogLevel: String = props.getString("app.logLevel")
 
   /**
-  * each processed object gets a run_time_ref log column associated with each record if the add_run_time_ref column is set to  true in the corresponding dataset metadata
-    */
+   * each processed object gets a run_time_ref log column associated with each record if the add_run_time_ref column is set to  true in the corresponding dataset metadata
+   */
   val sessionRunTime: Long = System.nanoTime()
 
   val cloudStorage: Boolean = props.getBoolean("global.cloudStorage")
@@ -75,8 +77,8 @@ object EnvConfig {
 
   // val inSessionDB: String = { if (globalTempDbEnabled) "global_temp." else ""}
   /**
-  * must be set to true to use the metadata associated with datasets
-    */
+   * must be set to true to use the metadata associated with datasets
+   */
   val overrideDefaultContainer: Boolean = props.getBoolean("global.overrideDefaultContainer")
 
   // NH 8/1/2019 EXPERIMENTAL: adding threading support ... may change to using cats library and or scala Future

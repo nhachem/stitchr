@@ -186,7 +186,8 @@ object DataCatalogObject {
       | user,
       | pwd,
       | driver,
-      | fetchsize)
+      | fetchsize,
+      | sslmode)
     """.stripMargin
     // val insertValues = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )"
     val insertValues =
@@ -200,7 +201,8 @@ object DataCatalogObject {
        | ${dataPersistence.user},
        | ${dataPersistence.pwd},
        | ${dataPersistence.driver},
-       | ${dataPersistence.fetchsize})""".stripMargin
+       | ${dataPersistence.fetchsize},
+       | ${dataPersistence.sslmode})""".stripMargin
 
     val updateString =
       """update data_persistence(
@@ -214,7 +216,8 @@ object DataCatalogObject {
       | user,
       | pwd,
       | driver,
-      | fetchsize)
+      | fetchsize,
+      | sslmode)
     """.stripMargin
     val insertStatement = insertString + insertValues
 
@@ -229,7 +232,8 @@ object DataCatalogObject {
        | user = ${dataPersistence.user},
        | pwd = ${dataPersistence.pwd},
        | driver = ${dataPersistence.driver},
-       | fetchsize = ${dataPersistence.fetchsize}
+       | fetchsize = ${dataPersistence.fetchsize},
+       | sslmode = ${dataPersistence.sslmode}
        | where id =  ${dataPersistence.id}""".stripMargin
 
     val deleteStatement = s""" delete from data_persistence where id = ${dataPersistence.id}"""

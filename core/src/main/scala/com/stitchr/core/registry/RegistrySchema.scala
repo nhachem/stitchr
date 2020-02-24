@@ -164,7 +164,8 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                 | "user",
                 | pwd,
                 | driver,
-                | fetchsize
+                | fetchsize,
+                | sslmode
                 | from public.data_persistence""".stripMargin
               )
               .cache(),
@@ -315,7 +316,8 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                          | "user",
                          | pwd,
                          | driver,
-                         | fetchsize
+                         | fetchsize,
+                         | sslmode
                          | from public.data_persistence""".stripMargin
               )
               .cache(),

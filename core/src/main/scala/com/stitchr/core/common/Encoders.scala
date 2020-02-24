@@ -71,8 +71,8 @@ object Encoders {
       data_persistence_src_id: Int,
       data_persistence_dest_id: Int = -1 // added to specify where we move an object -1 means don't move, 0 means temp space (should populate that in the data_persistence table)
       ,
-      add_run_time_ref: Boolean = false
-      , write_mode: String = "append"
+      add_run_time_ref: Boolean = false,
+      write_mode: String = "append"
   )
 
   // case class ExtendedDependency(object_name: String, depends_on: String, query: String, schema_id: Int = -1, data_persistence_id: Int = -1)
@@ -122,6 +122,7 @@ object Encoders {
    * @param user
    * @param pwd
    * @param fetchsize
+   * @param sslmode
    */
   case class DataPersistence(
       id: Int,
@@ -135,7 +136,8 @@ object Encoders {
       user: String = null,
       pwd: String = null,
       // index: String,
-      fetchsize: Int
+      fetchsize: Int,
+      sslmode: String
   )
 
   // id, position are unique
@@ -202,6 +204,6 @@ object Encoders {
 
   // empty structures
   val emptyDs = new DataSet(-1, "EmptyDataSet_0", "", "", "", "", "", "EmptyDataSet", "", "", -1, -1, 0, -1)
-  val emptyDp: DataPersistence = new DataPersistence(-1, "EmptyDataPersistence", "", "", "", "", -1, "", "", "", -1)
+  val emptyDp: DataPersistence = new DataPersistence(-1, "EmptyDataPersistence", "", "", "", "", -1, "", "", "", -1, "prefer")
   val emptyDependency: Dependency = Dependency(null, null, null.asInstanceOf[Int], null, null, null.asInstanceOf[Int], null.asInstanceOf[Int])
 }

@@ -71,11 +71,17 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
      */
     connectionProperties.put("user", jdbcProps.user)
     connectionProperties.put("password", jdbcProps.pwd)
+    connectionProperties.put("sslmode", jdbcProps.sslmode)
+
     connectionProperties
   }
 
   override def readDF(query: String): DataFrame =
-    spark.read.option("fetchsize", jdbcProps.fetchsize).jdbc(url, s"( $query ) as t", connectionProperties)
+    // may generalize with a map of key/value pairs
+    spark.read
+      .option("sslmode", jdbcProps.sslmode) // seems postgres specific?
+      .option("fetchsize", jdbcProps.fetchsize)
+      .jdbc(url, s"( $query ) as t", connectionProperties)
 
   /** EXPERIMENTAL
    * ::Experimental::
@@ -117,6 +123,7 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
                 "user"            -> jdbcProps.user,
                 "password"        -> jdbcProps.pwd,
                 "fetchsize"       -> jdbcProps.fetchsize.toString,
+                "sslmode"         -> jdbcProps.sslmode,
                 "id"              -> "0" // it seems spark picks what it needs!!?
             )
         )
