@@ -30,7 +30,7 @@ package com.stitchr.app
 import com.stitchr.core.api.DataSetApi.Implicits
 import com.stitchr.core.registry.RegistryService.{ getDataSet, getQueryReferenceList }
 import com.stitchr.util.SharedSession.spark
-import com.stitchr.util.EnvConfig.{ appLogLevel, logging, sem, threaded }
+import com.stitchr.util.EnvConfig.{ appLogLevel, logLevel, logging, sem, threaded }
 import com.stitchr.util.Util.time
 import com.stitchr.util.database.CatalogUtil._
 import com.stitchr.util.Threaded
@@ -88,6 +88,9 @@ object DataMoveService {
    * @param ql is a list of object_ref computed as <object_name>_<data_persistence_src_id> from the dataset DC table
    */
   def moveDataSetList(ql: List[String], threaded: Boolean = threaded): Unit = {
+
+    spark.sparkContext.setLogLevel(logLevel)
+
     if (threaded) runThreaded(ql)
     else runSerial(ql)
 
@@ -101,7 +104,7 @@ object DataMoveService {
 }
 
 object MoveDataSetGroup extends App {
-
+  spark.sparkContext.setLogLevel(logLevel)
   // just list the session info
   val configMap: Map[String, String] = spark.conf.getAll
   logging.log.info(s"configMap is $configMap")
@@ -128,7 +131,7 @@ object MoveDataSetGroup extends App {
 may replace the DataIngestService (or be merged with it)
  */
 object MoveDataSetList extends App {
-
+  spark.sparkContext.setLogLevel(logLevel)
   // just list the session info
   val configMap: Map[String, String] = spark.conf.getAll
   logging.log.info(s"configMap is $configMap")

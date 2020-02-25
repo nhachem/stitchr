@@ -29,11 +29,6 @@ trait SparkJdbc {
   import java.util.Properties
   def jdbcProps: JdbcProps
 
-  /*
-    spark.conf.set("spark.sql.shuffle.partitions", 6)
-    spark.conf.set("spark.executor.memory", "2g")
-   */
-
   val url: String = setupUrl()
   val connectionProperties: Properties = setupConnectionProperties()
 
@@ -98,22 +93,24 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
     if (numberOfPartitions == 1) readDF(query)
     else
       /* spark.read
-        .option("fetchsize", jdbcProps.fetchsize)
-        .jdbc(
-            url = url,
-            table = s"(select mod($partitionKey, $numberOfPartitions) as bucket, q.* from ($query ) q ) as t",
-            columnName = "bucket",
-            lowerBound = 0L,
-            upperBound = numberOfPartitions,
-            numPartitions = numberOfPartitions,
-            connectionProperties
-        ) */
+      .option("sslmode", jdbcProps.sslmode)
+      .option("fetchsize", jdbcProps.fetchsize)
+      .jdbc(
+          url = url,
+          table = s"(select mod($partitionKey, $numberOfPartitions) as bucket, q.* from ($query ) q ) as t",
+          columnName = "bucket",
+          lowerBound = 0L,
+          upperBound = numberOfPartitions,
+          numPartitions = numberOfPartitions,
+          connectionProperties
+      ) */
       // attempting to use the full abstracted api from spark... weakness is that options need to be all strings when passed in...
+      // we need to figure out functions to translate from strings to integers in general as partitionKey needs to be an integer
       spark.read
         .format("jdbc")
         .options(
             Map(
-                "url"             -> (url + s"?user=${jdbcProps.user}&password=jdbcProps.pwd&ssl=false"),
+                "url"             -> url,
                 "dbTable"         -> s"(select mod($partitionKey, $numberOfPartitions) as bucket, q.* from ($query ) q ) as t",
                 "partitionColumn" -> "bucket",
                 "lowerBound"      -> "0",
