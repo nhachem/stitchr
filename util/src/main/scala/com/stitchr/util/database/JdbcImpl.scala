@@ -17,6 +17,8 @@
 
 package com.stitchr.util.database
 
+import com.databricks.dbutils_v1.DBUtilsHolder.dbutils._
+
 import java.sql.{ Connection, DatabaseMetaData, DriverManager, ResultSet }
 import java.util.Properties
 
@@ -26,7 +28,12 @@ case class JdbcImpl(jdbcProps: JdbcProps) extends Jdbc {
 
   val jdbcUrl: String = setupUrl() // s"jdbc:${jdbcProps.dbms}://${jdbcProps.host}:${jdbcProps.port}/${jdbcProps.database}"
 
-  val conn: Connection = getJdbcConnection(jdbcUrl, jdbcProps.user, jdbcProps.pwd, jdbcProps.driver)
+  val conn: Connection = getJdbcConnection(
+      jdbcUrl,
+      jdbcProps.user,
+      if (jdbcProps.db_scope == "open") jdbcProps.pwd else secrets.get(scope = jdbcProps.db_scope, key = jdbcProps.pwd),
+      jdbcProps.driver
+  )
 
   // metadata ... lazy to be instantiated on first invocation
   // NH: To complete: add PK, indexes and references such as FKs.
@@ -54,10 +61,9 @@ case class JdbcImpl(jdbcProps: JdbcProps) extends Jdbc {
     val connectionProperties = new Properties()
     connectionProperties.put("driver", jdbcProps.driver)
 
-    // NH: not safe... we need to reconsider
+    // NH: not safe if "open" and that is used for demo and testing only
     connectionProperties.put("user", jdbcProps.user)
-    connectionProperties.put("password", jdbcProps.pwd)
-
+    connectionProperties.put("password", if (jdbcProps.db_scope == "open") jdbcProps.pwd else secrets.get(scope = jdbcProps.db_scope, key = jdbcProps.pwd))
     // may generalize with a map of key/value pairs
     connectionProperties.put("sslmode", jdbcProps.sslmode)
 

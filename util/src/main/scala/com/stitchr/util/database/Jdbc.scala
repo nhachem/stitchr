@@ -29,7 +29,8 @@ case class JdbcProps(
     user: String = null,
     pwd: String = null,
     fetchsize: Int = 10000,
-    sslmode: String = "prefer"
+    sslmode: String = "prefer",
+    db_scope: String = "open"
 )
 
 trait Jdbc {

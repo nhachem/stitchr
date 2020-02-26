@@ -123,6 +123,7 @@ object Encoders {
    * @param pwd
    * @param fetchsize
    * @param sslmode
+   * @param db_scope
    */
   case class DataPersistence(
       id: Int,
@@ -137,7 +138,8 @@ object Encoders {
       pwd: String = null,
       // index: String,
       fetchsize: Int,
-      sslmode: String
+      sslmode: String,
+      db_scope: String
   )
 
   // id, position are unique
@@ -204,6 +206,6 @@ object Encoders {
 
   // empty structures
   val emptyDs = new DataSet(-1, "EmptyDataSet_0", "", "", "", "", "", "EmptyDataSet", "", "", -1, -1, 0, -1)
-  val emptyDp: DataPersistence = new DataPersistence(-1, "EmptyDataPersistence", "", "", "", "", -1, "", "", "", -1, "prefer")
+  val emptyDp: DataPersistence = new DataPersistence(-1, "EmptyDataPersistence", "", "", "", "", -1, "", "", "", -1, "prefer", "open")
   val emptyDependency: Dependency = Dependency(null, null, null.asInstanceOf[Int], null, null, null.asInstanceOf[Int], null.asInstanceOf[Int])
 }

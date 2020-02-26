@@ -14,7 +14,8 @@ CREATE TABLE
         pwd CHARACTER VARYING(64),
         driver CHARACTER VARYING(64),
         fetchsize INTEGER,
-        sslmode CHARACTER VARYING(16) DEFAULT 'prefer'::CHARACTER VARYING
+        sslmode CHARACTER VARYING(16) DEFAULT 'prefer'::CHARACTER VARYING,
+        db_scope CHARACTER VARYING(16) DEFAULT 'open'::CHARACTER VARYING
     );
 
 

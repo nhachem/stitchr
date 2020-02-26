@@ -19,6 +19,8 @@ package com.stitchr.core.dbapi
 
 import com.stitchr.util.SharedSession.spark
 import com.stitchr.util.database.JdbcProps
+
+import com.databricks.dbutils_v1.DBUtilsHolder.dbutils._
 import java.util.Properties
 
 import org.apache.spark.annotation._
@@ -59,13 +61,9 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
   def setupConnectionProperties(): Properties = {
     val connectionProperties = new Properties()
     connectionProperties.put("driver", jdbcProps.driver)
-    /*
-    // for now until I come up with pwd encryption in the data source file (from the registry)
-    connectionProperties.put("user", sys.env.getOrElse(s"${jdbcprops.dbIndex}Username", jdbcprops.user))
-    connectionProperties.put("password", sys.env.getOrElse(s"${jdbcprops.dbIndex}Password", jdbcprops.pwd))
-     */
+
     connectionProperties.put("user", jdbcProps.user)
-    connectionProperties.put("password", jdbcProps.pwd)
+    connectionProperties.put("password", if (jdbcProps.db_scope == "open") jdbcProps.pwd else secrets.get(scope = jdbcProps.db_scope, key = jdbcProps.pwd))
     connectionProperties.put("sslmode", jdbcProps.sslmode)
 
     connectionProperties
@@ -118,7 +116,7 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
                 "numPartitions"   -> numberOfPartitions.toString,
                 "driver"          -> jdbcProps.driver,
                 "user"            -> jdbcProps.user,
-                "password"        -> jdbcProps.pwd,
+                "password"        -> (if (jdbcProps.db_scope == "open") jdbcProps.pwd else secrets.get(scope = jdbcProps.db_scope, key = jdbcProps.pwd)),
                 "fetchsize"       -> jdbcProps.fetchsize.toString,
                 "sslmode"         -> jdbcProps.sslmode,
                 "id"              -> "0" // it seems spark picks what it needs!!?
@@ -135,7 +133,7 @@ case class SparkJdbcImpl(jdbcProps: JdbcProps) extends SparkJdbc {
       .option("dbTable", tableName)
       .option("url", url)
       .option("user", jdbcProps.user)
-      .option("password", jdbcProps.pwd)
+      .option("password", (if (jdbcProps.db_scope == "open") jdbcProps.pwd else secrets.get(scope = jdbcProps.db_scope, key = jdbcProps.pwd)))
       .option("numPartitions", numberPartitions.toString)
       .save()
 

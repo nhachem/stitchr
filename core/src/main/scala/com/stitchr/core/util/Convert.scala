@@ -49,7 +49,7 @@ object Convert {
    * used for testing of the metadata code for now
    */
   // we use a dbIndex to specify general data source jdbc or use it for teh data catalog reference
-  def config2JdbcProp(c: Config, dbIndex: String = "jdbc"): JdbcProps =
+  def config2JdbcProp(c: Config, dbIndex: String): JdbcProps =
     JdbcProps(
         c.getString(s"$dbIndex.dbengine"),
         c.getString(s"$dbIndex.driver"),
@@ -61,7 +61,8 @@ object Convert {
         c.getString(s"$dbIndex.pwd"),
         // NH: 2/21/2020 will need to make more robust
         100,
-        c.getString("jdbc.sslmode")
+        c.getString(s"$dbIndex.sslmode"),
+        c.getString(s"$dbIndex.dbscope")
     )
 
   def dataSourceNode2JdbcProp(dataSource: DataPersistence): JdbcProps =
@@ -76,7 +77,8 @@ object Convert {
         dataSource.user,
         dataSource.pwd,
         dataSource.fetchsize,
-        dataSource.sslmode
+        dataSource.sslmode,
+        dataSource.db_scope
     )
 
   // inspired from https://stackoverflow.com/questions/1226555/case-class-to-map-in-scala

@@ -165,7 +165,8 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                 | pwd,
                 | driver,
                 | fetchsize,
-                | sslmode
+                | sslmode,
+                | db_scope
                 | from public.data_persistence""".stripMargin
               )
               .cache(),
@@ -317,7 +318,8 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                          | pwd,
                          | driver,
                          | fetchsize,
-                         | sslmode
+                         | sslmode,
+                         | db_scope
                          | from public.data_persistence""".stripMargin
               )
               .cache(),
