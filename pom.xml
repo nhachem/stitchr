@@ -179,8 +179,14 @@
     <!-- https://mvnrepository.com/artifact/com.databricks/dbutils-api -->
     <dependency>
       <groupId>com.databricks</groupId>
-      <artifactId>dbutils-api_2.11</artifactId>
+      <artifactId>dbutils-api_${scala.binary.version}</artifactId>
       <version>0.0.4</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/io.delta/delta-core -->
+    <dependency>
+      <groupId>io.delta</groupId>
+      <artifactId>delta-core_${scala.binary.version}</artifactId>
+      <version>0.5.0</version>
     </dependency>
     <!-- others -->
     <dependency>

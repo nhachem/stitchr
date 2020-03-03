@@ -144,12 +144,8 @@ object DataSetApi {
                   else baseDataFolder + dataSet.query
                 dataSet.format match {
                   // file formats  have more options. This is a default for now only tested are csv and pipedelimited
-                  case "parquet" => (spark.read.format(dataSet.format).load(objectURL), dataSet.object_ref)
-                  case "avro"    => (spark.read.format(dataSet.format).load(objectURL), dataSet.object_ref)
-                  case "json"    => (spark.read.format(dataSet.format).load(objectURL), dataSet.object_ref)
-                  case "orc" =>
-                    (spark.read.format(dataSet.format).schema(schema).load(objectURL), dataSet.object_ref)
-                  case _ =>
+                  case "parquet" | "delta" | "avro" | "orc" => (spark.read.format(dataSet.format).load(objectURL), dataSet.object_ref)
+                  case _                                    =>
                     // csv files have more option. This is a default ... we need tab vs csv to figure out delimiter
                     val fieldDelimiter = dataSet.format match {
                       case "pipeDelimited" => '|'.toString
