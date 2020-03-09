@@ -77,7 +77,8 @@ object DataMoveService {
   def runSerial(ql: List[String]): Unit =
     ql.foldLeft()(
         (_, next) => {
-          logging.log.info(s"loading to data target $next") // for storage_type $st")
+          logging.log.info(s"loading to data target $next")
+          println(s"loading to data target $next")
           getDataSet(next).move2Target
 
         }

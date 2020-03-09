@@ -80,6 +80,8 @@ object EnvConfig {
    * must be set to true to use the metadata associated with datasets
    */
   val overrideDefaultContainer: Boolean = props.getBoolean("global.overrideDefaultContainer")
+  // adding to support registration in hive in a databricks environment
+  val databricksHiveRegistration = props.getBoolean("global.databricksHiveRegistration")
 
   // NH 8/1/2019 EXPERIMENTAL: adding threading support ... may change to using cats library and or scala Future
   // val threadCount: Int = props.getInt("concurrent.threadcount")

@@ -23,7 +23,9 @@ import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.core.registry.RegistryService.{ getDataPersistence, getDataSet }
 import com.stitchr.core.util.Convert.dataSourceNode2JdbcProp
 import com.stitchr.util.SharedSession.spark
-import com.stitchr.util.EnvConfig.{ baseDataFolder, dataCatalogPersistence, defaultContainer, defaultFileType, logging, overrideDefaultContainer }
+import com.stitchr.util.EnvConfig._
+// { databricksHiveRegistration, baseDataFolder, dataCatalogPersistence, defaultContainer, defaultFileType, logging, overrideDefaultContainer }
+import com.stitchr.core.util.Hive._
 import com.stitchr.core.api.ExtendedDataframe._
 import com.stitchr.core.registry.DataCatalogObject.DcDataSet
 import org.apache.spark.sql.DataFrame
@@ -36,7 +38,6 @@ object DataSetApi {
     /**
      * main save to target function that takes a target object and materializes it in the target persistence.
      *  We can use an overriding target container but the normal use case is to rely on catalog-based persistence target metadata
-
      *
      * @param fileType used for target file format (in case of a file/object store persistence. Has a default set in the properties file
      * @return (dataSet to be registered or updated, dataSet.object_ref, DataFrame associated with the dataSet)
@@ -59,6 +60,19 @@ object DataSetApi {
 
           logging.log.info(s"fileUrl is $fileUrl for object ref ${dataSet.object_ref}")
           dfExtended.write.format(fileType).mode(dataSet.write_mode).save(fileUrl)
+          // NH for a first iteration we add the databricks hive registration to be global and if the container is null we use default
+          if (databricksHiveRegistration) {
+            // this copies the data dfExtended.write.format(fileType).saveAsTable(s"${dataSet.container}.${dataSet.object_name}")
+            // instead register with a create to fill in (and force parquet format only for now
+            val (dropDDL, createDDL) =
+              generateHiveDDL(dfExtended, if (dataSet.container != null) dataSet.container else "default", dataSet.object_name, fileUrl, fileType)
+            if (appLogLevel == "INFO") {
+              println(dropDDL)
+              println(createDDL)
+            }
+            spark.sql(dropDDL)
+            spark.sql(createDDL)
+          }
           logging.log.info(s"reference object count is ${spark.table(dataSet.object_ref).count}")
           (
               spark.read.format(fileType).load(fileUrl),
