@@ -31,11 +31,6 @@ object Parse {
   def jinjaReplace(q: String, context: HashMap[String, Object]): String = {
 
     val jinjava = new Jinjava
-    //val context = Maps.newHashMap
-    // context.put("name", "Jared")
-    val context: HashMap[String, Object] = HashMap(("hello", "world"), ("nabil", "good"))
-    val template = "abc from {{ hello }} {{ nabil }} "
-
     jinjava.render(q, context)
   }
 
