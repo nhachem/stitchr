@@ -55,7 +55,7 @@ object ExtendedDataframe {
         else pivotedColumnsList
 
       val l = s"'${pivotColumns.mkString("','")}'"
-      df.createOrReplaceTempView("_tmp")
+      dataFrame.createOrReplaceTempView("_tmp")
 
       val q = s"""SELECT * FROM
                   | (
