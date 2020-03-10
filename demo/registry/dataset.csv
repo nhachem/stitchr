@@ -45,7 +45,7 @@ id,format,storage_type,mode,container,object_type,object_name,query,partition_ke
 44,"pipeDelimited","file","base","tpcds","file","web_returns","web_returns.dat",,1,23,3,7,"2019-08-14 15:20:33",false,"append"
 45,"pipeDelimited","file","base","tpcds","file","call_center","call_center.dat",,1,1,3,7,"2019-08-14 15:20:33",false,"append"
 46,"pipeDelimited","file","base","tpcds","file","reason","reason.dat",,1,15,3,7,"2019-08-14 15:20:33",false,"append"
-47,"pipeDelimited","file","base","tpcds","file","web_sales","web_sales.dat",,1,24,3,7,"2019-08-14 15:20:33",false,"append"
+47,"pipeDelimited","file","base","tpcds","file","web_sales","web_sales.dat",,1,24,3,2,"2019-08-14 15:20:33",false,"append"
 48,"pipeDelimited","file","base","tpcds","file","ship_mode","ship_mode.dat",,1,16,3,7,"2019-08-14 15:20:33",false,"append"
 49,"pipeDelimited","file","base","tpcds","file","store","store.dat",,1,17,3,7,"2019-08-14 15:20:33",false,"append"
 50,"pipeDelimited","file","base","tpcds","file","store_returns","store_returns.dat",,1,18,3,7,"2019-08-14 15:20:33",false,"append"

@@ -1,5 +1,24 @@
  # (Data)Stitchr #
 
+##Table of Contents
+
+[TOC]
+
+1. [What is (Data)Stitchr?](#what-is-datastitchr)
+
+2. [Preamble Jargon](#preamble-jargon)
+
+3. [What Features do we currently support](#What Features do we currently support)
+    
+    3.1 [Supported Persistence Containers](#Supported-Persistence-Containers)
+    
+    3.2 [Data Movement Use Cases](#Data-Movement-Use-Cases)
+    
+    3.3 [Data Transformation](#Data Transformation)
+4. [Stitchr Architecture and Patterns](#Stitchr-Architecture-and-Patterns)
+5. [How to setup and demo the tool?](#how-to-setup-and-demo-the-tool)
+6. [The registry](#the-registry)
+
 ## What is (Data)Stitchr? ###
 
 DataStitchr or Stitchr is a tool that helps move and transform data along all phases of a data processing pipeline.
@@ -226,45 +245,66 @@ One can run the transformation DAG in different ways: the simplest is purely seq
 
 ## How to setup and demo the tool? ###
 
+* Build
+
+    First clone the repo
+    ``` git clone https://github.com/nhachem/stitchr.git``` under for example  `....repo/`. The ```STITCHR_ROOT``` is ```...repo/stitchr``` and  is the root of the code under stitchr. All environment variables for  stitchr are defined in ``` $STITCHR_ROOT/bash/stitchr_env.sh ```
+
+    to build 
+   ``` 
+   cd $STITCHR_ROOT 
+   mvn package -DskipTests 
+    ```
+   
+  the output jar which is relevant will be @ ```$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar``` where ```VERSION``` is set in ```stitchr_env.sh```
+
 * Configuration
     
     covered by 
-    ```$STITCHR_ROOT/demo/config/default.properties```
+    `$STITCHR_ROOT/bash/stitchr_env.sh ` and
+    ```$STITCHR_ROOT/demo/config/default.properties``` 
     
+    We make a copy of the defaults.properties file to `~/demo/config/default.properties`
+    and do not need to change the `stitchr_env.sh` file.
     
+    Now place the data under `~/data/demo/tpcds` (downloaded and unzipped from [stitchr demo data](https://github.com/nhachem/stitchr-demo "stitchr-demo"))
+    
+  ``` 
+  to do this use a working dir and  
+    git clone https://github.com/nhachem/stitchr-demo-data.git
+  
+    you get a directory  stitchr-demo-data
+    cp -r stitchr-demo-data/data/tpcds ~/data/demo/ 
+    then cd to the ~/data/demo/tpcds directory and gunzip all gzip files with
+  
+    gunzip *.gz
+    ```
+    
+    for the demo we make sure that, if necessary,  we modify the copied `defaults.properties` file as follows
+    ```
+    spark.logLevel=ERROR
+    app.logLevel=WARN
+  # registry is for filee-based catalog
+    dc.persistence=registry
+    ```
+    Then we would be using the file based registry under `~/demo/registry`
 * Dependencies
    
         needs Spark 2.4 and Scala 2.11 installed. Although the system has been tested to work on Spark 2.2.3
-    
-* How to run the demo
 
-    Place the data under `demo/data/tpcd` (downloaded and unzipped from [stitchr demo data](https://github.com/nhachem/stitchr-demo "stitchr-demo"))
-    
-    Edit the `bash/stitchr_env.sh` file and source it. This will setup the references to file-based registry objects, data folder and root directory of the code. Specifically     
-```  
-  export STITCHR_ROOT=<path to code base>
-  export USER_ROOT="<user home>"
-  export USER_PERSIST_ROOT="<usually hdfs>"
-  export CONFIG_DIR="<path to where the config directory is>"
-  export DATA_DIR="<path-to-root--data directory>" ## usually $USER_PERSIST_ROOT/data/...
-  export REGISTRY_DIR="<path to where the registry directory is>"
-  export baseRegistryFolder=$REGISTRY_DIR/registry/
-  export baseConfigFolder=$CONFIG_DIR/config/
-  ## using tpcds generated data
-  export baseDataFolder=$DATA_DIR/tpcds/ ## for the demo
-  export VERSION=<current version>
-  export MASTER=local[4] ## set to yarn or master url in a cluster mode
-  Issue: we add the user/pwd of data persistence zones to the registry. This is not safe and will have to be taken care of for a production ready use of the system        
-```
+* How to run the demo from spark-shell
 
- `cd` to the demo directory and then invoke interactively spark-shell as follows 
-      
-        spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-<$VERSION>-jar-with-dependencies.jar
+    Although not critical, `cd` to the $STITCHR_ROOT directory and then invoke interactively spark-shell as follows 
+        
+        ## make sur you 
+        source $STITCHR_ROOT/bash/stichr_env.sh
+        ## note that Avro before spark 2.4 is part of the distribution
+        spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
     
         in the shell
         :load <path-to-root-code>/app/scripts/demoBasicStitchr.scala
     
- It will run against a sample demo tpcds data. Those tables metadata are stored in the registry. 
+    It will run against a sample demo tpcds data. Those tables' metadata are stored in the registry. 
     The registry files datasets.csv and schema_columns.csv  are key and are found under demo/registry/
     (we do support and recommend using metadata support through a normal RDBMS, such as Postgres)
 
