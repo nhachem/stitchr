@@ -226,6 +226,18 @@
     <artifactId>scala-logging-slf4j_2.11</artifactId>
     <version>2.1.2</version>
     </dependency>
+    <!-- had to do it local as those are not available through maven https://mvnrepository.com/artifact/com.teradata.jdbc/tdgssconfig -->
+    <dependency>
+      <groupId>com.teradata.jdbc</groupId>
+      <artifactId>tdgssconfig</artifactId>
+      <version>16.20.00.10</version>
+    </dependency>
+    <!-- had to do it local as those are not available through maven had to do it local https://mvnrepository.com/artifact/com.teradata.jdbc/terajdbc4 -->
+    <dependency>
+      <groupId>com.teradata.jdbc</groupId>
+      <artifactId>terajdbc4</artifactId>
+      <version>16.20.00.10</version>
+    </dependency>
   </dependencies>
 
   <build>

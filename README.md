@@ -248,7 +248,19 @@ One can run the transformation DAG in different ways: the simplest is purely seq
     First clone the repo
     ``` git clone https://github.com/nhachem/stitchr.git``` under for example  `....repo/`. The ```STITCHR_ROOT``` is ```...repo/stitchr``` and  is the root of the code under stitchr. All environment variables for  stitchr are defined in ``` $STITCHR_ROOT/bash/stitchr_env.sh ```
 
-    to build 
+    First time build
+    ```
+    source bash/stitchr_env.sh
+  ```
+    then run
+    ```
+    ./bash/addDependencies2MavenRepo.sh
+    ```
+    This will deploy the jars that are under `$STITCHR_ROOT/jars` into the local maven; Usually to add support for closed source jdbc drivers. 
+    
+    This step is needed once on a new build environment.
+    
+    Then to build the stitchr jar 
    ``` 
    cd $STITCHR_ROOT 
    mvn package -DskipTests 
