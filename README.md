@@ -1,20 +1,18 @@
  # (Data)Stitchr #
 
-##Table of Contents
-
-[TOC]
+## Table of Contents
 
 1. [What is (Data)Stitchr?](#what-is-datastitchr)
 
 2. [Preamble Jargon](#preamble-jargon)
 
-3. [What Features do we currently support](#What Features do we currently support)
+3. [What Features do we currently support](#what-features-do-we-currently-support)
     
-    3.1 [Supported Persistence Containers](#Supported-Persistence-Containers)
+    3.1 [Supported Persistence Containers](#supported-persistence-containers)
     
     3.2 [Data Movement Use Cases](#Data-Movement-Use-Cases)
     
-    3.3 [Data Transformation](#Data Transformation)
+    3.3 [Data Transformation](#Data-Transformation)
 4. [Stitchr Architecture and Patterns](#Stitchr-Architecture-and-Patterns)
 5. [How to setup and demo the tool?](#how-to-setup-and-demo-the-tool)
 6. [The registry](#the-registry)
