@@ -253,8 +253,8 @@ object DataSetApi {
            */
           logging.log.info(s"upserting $dataSet")
           DcDataSet(dataSet).upsert
-        case "file" => logging.log.warn(s"for not supporting inserts/updates for dataCatalogPersistence value $dataCatalogPersistence")
-        case _      => logging.log.warn(s"unsupported dataCatalogPersistence value $dataCatalogPersistence")
+        case "file" => logging.log.warn(s"unsupported inserts/updates for dataCatalogPersistence value $dataCatalogPersistence")
+        case _      => logging.log.warn(s"unsupported inserts/updates for dataCatalogPersistence value $dataCatalogPersistence")
       }
 
     /** applies dataSet.init.materialize
@@ -274,7 +274,8 @@ object DataSetApi {
       val (newDS, viewName, datasetDF) = save2Target()
 
       materializeInSessionDb(datasetDF)
-      newDS.upsertDataset
+      if (dataCatalogUpdate) newDS.upsertDataset // updating the data catalog is controlled as we can't write through views
+
       logging.log.info(s"record count for $viewName is ${datasetDF.count()} ")
       (s"$viewName", datasetDF)
     }

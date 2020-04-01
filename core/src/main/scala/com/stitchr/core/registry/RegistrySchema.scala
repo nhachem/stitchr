@@ -18,7 +18,7 @@
 package com.stitchr.core.registry
 
 import com.stitchr.core.common.Encoders.{ DataSet, dataSetEncoder }
-import com.stitchr.util.EnvConfig.{ baseRegistryFolder, dataCatalogPersistence, props }
+import com.stitchr.util.EnvConfig._ // { baseRegistryFolder, dataCatalogPersistence, dataCatalogSchema, props }
 import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.core.util.Convert.config2JdbcProp
 import com.stitchr.util.SharedSession.spark
@@ -137,7 +137,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | data_persistence_dest_id,
                | add_run_time_ref,
                | write_mode
-               | from public.dataset""".stripMargin
+               | from ${dataCatalogSchema}.${dataCatalogDataset}""".stripMargin
               )
               .cache(),
             jdbc
@@ -149,7 +149,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | column_precision,
                | string_length,
                | is_nullable
-               | from public.schema_column""".stripMargin
+               | from ${dataCatalogSchema}.${dataCatalogSchemaColumn}""".stripMargin
               )
               .cache(),
             jdbc
@@ -167,14 +167,14 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                 | fetchsize,
                 | sslmode,
                 | db_scope
-                | from public.data_persistence""".stripMargin
+                | from ${dataCatalogSchema}.${dataCatalogDataPersistence}""".stripMargin
               )
               .cache(),
             jdbc.readDF(
                 s"""select
                    | g.id,
                | g.name
-               | from batch_group g
+               | from ${dataCatalogSchema}.${dataCatalogBatchGroup} g
                | """.stripMargin
             ),
             jdbc.readDF(
@@ -182,7 +182,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                    | bgm.group_id,
                | bgm.dataset_id
                | from
-               | batch_group_members bgm
+               | ${dataCatalogSchema}.${dataCatalogBatchGroupMembers} bgm
                | """.stripMargin
             )
             // better to read the tables in and join with  datsetdf?!
@@ -290,7 +290,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | data_persistence_dest_id,
                | add_run_time_ref
                | write_mode
-               | from public.dataset""".stripMargin
+               | from ${dataCatalogSchema}.${dataCatalogDataset}""".stripMargin
               )
               .cache(),
             jdbc
@@ -302,7 +302,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | column_precision,
                | string_length,
                | is_nullable
-               | from public.schema_column""".stripMargin
+               | from ${dataCatalogSchema}.${dataCatalogSchemaColumn}""".stripMargin
               )
               .cache(),
             jdbc
@@ -320,14 +320,14 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                          | fetchsize,
                          | sslmode,
                          | db_scope
-                         | from public.data_persistence""".stripMargin
+                         | from ${dataCatalogSchema}.${dataCatalogDataPersistence}""".stripMargin
               )
               .cache(),
             jdbc.readDF(
                 s"""select
                    | g.id,
                | g.name
-               | from batch_group g
+               | from ${dataCatalogSchema}.${dataCatalogBatchGroup} g
                | """.stripMargin
             ),
             jdbc.readDF(
@@ -335,7 +335,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                    | bgm.group_id,
              | bgm.dataset_id
              | from
-             | batch_group_members bgm
+             | ${dataCatalogSchema}.${dataCatalogBatchGroupMembers} bgm
              | """.stripMargin
             )
         )

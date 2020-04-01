@@ -53,6 +53,15 @@ object EnvConfig {
    * a value of dc means a postgres-based data catalog
    */
   val dataCatalogPersistence: String = props.getString("dc.persistence")
+  val dataCatalogSchema: String = props.getString("dc.schema")
+  val dataCatalogDataset: String = props.getString("dc.dataset")
+  val dataCatalogDataPersistence: String = props.getString("dc.dataPersistence")
+  val dataCatalogSchemaColumn: String = props.getString("dc.schemaColumn")
+  val dataCatalogBatchGroup: String = props.getString("dc.batchGroup")
+  val dataCatalogBatchGroupMembers: String = props.getString("dc.batchGroupMembers")
+
+  // used to disable or enable data catalog updates.
+  val dataCatalogUpdate: Boolean = props.getBoolean("dc.update")
   // if we want hive support set hiveSupport to true
   val hiveSupport: Boolean = props.getBoolean("global.hiveSupport")
   // val globalLogging: Boolean = props.getBoolean("global.logging")
