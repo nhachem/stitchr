@@ -48,6 +48,7 @@
             <groupId>com.crealytics</groupId>
             <artifactId>spark-excel_2.11</artifactId>
             <version>0.12.0</version>
+            <!-- <version>0.13.1</version> -->
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
@@ -68,17 +69,17 @@
            <!-- 2.4.3 does not exist as of 8/9/2019 <version>${spark.version}</version> -->
         </dependency>
         <!-- note this is not for 4.3 ...https://mvnrepository.com/artifact/com.databricks/spark-avro -->
-        <dependency>
+       <!-- <dependency>
             <groupId>com.databricks</groupId>
             <artifactId>spark-avro_${scala.binary.version}</artifactId>
             <version>4.0.0</version>
-        </dependency>
+        </dependency> -->
         <!-- https://mvnrepository.com/artifact/com.databricks/spark-avro_2.11 -->
         <!-- https://mvnrepository.com/artifact/com.databricks/spark-xml_2.11 -->
         <dependency>
             <groupId>com.databricks</groupId>
             <artifactId>spark-xml_${scala.binary.version}</artifactId>
-            <version>0.4.1</version>
+            <version>0.9.0</version>
         </dependency>
 
         <!-- databases -->

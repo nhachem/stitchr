@@ -360,6 +360,13 @@ Important annotations include
 ## Contribution guidelines ###
  
 * Known Issues
+    * scala 2.12 support
+      ```
+      in core: com.crealytics is not available for scala 2.12
+      in top: scala-pickling_2.11 with scala 2.12
+                dbutils-api_2.11 not tested with scala 2.12
+                scala-logging-slf4j_2.11
+      ```
     * mvn scala:doc fails if the dependent jar files are not added to the local repo. It is a build config issue. 
     This is not critical and the api docs actually are built. A work around is to add the jar after the build by running `./addJars2MavenRepo.sh $VERSION`.
     * Currently the DataSet name is unique within a persistence container. But it should be a tighter constraint and include the `dataset.container` attribute in the constraint (representing database schema in rdbms database terminology).
