@@ -17,7 +17,7 @@
 
 package com.stitchr.util
 
-import com.stitchr.util.EnvConfig.{globalLogging, logging}
+import com.stitchr.util.EnvConfig.{ globalLogging, logging }
 //import org.slf4j.{ LoggerFactory, Logger }
 
 object Util {
@@ -31,8 +31,8 @@ object Util {
     val result = block // call-by-name
     val t1 = System.nanoTime()
     globalLogging match {
-      case true => logging.log.info(s"$message, Elapsed time: " + (t1 - t0) / 1000000 + "ms")
-      case false =>  println(s"$message Elapsed time: " + (t1 - t0) / 1000000 + "ms")
+      case true  => logging.log.info(s"$message, Elapsed time: " + (t1 - t0) / 1000000 + "ms")
+      case false => val t0 = System.nanoTime()
     }
     result
   }

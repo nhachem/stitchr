@@ -65,7 +65,7 @@ object DataSetApi {
             // this copies the data dfExtended.write.format(fileType).saveAsTable(s"${dataSet.container}.${dataSet.object_name}")
             // instead register with a create to fill in (and force parquet format only for now
             val (dropDDL, createDDL) =
-              generateHiveDDL(dfExtended, if (dataSet.container != null) dataSet.container else "default", dataSet.object_name, fileUrl, fileType)
+              generateDDL(dfExtended, if (dataSet.container != null) dataSet.container else "default", dataSet.object_name, fileUrl, fileType)
             if (appLogLevel == "INFO") {
               println(dropDDL)
               println(createDDL)

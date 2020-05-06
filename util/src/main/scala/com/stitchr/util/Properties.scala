@@ -27,9 +27,7 @@ object Properties {
   import org.apache.spark.sql.SparkSession
 
   def readConfig(configurationFile: String, configRootPath: String) = {
-    import scala.io.Source
     println(s"Configuration file is $configRootPath$configurationFile")
-    val configFile = Source.fromURL(configRootPath + configurationFile)
     val configString = spark.sparkContext
       .textFile(configRootPath + configurationFile)
       .collect()

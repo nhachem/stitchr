@@ -35,17 +35,42 @@ import com.typesafe.config.Config
 import scala.collection.mutable.ArrayBuffer
 
 object Hive {
-
-  def generateHiveDDL(df: DataFrame, schemaName: String, tableName: String, fileURL: String, storageType: String): (String, String) = {
+  // NH: 5/4/2020 under development
+  //assumes the dataframe is written to storage somewhere else
+  def generateDDL(df: DataFrame, schemaName: String, tableName: String, fileURL: String, storageType: String = "delta"): (String, String) = {
     //get the schema split as string with comma-separated field-datatype pairs
     val schema: StructType = df.schema
-    val columns = df.schema.fields.toList.foldLeft("")((head, next) => s"$head${next.name} ${next.dataType.typeName}\n,").replaceAll(",$", "")
+    // can do that with mkStrings + prefix and suffix...
+    // also the real solution is to quote the column names to handle the .?!
+    val columns =
+      df.schema.fields.toList.foldLeft("")((head, next) => s"$head${(next.name).replace(".", "_")} ${next.dataType.typeName}\n,").replaceAll(",$", "")
     //drop the table if already created
     val dropDDL = s"drop table if exists ${schemaName}.${tableName}"
     //create the table using the dataframe schema
-    val createDDL = s"""create table if not exists $schemaName.$tableName ($columns)
+    // val createDDL = s"""create table if not exists $schemaName.$tableName ($columns)
+    //val createDDL = s"""create table $schemaName.$tableName ($columns)
+    //                   | USING $storageType location '$fileURL'""".stripMargin
+    val createDDL = s"""create table $schemaName.$tableName
                        | USING $storageType location '$fileURL'""".stripMargin
     (dropDDL, createDDL)
   }
+  def listColumns(schemaName: String, tableName: String): List[String] =
+    //spark.sql(s"describe ${schemaName}.${tableName}").select("columnName").collect.map(r => r(0).toString()).toList
+    // or
+    spark.table(s"${schemaName}.${tableName}").select("columnName").collect.map(r => r(0).toString()).toList
 
+  def listColumnsDF(schemaName: String, tableName: String): DataFrame =
+    //spark.sql(s"describe ${schemaName}.${tableName}").select("columnName").collect.map(r => r(0).toString()).toList
+    // or
+    spark.table(s"${schemaName}.${tableName}").select("columnName")
+
+  def listTables(schemaName: String): List[String] = {
+    spark.sql(s"use ${schemaName}")
+    spark.sql(s"show tables").select("tableName").collect.map(r => r(0).toString()).toList
+  }
+
+  def listTablesDF(schemaName: String): DataFrame = {
+    spark.sql(s"use ${schemaName}")
+    spark.sql(s"show tables").select("tableName")
+  }
 }
