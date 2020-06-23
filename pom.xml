@@ -100,8 +100,8 @@
     <!-- https://mvnrepository.com/artifact/net.liftweb/lift-json -->
     <dependency>
       <groupId>net.liftweb</groupId>
-      <artifactId>lift-json_${scala.binary.version}</artifactId>
-      <version>3.4.1</version>
+      <artifactId>lift-json_2.11</artifactId>
+      <version>3.3.0</version>
     </dependency>
    <!-- Doobie stuff experimental
    <dependency>
@@ -168,8 +168,7 @@
     </dependency>
     <dependency>
       <groupId>org.scala-lang.modules</groupId>
-      <!-- <artifactId>scala-pickling_${scala.binary.version}</artifactId> -->
-      <artifactId>scala-pickling_2.11</artifactId>
+      <artifactId>scala-pickling_${scala.binary.version}</artifactId>
       <version>0.10.0</version>
     </dependency>
     <dependency>
@@ -180,14 +179,14 @@
     <!-- https://mvnrepository.com/artifact/com.databricks/dbutils-api -->
     <dependency>
       <groupId>com.databricks</groupId>
-      <artifactId>dbutils-api_2.11</artifactId>
+      <artifactId>dbutils-api_${scala.binary.version}</artifactId>
       <version>0.0.4</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/io.delta/delta-core -->
     <dependency>
       <groupId>io.delta</groupId>
       <artifactId>delta-core_${scala.binary.version}</artifactId>
-      <version>0.5.0</version>
+      <version>0.6.0</version>
     </dependency>
     <!-- others -->
     <dependency>
@@ -210,8 +209,8 @@
     <!-- https://mvnrepository.com/artifact/org.scalatest/scalatest-funspec -->
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest-funspec_${scala.binary.version}</artifactId>
-      <version>3.2.0-M4</version>
+      <artifactId>scalatest-funspec_2.11</artifactId>
+      <version>3.0.0-SNAP13</version>
       <scope>test</scope>
     </dependency>
 
@@ -224,8 +223,8 @@
     <!-- logging -->
     <dependency>
     <groupId>com.typesafe.scala-logging</groupId>
-      <artifactId>scala-logging-slf4j_2.11</artifactId>
-      <version>2.1.2</version>
+    <artifactId>scala-logging-slf4j_2.11</artifactId>
+    <version>2.1.2</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
     <dependency>
@@ -244,19 +243,6 @@
       <groupId>com.teradata.jdbc</groupId>
       <artifactId>terajdbc4</artifactId>
       <version>16.20.00.10</version>
-    </dependency>
-    <!-- other -->
-    <!-- https://mvnrepository.com/artifact/org.json4s/json4s-jackson -->
-    <dependency>
-      <groupId>org.json4s</groupId>
-      <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
-      <version>3.6.7</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.module/jackson-module-scala -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
-      <version>2.10.3</version>
     </dependency>
   </dependencies>
 

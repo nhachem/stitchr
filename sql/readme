@@ -1,13 +1,38 @@
-basic tables used in the postgres DC.
+Database postgres
+user
+dc/dc
+schema data_catalog
+-- CREATE schema data_catalog authorization dc;
+
+views and tables used in the postgres DC.
+
+dataset_v is a join between dataset and dataset_transform
+data_persistence_v is directly pulled from data_persistence
+schema_column_v
+
+batch_group_v is directly pulled from dataset_collection
+batch_group_members_v is directly based on dataset_collection_member
+
+seed data is for testing and demo purposes
+
+== underlying table (extending the data catalog for V0.2)
 
 dataset
-data_persistense
-schema_column
+data_persistence
+transform
+dataset_transform
 
-batch_group
-batch_group_members
+schema_column and dataset_schema
 
+dataset_collection
+dataset_collection_member
 
-also seed data is for testing and demo purposes
+The model is in dc.pdf
 
+===
+the extension is to decouple target destination persistence and provide for formal linking between datasets through transforms.
 
+we are starting to deprecate batch groups to replace with collection groups in prep to add annotations that allow indexing and linking between the operational (current) layer of the data catalog with any business data cata log
+
+we plan also to normalize the data_persistence piece as we currently overload the jdbc and file persistence objects to map to the same attributes.
+===
