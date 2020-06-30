@@ -17,11 +17,17 @@
 
 package com.stitchr.util
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
+// import com.typesafe.scalalogging.slf4j.LazyLogging
+import org.slf4j._
 /*
  * 7/8/2019 logging place holder
  */
-class Logging extends LazyLogging {
+/* class Logging extends LazyLogging {
   // logger.debug("This is a test")
   val log = logger
+} */
+
+class Logging {
+  // logger.debug("This is a test")
+  val log = LoggerFactory.getLogger("logger")
 }

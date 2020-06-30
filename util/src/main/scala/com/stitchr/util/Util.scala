@@ -18,11 +18,8 @@
 package com.stitchr.util
 
 import com.stitchr.util.EnvConfig.{ globalLogging, logging }
-//import org.slf4j.{ LoggerFactory, Logger }
 
 object Util {
-  // may use or just have a logger class used across
-  //val logger: Logger = LoggerFactory.getLogger(this.getClass.getName)
 
   // shamelessly adapted from http://stackoverflow.com/questions/9160001/how-to-profile-methods-in-scala
   // has a side effect
@@ -32,7 +29,7 @@ object Util {
     val t1 = System.nanoTime()
     globalLogging match {
       case true  => logging.log.info(s"$message, Elapsed time: " + (t1 - t0) / 1000000 + "ms")
-      case false => val t0 = System.nanoTime()
+      case false => println(s"$message, Elapsed time: " + (t1 - t0) / 1000000 + "ms")
     }
     result
   }

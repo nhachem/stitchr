@@ -30,8 +30,10 @@
       <unpack>true</unpack>
       <scope>runtime</scope>
         <excludes>
-          <exclude>commons-lang:commons-lang</exclude>
-          <exclude>log4j:log4j</exclude>
+         <!-- <exclude>log4j:log4j:*</exclude>
+          <exclude>org.slf4j:slf4j-api:*</exclude>
+          <exclude>org.slf4j:*:*</exclude>
+          <exclude>com.fasterxml.jackson.core:*</exclude> -->
           <exclude>org.apache.spark:*:*</exclude>
           <exclude>org.apache.hadoop:hadoop-client</exclude>
         </excludes>

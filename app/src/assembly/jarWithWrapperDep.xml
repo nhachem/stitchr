@@ -31,9 +31,9 @@
             <scope>test</scope>
             <includes>
                 <include>commons-lang:commons-lang</include>
-                <include>org.apache.logging.log4j:**</include>
+              <!--  <include>org.apache.logging.log4j:**</include> -->
             <!--    <include>org.slf4j:*:*</include> -->
-                <include>log4j:*:*</include>
+             <!--   <include>log4j:*:*</include> -->
                 <include>org.apache.spark:*:*</include>
             </includes>
         </dependencySet>

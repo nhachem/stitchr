@@ -28,7 +28,7 @@
     <scala.version>${scala.binary.version}.12</scala.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <spark.version>2.4.4</spark.version>
+    <spark.version>2.4.6</spark.version>
     <hadoop.version>2.7.4</hadoop.version>
     <yarn.version>${hadoop.version}</yarn.version>
     <maven.version>3.6.0</maven.version>
@@ -47,6 +47,8 @@
     <build.testJarPhase>prepare-package</build.testJarPhase>
     <build.copyDependenciesPhase>none</build.copyDependenciesPhase>
 
+      <slf4j.version>1.7.30</slf4j.version>
+      <log4j.version>1.2.17</log4j.version>
   </properties>
 
   <groupId>com.stitchr</groupId>
@@ -77,21 +79,9 @@
       </snapshots>
     </repository>
   </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>central</id>
-      <url>https://repo.maven.apache.org/maven2</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
 
   <dependencies>
-    <!-- https://mvnrepository.com/artifact/com.hubspot.jinjava/jinjava -->
+  <!-- https://mvnrepository.com/artifact/com.hubspot.jinjava/jinjava -->
     <dependency>
       <groupId>com.hubspot.jinjava</groupId>
       <artifactId>jinjava</artifactId>
@@ -221,10 +211,16 @@
       <scope>test</scope>
     </dependency>
     <!-- logging -->
+      <!-- <dependency>
+        <groupId>com.typesafe.scala-logging</groupId>
+        <artifactId>scala-logging-slf4j_2.11</artifactId>
+      <version>2.1.2</version>
+        <version>1.7.5</version>
+      </dependency> -->
     <dependency>
-    <groupId>com.typesafe.scala-logging</groupId>
-    <artifactId>scala-logging-slf4j_2.11</artifactId>
-    <version>2.1.2</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
     <dependency>
@@ -244,10 +240,16 @@
       <artifactId>terajdbc4</artifactId>
       <version>16.20.00.10</version>
     </dependency>
+    <!-- trying to override jackson -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.6.5</version>
+    </dependency>
+
   </dependencies>
 
   <build>
-
     <sourceDirectory>src/main/scala</sourceDirectory>
     <testSourceDirectory>src/test/scala</testSourceDirectory>
     <pluginManagement>
@@ -301,6 +303,58 @@
                   <arg>${project.build.directory}/.scala_dependencies</arg>
                 </args>
               </configuration> -->
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>3.2.4</version>
+          <executions>
+            <execution>
+              <phase>package</phase>
+              <goals>
+                <goal>shade</goal>
+              </goals>
+              <configuration>
+                <relocations>
+                <!-- <relocation> 
+                    <pattern>org.slf4j</pattern>
+                    <shadedPattern>stitchr_shaded.org.slf4j</shadedPattern>
+                  </relocation> -->
+                </relocations>
+                <filters>
+                  <filter>
+                    <artifact>*:*</artifact>
+                    <excludes>
+                      <exclude>META-INF/services/javax.annotation.processing.Processor</exclude>
+                      <exclude>META-INF/*.MF</exclude>
+                      <exclude>META-INF/*.SF</exclude>
+                      <exclude>META-INF/*.DSA</exclude>
+                      <exclude>META-INF/*.RSA</exclude>
+                    </excludes>
+                  </filter>
+                  <filter>
+                    <artifact>commons-logging:commons-logging</artifact>
+                    <includes>
+                      <include>**</include>
+                    </includes>
+                  </filter>
+                </filters>
+                <artifactSet>
+                  <excludes>
+                    <!-- <exclude>org.slf4j:slf4j-api:*</exclude> -->
+                    <exclude>org.slf4j:*:*</exclude>
+                    <exclude>org.apache.hadoop:*</exclude>
+                    <exclude>org.apache.spark:*</exclude>
+                    <exclude>org.scala-lang:*</exclude>
+                    <exclude>org.apache.tinkerpop:*</exclude>
+                    <exclude>com.google.code.gson:*</exclude>
+                  </excludes>
+                </artifactSet>
+                <minimizeJar>true</minimizeJar>
+                <finalName>${project.artifactId}-${project.version}-uber</finalName>
+              </configuration>
             </execution>
           </executions>
         </plugin>
