@@ -240,7 +240,7 @@
       <artifactId>terajdbc4</artifactId>
       <version>16.20.00.10</version>
     </dependency>
-    <!-- trying to override jackson -->
+    <!-- trying to override jackson and upgrading for vulnerabilities -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
