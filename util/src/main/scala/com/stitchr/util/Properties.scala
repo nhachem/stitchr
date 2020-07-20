@@ -26,7 +26,7 @@ object Properties {
   import org.apache.hadoop.conf.Configuration
   import org.apache.spark.sql.SparkSession
 
-  def readConfig(configurationFile: String, configRootPath: String) = {
+  def readConfig(configurationFile: String, configRootPath: String): Config = {
     println(s"Configuration file is $configRootPath$configurationFile")
     val configString = spark.sparkContext
       .textFile(configRootPath + configurationFile)
