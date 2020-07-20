@@ -54,12 +54,16 @@ object DataSetApi {
         case "file" =>
           val fileUrl =
             if (overrideDefaultContainer)
-              // note: examp,e url is of the form {gsORs3ORfileORhdfs}://bucket/folder/file.filetype
+              // note: example url is of the form {gsORs3ORfileORhdfs}://bucket/folder/file.filetype
               s"${destPersistence.storage_type}${destPersistence.host}/${destPersistence.db}/${dataSet.object_ref}.$fileType"
             else s"$defaultContainer/${dataSet.object_ref}.$fileType"
-
+          /* NH 7/7/2020: trying to circumvent this error with delta not being recognised as a source by forcing full .
+            until I can work put a more elegant solution
+          Exception in thread "main" java.lang.ClassNotFoundException: Failed to find data source: delta. Please find packages at http://spark.apache.org/third-party-projects.html
+           */
+          val formatType = if (fileType == "delta") "org.apache.spark.sql.delta.sources.DeltaDataSource" else fileType
           logging.log.info(s"fileUrl is $fileUrl for object ref ${dataSet.object_ref}")
-          dfExtended.write.format(fileType).mode(dataSet.write_mode).save(fileUrl)
+          dfExtended.write.format(formatType).mode(dataSet.write_mode).save(fileUrl)
           // NH for a first iteration we add the databricks hive registration to be global and if the container is null we use default
           if (databricksHiveRegistration) {
             // this copies the data dfExtended.write.format(fileType).saveAsTable(s"${dataSet.container}.${dataSet.object_name}")
@@ -75,7 +79,7 @@ object DataSetApi {
           }
           logging.log.info(s"reference object count is ${spark.table(dataSet.object_ref).count}")
           (
-              spark.read.format(fileType).load(fileUrl),
+              spark.read.format(formatType).load(fileUrl),
               dataSet.copy(
                   id = -1,
                   object_name = dataSet.object_ref,
