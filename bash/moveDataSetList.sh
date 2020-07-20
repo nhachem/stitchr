@@ -25,6 +25,8 @@
 ## source bash/stitchr_env.sh
 
 source ./bash/stitchr_env.sh
+# STITCHR_SCALA_VERSION=2.11
+# STITCHR_SPARK_VERSION=2.4.6
 
 echo $@
 STITCHR_CLASS="com.stitchr.app.MoveDataSetList"
@@ -32,8 +34,8 @@ STITCHR_CLASS="com.stitchr.app.MoveDataSetList"
 # for a cluster deployment better use deploy_mode
 #    --deploy-mode client \
 $SPARK_HOME/bin/spark-submit \
-     --master $MASTER \
-     --packages org.apache.spark:spark-avro_2.11:2.4.3 \
-     --class $STITCHR_CLASS\
+      --master $MASTER \
+      --class $STITCHR_CLASS\
+      --packages org.apache.spark:spark-avro_$STITCHR_SCALA_VERSION:$STITCHR_SPARK_VERSION \
      "$STITCHR_JAR" \
      "$@"

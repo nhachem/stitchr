@@ -42,3 +42,7 @@ export defaultOutputDir=/tmp
 export VERSION=0.2-SNAPSHOT
 export MASTER=local[4]
 export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
+
+## used in bash scripts
+export STITCHR_SCALA_VERSION=2.11
+export STITCHR_SPARK_VERSION=2.4.6

@@ -26,6 +26,8 @@
 ## you need to change those parameters
 
 source ./bash/stitchr_env.sh
+# STITCHR_SCALA_VERSION=2.11
+# STITCHR_SPARK_VERSION=2.4.6
 
 ## set it up if JAVA_HOME is not set export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_211.jdk/Contents/Home
 
@@ -35,12 +37,12 @@ STITCHR_CLASS="com.stitchr.app.MoveDataSetGroup"
 
 # for a cluster deployment better use deploy_mode
 #    --deploy-mode client \
-##      --packages org.apache.spark:spark-avro_2.11:2.4.3 \
+
 
 $SPARK_HOME/bin/spark-submit \
      --master $MASTER \
      --class $STITCHR_CLASS\
-     --packages org.apache.spark:spark-avro_2.11:2.4.3 \
+     --packages org.apache.spark:spark-avro_$STITCHR_SCALA_VERSION:$STITCHR_SPARK_VERSION \
      "$STITCHR_JAR" \
      "$@"
 
