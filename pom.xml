@@ -24,11 +24,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <zinc.enabled>false</zinc.enabled>
     <zinc.port>7919</zinc.port>
-    <scala.binary.version>2.11</scala.binary.version>
-    <scala.version>${scala.binary.version}.12</scala.version>
+    <scala.binary.version>2.12</scala.binary.version>
+    <scala.version>${scala.binary.version}.10</scala.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <spark.version>2.4.6</spark.version>
+    <spark.version>3.0.0</spark.version>
     <hadoop.version>2.7.4</hadoop.version>
     <yarn.version>${hadoop.version}</yarn.version>
     <maven.version>3.6.0</maven.version>
@@ -90,8 +90,8 @@
     <!-- https://mvnrepository.com/artifact/net.liftweb/lift-json -->
     <dependency>
       <groupId>net.liftweb</groupId>
-      <artifactId>lift-json_2.11</artifactId>
-      <version>3.3.0</version>
+      <artifactId>lift-json_${scala.binary.version}</artifactId>
+      <version>3.4.1</version>
     </dependency>
    <!-- Doobie stuff experimental
    <dependency>
@@ -156,27 +156,29 @@
       <artifactId>scala-compiler</artifactId>
       <version>${scala.version}</version>
     </dependency>
-    <dependency>
+<!--    <dependency>
       <groupId>org.scala-lang.modules</groupId>
-      <artifactId>scala-pickling_${scala.binary.version}</artifactId>
+      <artifactId>scala-pickling_2.11</artifactId>
       <version>0.10.0</version>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.scala-tools</groupId>
       <artifactId>maven-scala-plugin</artifactId>
       <version>2.15.2</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.databricks/dbutils-api -->
+    <!-- NH: will need to upgrade when db-utils is 2.12 compliant -->
     <dependency>
       <groupId>com.databricks</groupId>
-      <artifactId>dbutils-api_${scala.binary.version}</artifactId>
+      <artifactId>dbutils-api_2.11</artifactId>
       <version>0.0.4</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/io.delta/delta-core -->
     <dependency>
       <groupId>io.delta</groupId>
       <artifactId>delta-core_${scala.binary.version}</artifactId>
-      <version>0.6.0</version>
+      <!-- NH: version 0.6.1 is the last version to work with scala 2.11. and 0.7.0 is for Spark 3 -->
+      <version>0.7.0</version>
     </dependency>
     <!-- others -->
     <dependency>
@@ -331,6 +333,7 @@
                     <artifact>*:*</artifact>
                     <excludes>
                       <exclude>META-INF/services/javax.annotation.processing.Processor</exclude>
+                      <exclude>META-INF/services/</exclude>
                       <exclude>META-INF/*.MF</exclude>
                       <exclude>META-INF/*.SF</exclude>
                       <exclude>META-INF/*.DSA</exclude>
@@ -344,6 +347,17 @@
                     </includes>
                   </filter>
                 </filters>
+                <transformers>
+                  <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                    <resource>META-INF/services/</resource>
+                  </transformer>
+                  <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                    <resource>META-INF/services/org.apache.spark.sql.sources.DataSourceRegister</resource>
+                  </transformer>
+                  <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                    <resource>META-INF/services/org.apache.spark.sql.delta.sources.DeltaDataSource</resource>
+                  </transformer>
+                </transformers>
                 <artifactSet>
                   <excludes>
                     <!-- <exclude>org.slf4j:slf4j-api:*</exclude> -->
