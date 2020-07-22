@@ -72,13 +72,13 @@ We do not compute the min/max but resort to runtime round robin bucketing based 
 #### Move a group of Data Objects from a Source Container to a Destination Container
 * Move a group of DataSets
 
-    ```$STITCHR_ROOT/bash/runMoveDatSetGroup.sh```
+    ```$STITCHR_ROOT/bash/moveDatSetGroup.sh```
      
 takes one argument which is the name of the group to run. The system reads the set of DataSet objects associated with the group and moves them to the target destination. Finally it will register or update the registry with the new moved objects.
    
 * Move a list of object references
   
-    ``` $STITCHR_ROOT/bash/runMoveDatSetList.sh ```
+    ``` $STITCHR_ROOT/bash/moveDatSetList.sh ```
 
 is passed a comma-delimited list of object references and performs the same function of moving those objects to individually specified target containers. All of that is supported by registering the proper metadata information in the DC registry.
 
@@ -100,7 +100,7 @@ runs a battery of tests moving a group of objects as well as a list of objects
 
 #### Move objects from a JDBC source persistence by specifying the object as a select query.
 
-This is supported by providing the select query in the  DataSet.query attribute and tagging the DataSet.mode as "base". The system will then push dpwn the query to the source JDBC persistence and return a handle to the result initialized in the runtime in session database. The materialization of the result to any target can be associated as well.
+This is supported by providing the select query in the  DataSet.query attribute and tagging the DataSet.mode as "base". The system will then push down the query to the source JDBC persistence and return a handle to the result initialized in the runtime in session database. The materialization of the result to any target can be associated as well.
 ### DataSet object and Data Persistence container registration 
      
 #### Automated Registration of a set of DataSet from a JDBC persistence source
@@ -165,7 +165,7 @@ com.stitchr.core.registry.RegistryService.getJsonSchema
 ### Data Transformation 
 In the current version, The constraint is that all objects that we transform come from the same source persistence layer. This constraint will be removed in upcoming versions so that one could use federated queries. 
 The constraint right now is more tied to keep the complexity burden on the user low. To enable it properly we need to, either constrain the object references globally or assume the query writer can specify object references across different persistence containers.
-This would put an extra burden on the developer of such queries as we would need to introduce template support for query rewrites (with tolls such as JinJa). 
+This would put an extra burden on the developer of such queries as we would need to introduce template support for query rewrites (with tools such as JinJa). 
 We do use Jinja in a very specific case and constrain the query writers to always alias the main table/view objects and enclose the dependency objects with `{{ }}`  (such as `{{ person }} as p`)
  
 Taking into account the above restriction, any transformation that can be supported through (Spark)SQL can be specified. This covers Use cases 1 and 2 we outlined in the overview section.
@@ -203,9 +203,9 @@ and are as follows:
 
 * Input: DataSet Extractor → service to pull the (SQL) Transformer associated with the targeted DataSet
 * Logical SQL Parser → parses and extracts the dependencies from the Transformation function if any (uses the Spark SQL parser) 
-* DAG Builder → builds the dependency set recursively down to all base DataSets (simple emi-naive transitive closure on the dependencies)
+* DAG Builder → builds the dependency set recursively down to all base DataSets (simple semi-naive transitive closure on the dependencies)
 * InitRuntimeDB Service → executes the instantiation of all dependencies as well as the target set as abstractions (DataFrames and Tables) in the Spark internal session-based DB
-* materilise2Target Service → physically materialising the target object in the associated target persistence container
+* materialise2Target Service → physically materialising the target object in the associated target persistence container
 * Catalog Query Service → interface api to the MDC to retrieve metadata about DataSets, DataSetPersistence and DataSetSchema among other services
 * Catalog Registration Service→ interface api to the MDC to register or update DataSets and other artifacts as they are created or modified
 
@@ -258,9 +258,9 @@ One can run the transformation DAG in different ways: the simplest is purely seq
     ```
     This will deploy the jars that are under `$STITCHR_ROOT/jars` into the local maven; Usually to add support for closed source jdbc drivers. 
     
-    This step is needed once on a new build environment.
+    This step is needed once for a new build environment.
     
-    Then to build the stitchr jar 
+    Then to build the Stitchr jar 
    ``` 
    cd $STITCHR_ROOT 
    mvn package -DskipTests 
@@ -298,9 +298,13 @@ One can run the transformation DAG in different ways: the simplest is purely seq
     dc.persistence=registry
     ```
     Then we would be using the file based registry under `~/demo/registry`
+
+    Note: for proper deployment in cloud based environments, move the `defaults.properties` to a persistence storage accessible by all nodes in the cluster. The location of the `defaults.properties` file is determined by `export baseConfigFolder=file://$CONFIG_DIR/config/` that is set in `stitchr_env.sh` and should be modified for the target storage bucket.
+
 * Dependencies
    
-        needs Spark 2.4 and Scala 2.11 installed. Although the system has been tested to work on Spark 2.2.3
+        needs Spark 2.4 and Scala 2.11 installed. Although the system has been tested to work on Spark 2.2.3. 
+        Also the code base has been recently upgraded to work with Scala 2.12 and Spark 3.0.0
 
 * How to run the demo from spark-shell
 
@@ -335,18 +339,21 @@ after you set up your environment properly (python 3.7)
 
 
 ## The registry ##
+
+`[NH 7/20/2020]: This database schema has changed and docs need to be updated]`
+
 Current key registry objects include the `dataset`, `data_persistence` and `schema_column` tables. The schema of those registry objects may be in files but, for full functionality the RDBMS Postgres-based implementation is needed. Refer to the sql DDL under `$STITCHR_ROOT/sql`
 
 A data object (table or file, etc) is registered in the "dataset" table and is associated with a data persistence container as its source. Metadata needed includes
 data persistence source (such as jdbc source database and associated schema as the container), or a file with associated target folder and data source root file system. For "files" we lump sum object stores such as GS and S3.
 
-Important annotations include
+Some Important annotations
 * Primary key definitions as sequences but we assert alternate keys to ensure consistency.
-* data_persistence driver and connections info... A weakness in the current implementation is that the user/pwd attributes are in the clear.
+* data_persistence driver and connections info... A weakness in the current implementation is that the user/pwd attributes are in the clear, but we recently extended the code to support Databricks `com.databricks.dbutils_v1.DBUtilsHolder.dbutils.secrets`
 * `data_persistence.name` is unique. For `persistence_type = "file"` the driver is assembled as storage_type/host/db combination.
 * The `schema_column` table holds the schema info and is usually needed when we manipulate objects that are inherently not self-describing (such as CSV or delimited files in general)
 * The `data_persistence.object_name` is assumed unique within its `data_persistence_src_id` persistence. 
-    * `format` is database format such as postgresql, vertica, ... , parquet, avro, csv, pipeDelimited... 
+    * `format` is database format such as postgresql, vertica, ... , delta, parquet, avro, csv, pipeDelimited... 
     * `storage_type` is either "database" or "file" for now and `mode` is either "base" or "derived". 
 * In the current version we focus on base objects and data movement between persistence, although the transformation engine (for derived objects) is the key to all data movement. 
 * `object_type` is "table", "view", or "file" for now.
@@ -378,7 +385,7 @@ Important annotations include
 * Pending Features and Fixes
     
     * Full crawler/module to enable auto registration of self-describing files and jdbc sources. We currently support only JDBC
-    * Formalize the basic metadata schema and document it.
+    * Formalize the metadata schema and document it.
     * Adding support for other containers/formats, such as sftp, fixed-length-delimited files, spreadsheets, etc...
     * Add non-sql functions that are "stitched" in the computation/derivation graph
 
