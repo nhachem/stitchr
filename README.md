@@ -181,7 +181,9 @@ The way data is moved is controlled at runtime using the `dataset` attribute `wr
 We introduced a threaded implementation for moving a group of datasets using simple threads with semaphores based on `java.util.concurrent`. This is purely EXPERIMENTAL as concurrency 
 issues may arise when updating the metadata in the data catalog.  
 Tests show possible improvements of over 25% in runtime with 2 concurrent threads (running spark on a high end laptop)
-To enable parallel threads set `concurrent.threaded` to tr `true` and the number of semaphores by setting `concurrent.semaphores`
+To enable parallel threads set `concurrent.threaded` to tr `true` and the number of semaphores by setting `concurrent.semaphores`.
+
+While not on the critical path, we will be modifying the code to use futures. 
 
 ## Stitchr Architecture and Patterns ##
 
