@@ -231,17 +231,19 @@
       <version>8.0.19</version>
     </dependency>
     <!-- had to do it local as those are not available through maven https://mvnrepository.com/artifact/com.teradata.jdbc/tdgssconfig -->
-    <dependency>
+<!--    <dependency>
       <groupId>com.teradata.jdbc</groupId>
       <artifactId>tdgssconfig</artifactId>
       <version>16.20.00.10</version>
     </dependency>
+-->
     <!-- had to do it local as those are not available through maven had to do it local https://mvnrepository.com/artifact/com.teradata.jdbc/terajdbc4 -->
-    <dependency>
+<!--    <dependency>
       <groupId>com.teradata.jdbc</groupId>
       <artifactId>terajdbc4</artifactId>
       <version>16.20.00.10</version>
     </dependency>
+-->
     <!-- trying to override jackson and upgrading for vulnerabilities -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
