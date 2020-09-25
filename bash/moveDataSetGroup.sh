@@ -38,11 +38,14 @@ STITCHR_CLASS="com.stitchr.app.MoveDataSetGroup"
 # for a cluster deployment better use deploy_mode
 #    --deploy-mode client \
 
+#JARS=$STITCHR_ROOT/jars/postgresql-42.2.5.jar
+JARS=
 
 $SPARK_HOME/bin/spark-submit \
-     --master $MASTER \
-     --class $STITCHR_CLASS\
+    --master $MASTER \
+    --jars JARS \
      --packages org.apache.spark:spark-avro_$STITCHR_SCALA_VERSION:$STITCHR_SPARK_VERSION \
+     --class $STITCHR_CLASS\
      "$STITCHR_JAR" \
      "$@"
 

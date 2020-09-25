@@ -41,7 +41,8 @@ export defaultOutputDir=/tmp
 
 export VERSION=0.2.0
 export MASTER=local[4]
-export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
+# export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
+export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-uber.jar
 
 ## used in bash scripts
 export STITCHR_SCALA_VERSION=2.12
