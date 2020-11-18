@@ -76,9 +76,10 @@ object Encoders {
   )
 
   // case class ExtendedDependency(object_name: String, depends_on: String, query: String, schema_id: Int = -1, data_persistence_id: Int = -1)
+  // NH: need to review the data persistence_id
   /**
    * A Dependency relation captures lineage between (sets of) DatSets. It captures every From object in a sql query
-   * @param object_name
+   * @param object_ref
    * @param depends_on
    * @param dataset_id
    * @param storage_type
@@ -86,7 +87,7 @@ object Encoders {
    * @param schema_id
    * @param data_persistence_id
    */
-  case class Dependency(object_name: String, depends_on: String, dataset_id: Int, storage_type: String, query: String, schema_id: Int, data_persistence_id: Int)
+  case class Dependency(object_ref: String, depends_on: String, dataset_id: Int, storage_type: String, query: String, schema_id: Int, data_persistence_id: Int)
 
   /**
    *

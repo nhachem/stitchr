@@ -43,11 +43,16 @@ object DataSetApi {
      * @return (dataSet to be registered or updated, dataSet.object_ref, DataFrame associated with the dataSet)
      */
     // NH 7/25/2019: not urgent but we may be able to make it implicit if a dataset instance object (dataset + timestamp or run_id) can be manipulated inline
+    // NH: 10/5/20: to split src and dest persistence... we assume all base objects not "savable". if we need to copy we would have a daatset defined as select * from the base....
+    // so base is not saves
+    // derived... assume always recompute but in future.... ifSaved and noOverride then do nothing (actually do ot compute assume as base functionality... so maybe we need a runtime base?
+
     def save2Target(
         fileType: String = defaultFileType // will need to specify as well
     ): (DataSet, String, DataFrame) = {
       // add session run time column if enabled
       val dfExtended = if (dataSet.add_run_time_ref) spark.table(dataSet.object_ref).addRunTimeRef else spark.table(dataSet.object_ref)
+      // NH: 11/04/2020 the following should be changed when we get rid of source and dest persistence
       val destPersistence = getDataPersistence(dataSet.data_persistence_dest_id)
 
       val (dfResult, newDS) = destPersistence.persistence_type match {
@@ -55,7 +60,7 @@ object DataSetApi {
           val fileUrl =
             if (overrideDefaultContainer)
               // note: example url is of the form {gsORs3ORfileORhdfs}://bucket/folder/file.filetype
-              s"${destPersistence.storage_type}${destPersistence.host}/${destPersistence.db}/${dataSet.object_ref}.$fileType"
+              s"${destPersistence.storage_type}${destPersistence.host}/${destPersistence.db}/${dataSet.container}${containerDelimiter}${dataSet.object_name}.$fileType"
             else s"$defaultContainer/${dataSet.object_ref}.$fileType"
           /* NH 7/7/2020: trying to circumvent this error with delta not being recognised as a source by forcing full .
             until I can work put a more elegant solution
@@ -225,7 +230,6 @@ object DataSetApi {
         (jdbc.readDF(q, dataSet.partition_key, dataSet.number_partitions), dataSet.object_ref) // s"${dsn.storage_type}_${dsn.id}_${dataset.object_name}")
       }
 
-      // datasetDF.createTemporaryView(viewName)
       materializeInSessionDb(datasetDF) // need to verify it does pick the right reference... mostly we need to extend the api to use an extended dynamic DataSet object
       (viewName, datasetDF)
     }

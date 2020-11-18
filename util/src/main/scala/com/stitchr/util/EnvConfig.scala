@@ -107,4 +107,7 @@ object EnvConfig {
   logging.log.info(s"global_temp database enabled is $globalTempDbEnabled")
 
   logging.log.info(s"destination persistence is associated with the dataset $overrideDefaultContainer")
+  // misc
+  val containerDelimiter = props.getString("global.containerDelimiter") // "/"
+  val objectRefDelimiter = props.getString("global.objectRefDelimiter") // "/"
 }

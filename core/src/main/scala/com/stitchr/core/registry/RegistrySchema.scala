@@ -17,7 +17,7 @@
 
 package com.stitchr.core.registry
 
-import com.stitchr.core.common.Encoders.{ DataSet, dataSetEncoder }
+import com.stitchr.core.common.Encoders.{ DataSet, dataSetEncoder , SchemaColumn}
 import com.stitchr.util.EnvConfig._ // { baseRegistryFolder, dataCatalogPersistence, dataCatalogSchema, props }
 import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.core.util.Convert.config2JdbcProp
@@ -27,7 +27,7 @@ import org.apache.spark.sql.{ DataFrame, Dataset }
 object RegistrySchema {
 
   import org.apache.spark.sql.types._
-
+  import spark.implicits._
   /**
    * schema_column.csv looks
    * [id, column_name,ordinal_position,data_type,numeric_precision,character_maximum_length,is_nullable]
@@ -90,7 +90,7 @@ object RegistrySchema {
     .add("column_type", StringType, nullable = false)
     .add("column_precision", IntegerType, nullable = true) // need to fix null representation
     .add("string_length", IntegerType, nullable = true) // need to fix null representation
-    .add("is_nullable", StringType, nullable = false)
+    .add("is_nullable", BooleanType, nullable = false)
   //.add("c_type", StringType)
   /* had problem decyphering nulls in integer fields and also boolean....
 had to edit and replace nulls with -q for now and bypass the use of boolean ype
@@ -124,20 +124,22 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
         (
             jdbc
               .readDF(
-                  s"""select id,
-               | CONCAT(object_name, '_', data_persistence_src_id) as object_ref,
-               | format,
-               | storage_type, mode,
-               | container, object_type,
-               | object_name, query,
-               | partition_key,
-               | number_partitions,
-               | schema_id,
-               | data_persistence_src_id,
-               | data_persistence_dest_id,
-               | add_run_time_ref,
-               | write_mode
-               | from ${dataCatalogSchema}.${dataCatalogDataset}""".stripMargin
+                  s"""select d.id,
+               | CONCAT(p.name, '${objectRefDelimiter}', d.container, '${objectRefDelimiter}', object_name) as object_ref,
+               | d.format,
+               | d.storage_type, d.mode,
+               | d.container, d.object_type,
+               | d.object_name, d.query,
+               | d.partition_key,
+               | d.number_partitions,
+               | d.schema_id,
+               | d.data_persistence_src_id,
+               | d.data_persistence_dest_id,
+               | d.add_run_time_ref,
+               | d.write_mode
+               | from ${dataCatalogSchema}.${dataCatalogDataset} d
+               | join ${dataCatalogSchema}.${dataCatalogDataPersistence} p
+               | on d.data_persistence_src_id = p.id""".stripMargin
               )
               .cache(),
             jdbc
@@ -185,36 +187,27 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | ${dataCatalogSchema}.${dataCatalogBatchGroupMembers} bgm
                | """.stripMargin
             )
-            // better to read the tables in and join with  datsetdf?!
-            /*  jdbc.readDF(
-                s"""select bgm.group_id,
-                     | g.name,
-                     | bgm.dataset_id,
-                     | d.object_name || '_' || data_persistence_src_id as object_ref
-                     | from
-                     | batch_group g,
-                     | batch_group_members bgm,
-                     | dataset d
-                     | where d.id = bgm.dataset_id
-                     | and g.id = bgm.group_id
-                     | """.stripMargin
-            ) */
         )
       // to fix to use data_persistence
       case "registry" =>
-        ( {
-        import org.apache.spark.sql.functions.{concat, lit}
-        val df =
-            spark.read
-              // .schema(datasetSchema)
-              .format("csv")
-              .option("header", true)
-              .option("quote", "\"")
-              .option("multiLine", true)
-              .option("inferSchema", "true")
-              .option("delimiter", ",")
-              .load(baseRegistryFolder + "dataset.csv")
-              .select("id",
+        val dfP = spark.read
+          .format("csv")
+          .option("header", "true")
+          .option("inferSchema", "true")
+          .option("delimiter", ",")
+          .load(baseRegistryFolder + "data_persistence.csv")
+        val dfP0 = dfP.withColumnRenamed("id", "pers_id").select("pers_id", "name")
+        val dfD =
+          spark.read
+            // .schema(datasetSchema)
+            .format("csv")
+            .option("header", true)
+            .option("quote", "\"")
+            .option("multiLine", true)
+            .option("inferSchema", "true")
+            .option("delimiter", ",")
+            .load(baseRegistryFolder + "dataset.csv")
+            .select("id",
               "format",
               "storage_type",
               "mode",
@@ -230,11 +223,32 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               "add_run_time_ref",
               "write_mode"
             )
+
+        ( {
+        import org.apache.spark.sql.functions.{concat, lit}
           // convoluted but fine for now... maybe better to use cast straight in the select above?
-           df.withColumn("id_", df.col("id")
+           dfD.withColumn("id_", dfD.col("id")
              .cast(IntegerType)).drop("id")
              .withColumnRenamed("id_", "id")
-             .withColumn ("object_ref", concat (df.col ("object_name") , lit ("_"), df.col ("data_persistence_src_id")))
+             .join(dfP0, dfD("data_persistence_src_id") === dfP0("pers_id"), "inner")
+             .withColumn ("object_ref", concat (dfP0.col ("name"), lit(objectRefDelimiter),
+               dfD.col("container"), lit(objectRefDelimiter), dfD.col ("object_name")))
+            .select("id",
+              "object_ref",
+          "format",
+          "storage_type",
+          "mode",
+          "container",
+          "object_type",
+          "object_name",
+          "query",
+          "partition_key",
+          "number_partitions",
+          "schema_id",
+          "data_persistence_src_id",
+          "data_persistence_dest_id",
+          "add_run_time_ref",
+          "write_mode")
              .cache()
         },
             spark.read
@@ -243,15 +257,9 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               .option("header", "true")
               .option("inferSchema", "false")
               .option("delimiter", ",")
-              .load(baseRegistryFolder + "schema_column.csv")
+              .load(baseRegistryFolder + "schema_column.csv").as[SchemaColumn].toDF()
               .cache(),
-            spark.read
-              .format("csv")
-              .option("header", "true")
-              .option("inferSchema", "true")
-              .option("delimiter", ",")
-              .load(baseRegistryFolder + "data_persistence.csv")
-              .cache(),
+            dfP.cache(),
             // NH: maybe will add in V0.2 but files are only for demo purposes and are not transactional
             // this is a placeholder for now...
             spark.read
@@ -365,7 +373,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
   val groupListDF = batchGroupDF
     .join(batchGroupMembersDF, batchGroupDF.col("id") === batchGroupMembersDF.col("group_id"))
     .join(dataSetDF, dataSetDF.col("id") === batchGroupMembersDF.col("dataset_id"))
-    .select("group_id", "name", "dataset_id", "object_name", "data_persistence_src_id")
+    .select("group_id", "name", "dataset_id", "object_name", "data_persistence_src_id", "object_ref")
   //val extendedDataSetDs: Dataset[ExtendedDataSet] =
   //  dataSetDS.map{ r: DataSet => extendedFromDataSet(r) }
 

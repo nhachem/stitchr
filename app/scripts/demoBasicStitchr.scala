@@ -55,7 +55,7 @@ val configMap:Map[String, String] = spark.conf.getAll
  and 1 is for postgres tpcds
  */
 // files
-val ql0 = List("q2_3","q4_3")
+val ql0 = List("file3__tpcds__q2","file3__tpcds__q4")
 
 val ds = new DerivationService
 
@@ -69,8 +69,8 @@ ds.deriveQueryList(ql0)
 infoListTables()
 
 /* persistence  id = 3 is file system */
-spark.sql("select * from q2_3").show(50)
-spark.sql("select * from q4_3").show(50)
+spark.sql("select * from file3__tpcds__q2").show(50)
+spark.sql("select * from file3__tpcds__q4").show(50)
 
 
 //import spark.sqlContext.implicits._
@@ -87,7 +87,7 @@ logging.log.info("done with q2 and q4")
 // store in data lake
 print(s"storing web_sales in the data lake ")
 // adding web_sales as a direct example of how to materialize
-val (viewName3, dfm3) = getDataSet("web_sales_3").materialize
+val (viewName3, dfm3) = getDataSet("file3__tpcds__web_sales").materialize
 
 // show all tables assumes applogLevel = INFO
 infoListTables()

@@ -40,8 +40,7 @@ object Runner {
    * @param objectReference
    * @return SparkSession is not used directly, but we need if we implement multiple sessions and to interface properly with Python
    */
-  // NH: potential for bugs... to fix objectReference is really object_name
-  def run(objectReference: String): SparkSession = { // }, storageType: String): SparkSession = {
+  def run(objectReference: String): SparkSession = {
 
     if (appLogLevel == "INFO") println(spark.conf.getAll)
 
@@ -67,18 +66,16 @@ object Runner {
      * Note that in the any/mixed situation, optimization is tricky and may need special coding
      * as the spark optimizer can do push down but is not mature yet and any sql across engines will need special analysis
      */
-    // need to alias to disambiguate column names
-    val df1 = depSet.select("object_name").distinct.as("left")
-    val df2 = depSet.select("object_name", "data_persistence_id").distinct.toDF("depends_on", "data_persistence_id")
-    val selfDS = df1.join(df2, df1("object_name") === df2("depends_on"))
-
+    val df1 = depSet.select("object_ref").distinct.as("left")
+    val df2 = depSet.select("object_ref").distinct.toDF("depends_on")
+    val selfDS = df1.join(df2, df1("object_ref") === df2("depends_on"))
     // this is the whole dependency graph covered in a table of edges
     val dependencyGraphDF = depSet.union(selfDS).distinct()
 
     // BUG NH: logging is not serializable and while did not show up on the MAC broke in Google Dataproc cluster.
     // Have a fix but will be in the next version
     // dependencyGraphDF.foreach(r => logging.log.info(s"dependency is $r"))
-
+    println("the full dependency graph is ")
     dependencyGraphDF.show(false)
 
     // dependencyGraphDF.printSchema()
@@ -95,13 +92,11 @@ object Runner {
     // select depends_on from dependency_graph join with datasets where mode = 'base'
     // in this system datasets are already filtered on files only
 
-    //NH IMPORTANT (BUG): using data_persistence_id disables cross file storage containers (and this is not a good idea... this is a BUG!
-    // works if we do not have a fully federated environment
     val baseObjectsDF = dataSetDF
       .filter(s"mode = 'base'") // and storage_type = '$storageType' ")
       .join(
           dependencyGraphDF,
-          dataSetDF("object_name") === dependencyGraphDF("depends_on") and dataSetDF("data_persistence_src_id") === dependencyGraphDF("data_persistence_id"),
+          dataSetDF("object_ref") === dependencyGraphDF("depends_on"), // and dataSetDF("data_persistence_src_id") === dependencyGraphDF("data_persistence_id"),
           "leftsemi"
       ) // NH IMPORTANT: here we need to also include the data_persistence_id in the join...
       .select(
@@ -132,7 +127,7 @@ object Runner {
 
     // delete base objects as they were initialized
     val derivedDF = dependencyGraphDF
-      .join(baseObjectsDF, dependencyGraphDF("depends_on") === baseObjectsDF("object_name"), "left_anti")
+      .join(baseObjectsDF, dependencyGraphDF("depends_on") === baseObjectsDF("object_ref"), "left_anti")
     derivedDF.show(false)
 
     // step 2 recursively process derived objects
@@ -143,15 +138,16 @@ object Runner {
     val dfl = derivedDF.as("dfl")
     val dfr = dataSetDF.as("dfr")
     val derivedDependencyQueriesDS = dfl
-      .join(dfr, dfl("depends_on") === dfr("object_name") and dfl("data_persistence_id") === dfr("data_persistence_src_id"))
+      .join(dfr, dfl("depends_on") === dfr("object_ref")) //NH getting rid of this requirement and dfl("data_persistence_id") === dfr("data_persistence_src_id"))
       .select(
-          col("dfl.object_name"),
+          col("dfl.object_ref"),
           col("dfl.depends_on"),
           col("dfr.id") alias ("dataset_id"),
           col("dfr.storage_type"),
           col("dfr.query"),
           col("dfr.schema_id"),
-          col("dfl.data_persistence_id"),
+          // col("dfl.data_persistence_id"),
+          col("dfr.data_persistence_dest_id").as("data_persistence_id"), // to be replaced by one persustence
           col("dfr.add_run_time_ref"),
           col("dfr.write_mode")
       )
@@ -161,8 +157,7 @@ object Runner {
     // get results
     val derivedSet = derivedDependencyQueriesDS.collect
 
-    //   time(computeDerivedObjects(derivedSet, storageType), "timing the run")
-    time(computeDerivedObjects(derivedSet), "timing the run")
+    computeDerivedObjects(derivedSet)
     spark
   }
 

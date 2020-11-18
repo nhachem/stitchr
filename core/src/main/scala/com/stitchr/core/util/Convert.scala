@@ -151,10 +151,12 @@ object Convert {
 
       // Prefer Spark's getSchema function
       // issue is to find the dialect or use a default as a catch all (maybe write a default one or just refer to the PostgresDialect always...
-      // need to use the jdbc prefix to match to the registred dialect!! this is undocumented. this would be added ot the datasource metadata :-(
+      // need to use the jdbc prefix to match to the registered dialect!! this is undocumented. this would be added ot the datasource metadata :-(
       // or use my own override of the dialect... which is not recommended val schema: StructType = getSchema(rs, PostgresDialect, alwaysNullable = true)
       // val schema: StructType = getSchema(rs, JdbcDialects.get("jdbc:postgresql"), alwaysNullable = true)
-      val schema: StructType = getSchema(rs, new PostgresDialect) // ??, alwaysNullable = true)
+      // NH 11/10/20
+      // original val schema: StructType = getSchema(rs, new PostgresDialect) // ??, alwaysNullable =
+      val schema: StructType = getSchema(rs, new PostgresDialect, alwaysNullable = true)
 
       while ({ rs.next }) {
         val row = new ArrayBuffer[AnyRef]
@@ -193,15 +195,18 @@ object Convert {
     import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
     import scala.collection.JavaConversions._
     // logging.log.info(s"query is $q")
+    // println(s"qs is $q")
     val t = stripCurlyBrace(q)
     // logging.log.info(s"stripped query is $t")
     val plan = logicalPlan(t)
 
     // (V0.1) we assume all tables are aliased already so when we replace using jinja we do not need to alias
-    val context = plan.collect { case r: UnresolvedRelation => (r.tableName, s"${r.tableName}_${dpId}") }.toMap
+    // NH: this needs to be changed so if  mapping is needed we would use a mapping table
+    // val context = plan.collect { case r: UnresolvedRelation => (r.tableName, s"${r.tableName}_${dpId}") }.toMap
+    val context = plan.collect { case r: UnresolvedRelation => (r.tableName, s"${r.tableName}") }.toMap
     val jinjava = new Jinjava
     val q0 = jinjava.render(q, context)
-
+    // println(s"query out is $q0")
     // logging.log.info(s"query rewriting $q0")
     q0
   }

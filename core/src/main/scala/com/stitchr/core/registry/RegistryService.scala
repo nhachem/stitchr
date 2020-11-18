@@ -65,9 +65,9 @@ object RegistryService {
   def getQueryReferenceList(groupName: String): List[String] =
     groupListDF
       .filter(s"name = '$groupName'")
-      .select("object_name", "data_persistence_src_id")
+      .select("object_ref")
       .map { r =>
-        s"${r(0)}_${r(1)}"
+        s"${r(0)}"
       }
       .collect
       .toList
@@ -135,7 +135,7 @@ object RegistryService {
       logging.log.warn("number of dataset rows returned is greater than 1 and is " + dataSetDS.filter(r => r.object_ref == objectRef).count().toString)
 
     if (ds.count >= 1)
-      ds.take(1)(0) // assumes one row back... need to out validation tests for dups
+      ds.take(1)(0) // assumes one row back... need validation tests for dups
     else {
       // if you don't find a DS then return a default DS with id = -1...
       logging.log.warn("no dataset found returning the empty DS")

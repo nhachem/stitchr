@@ -50,17 +50,16 @@ object ComputeService {
       case "derived" =>
         import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 
-        // 1st pass into rewrite to strip {{ and }} jinja templates if any. We use Jinja in some cases to rewrite the dependencies from dataset.object_name to dataset.object_ref
-        // hack for V0.1
+        // 1st pass into rewrite to strip {{ and }} jinja templates if any. We use Jinja in some cases to rewrite the dependencies but we focus on  dataset.object_ref
         val q: String = stripCurlyBrace(queryNode.query)
         val plan = logicalPlan(q)
         plan
-          .collect { case r: UnresolvedRelation => (queryNode.object_name, r.tableName, queryNode.data_persistence_id) }
-          .toDF("objectName", "dependsOn", "data_persistence_id")
+          .collect { case r: UnresolvedRelation => (queryNode.object_ref, r.tableName) } //, queryNode.data_persistence_id) }
+          .toDF("object_ref", "dependsOn")
 
       // NH to revisit in V0.2
       // we should not get here as all are filtered to be derived unless one calls this independently...
-      case _ => Array((queryNode.object_name, queryNode.object_name, queryNode.data_persistence_id)).toSeq.toDF("objectName", "dependsOn", "dataSourceId")
+      case _ => Array((queryNode.object_ref, queryNode.object_ref)).toSeq.toDF("object_ref", "dependsOn") //, "dataSourceId")
 
     }
     dependencySet.distinct // distinct is needed as dependencies may have multiple occurrences in the logical plan
@@ -78,8 +77,6 @@ object ComputeService {
     def getDependencySet0(queries: List[QueryNode], df: DataFrame): DataFrame = { //, datasetDF: DataFrame): DataFrame = {
       val dependenciesDF: DataFrame = queries.foldLeft(df)(
           (initial, next) => {
-            // case class QueryNode(object_name: String, query: String, mode: String, data_persistence_id: Int)
-            // to use .as('l).join(filteredDatasetDF.as('r), $"l.dependsOn" === $"r.object_name", "left_semi")
             val df = getQueryDependencies(QueryNode(next.id, next.object_ref, next.object_name, next.query, next.mode, next.data_persistence_id))
             // val df1 = df.join(datasetDF)
             df match {
@@ -93,12 +90,11 @@ object ComputeService {
       /*  make it tail recursive until no new objects need to compute dependencies */
       //  TC is intended to be  naive here
       val dependsOnDS = dependenciesDF
-        .select("depends_on", "data_persistence_id")
+        .select("depends_on") //, "data_persistence_id")
         .distinct
-        // NH: we force the objects to be from the same datasource but this is not a long term requirement as we enable true federation
         .join(
             dataSetDF,
-            dependenciesDF("depends_on") === dataSetDF("object_name") and dependenciesDF("data_persistence_id") === dataSetDF("data_persistence_src_id")
+            dependenciesDF("depends_on") === dataSetDF("object_ref")
         )
         // .filter(s"object_type = '$objectType' and mode in ('derived')")
         .filter(s" mode in ('derived')")
@@ -108,7 +104,7 @@ object ComputeService {
       // anti dependencies. We pick only the non-base which have not been processed yet and encode as a DataSet(QueryNode)
       val depAnti =
         dependsOnDS
-          .join(dependenciesDF.select("object_name").distinct(), dependsOnDS("object_name") === dependenciesDF("object_name"), "left_anti")
+          .join(dependenciesDF.select("object_ref").distinct(), dependsOnDS("object_ref") === dependenciesDF("object_ref"), "left_anti")
           .as(queryNodeEncoder)
 
       // we could spark Dataset manipulations instead of scala sets by performing a minus operation
@@ -122,7 +118,7 @@ object ComputeService {
       }
     }
     // initial call into the resursion. Here compute the dataset DF and use it?! I could pass it into the function to reduce the side effect...
-    getDependencySet0(queries, Seq.empty[(String, String, Int)].toDF("object_name", "depends_on", "data_persistence_id"))
+    getDependencySet0(queries, Seq.empty[(String, String)].toDF("object_ref", "depends_on")) //, "data_persistence_id"))
     // , datasetDF)
 
   }
@@ -134,21 +130,6 @@ object ComputeService {
    */
   def getDataSetQueryNode(objectReference: String): QueryNode = {
 
-    // in 2.2.3 || is not supported in sparkSQL
-    // table name not used
-    /* val sqltest =
-      s"""select id,
-         | concat(container, '.',  object_name) as table_name,
-         | object_ref,
-         | container,
-         | object_name,
-         | query,
-         | mode,
-         | data_persistence_src_id as data_persistence_id
-         | from dc_datasets
-         | where object_ref in ('$objectReference')""".stripMargin // need to use object_ref or object_name + source
-
-     */
     // NH: 2/20/2020 had to replace as databricks was throwing an error with the use of concat
     val sqltest =
       s"""select d.id,
@@ -197,7 +178,7 @@ object ComputeService {
 
   // need now to make it recursive over all cases? or just call this function within the compute phase....
   def getRemainingDependencies(derivedSet: Array[Dependency]): Array[Dependency] = {
-    val grouped = derivedSet.groupBy(_.object_name)
+    val grouped = derivedSet.groupBy(_.object_ref)
     val s: Set[String] = grouped.map(x => (x._1, x._2.length)).filter(_._2 == 1).keySet //map(x => x._1).toSet
 
     s.foldLeft(Array.empty[Dependency]: Array[Dependency])((_, next) => {
@@ -216,7 +197,7 @@ object ComputeService {
   import com.stitchr.core.util.Convert._
 
   /**
-   * This function takes the dependy set and groups by the object_name counting its dependencies ...
+   * This function takes the dependency set and groups by the object_ref counting its dependencies ...
    * It then recursively iterate to establish those objects that have all their dependencies initialized.
    * It stops
    * @param derivedSet array of objects with all its dependencies
@@ -228,7 +209,7 @@ object ComputeService {
     def computeDerivedObjects0(derivedSet: Array[Dependency]): Row = {
       // val ds1 = derivedSet.map(p => (p.depends_on -> p))
       // val grouped = derivedSet.groupBy(_.object_name)
-      val grouped = derivedSet.groupBy(_.object_name)
+      val grouped = derivedSet.groupBy(_.object_ref)
       // note the count(1) has only one entry in the array
       val queries = grouped.map(x => (x._1, x._2, x._2.length)).filter(_._3 == 1).map(x => (x._1, x._2(0)))
 
@@ -245,14 +226,12 @@ object ComputeService {
 
             // NH: 7/8/2019. we need to refactor and use initializeObject?!
             next._2.storage_type match {
-              // case "file" => spark.sql(next._2.query).createTemporaryView(next._2.object_name)
-              // we rewrite only for files as they are computed from the
               case "file" =>
                 spark
                   .sql(query2InSessionRep(next._2.query, next._2.data_persistence_id))
-                  .createTemporaryView(next._2.depends_on + "_" + next._2.data_persistence_id)
+                  .createTemporaryView(next._2.depends_on)
               case "database" => // assume here that we have one target engine with full pushdown (we use straight jdbc)
-                val ddl = generateDDL(next._2.object_name)
+                val ddl = generateDDL(next._2.object_ref)
                 // need to use the data source info!!
                 val dsn = getDataPersistence(next._2.data_persistence_id)
                 import com.stitchr.core.util.Convert._
@@ -269,9 +248,9 @@ object ComputeService {
                 dataSet.initializeJdbcObject
               //dataSet.init
 
-              case _ => spark.sql(next._2.query).createTemporaryView(next._2.object_name) // to fix
+              case _ => spark.sql(next._2.query).createTemporaryView(next._2.object_ref) // to fix
             }
-            logging.log.info(s"computed ${next._2.object_name}")
+            logging.log.info(s"computed ${next._2.object_ref}")
             next
           }
       )
