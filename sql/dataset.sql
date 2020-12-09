@@ -20,6 +20,7 @@ CREATE TABLE
 --     	data_persistence_dest_id INTEGER DEFAULT '-1'::INTEGER NOT NULL, -- FK to data_persistence need to add -1 as a dummy persistence
         log_timestamp TIMESTAMP(6) WITH TIME ZONE DEFAULT now() NOT NULL -- log on inserts only for now 
 	, last_updated timestamp
+    , object_key CHARACTER VARYING(30) default null -- used to override object_ref
 );
     
 ALTER TABLE dataset ALTER COLUMN id SET DEFAULT nextval('dataset_id_seq');

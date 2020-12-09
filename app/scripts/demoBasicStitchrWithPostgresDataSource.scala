@@ -100,6 +100,8 @@ logging.log.info("done with q21")
 // store in data lake
 print(s"storing web_sales in the data lake ")
 // adding web_sales as a direct example
+// NH: 12/8/20... deprecating... materializing base object as copies is not to be supported directly.
+// in upcoming changes new datasets will act as the copies
 val (viewName, dfm) = getDataSet(getObjectRef("web_sales", "file")).materialize
 val (viewName3, dfm3) = getDataSet("web_sales_3").materialize
 val (viewName1, dfm1) = getDataSet("web_sales_1").materialize

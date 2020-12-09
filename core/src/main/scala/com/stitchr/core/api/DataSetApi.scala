@@ -88,6 +88,7 @@ object DataSetApi {
               dataSet.copy(
                   id = -1,
                   object_name = dataSet.object_ref,
+                  // NH: this needs refactoring and deprecation for the next release
                   object_ref = s"${dataSet.object_ref}_${dataSet.data_persistence_dest_id}",
                   format = fileType,
                   storage_type = "file",
@@ -146,7 +147,7 @@ object DataSetApi {
 
     /**
      *  init is the main function that takes any dataSet and associates a lazy eval dataframe object in the inSessionDB
-     * @return  (viewName object_ref of the inistanatiated object, DataFrame asociated with the object_ref in the inSessionDB)
+     * @return  (viewName object_ref of the instantiated object, DataFrame associated with the object_ref in the inSessionDB)
      */
     def init: (String, DataFrame) = {
       val partitionKey = dataSet.partition_key
@@ -278,15 +279,19 @@ object DataSetApi {
      * Takes a dataSet from the inSessionDB and saves it  to the destination persistence layer and registers/updates the DC
      * @return (viewName as object_ref, dataset dataframe associated with the saved object)
      */
-    def materialize: (String, DataFrame) = {
-      val (newDS, viewName, datasetDF) = save2Target()
+    def materialize: (String, DataFrame) =
+      if (dataSet.mode != "base") {
+        val (newDS, viewName, datasetDF) = save2Target()
 
-      materializeInSessionDb(datasetDF)
-      if (dataCatalogUpdate) newDS.upsertDataset // updating the data catalog is controlled as we can't write through views
+        materializeInSessionDb(datasetDF)
+        if (dataCatalogUpdate) newDS.upsertDataset // updating the data catalog is controlled as we can't write through views
 
-      logging.log.info(s"record count for $viewName is ${datasetDF.count()} ")
-      (s"$viewName", datasetDF)
-    }
+        logging.log.info(s"record count for $viewName is ${datasetDF.count()} ")
+        (s"$viewName", datasetDF)
+      } else {
+        println(s"${dataSet.object_ref} is a base object and is not materialized")
+        ("".toString, spark.emptyDataFrame)
+      }
 
     // API getters/setters
     // schema back may be empty... (if schema id = -1

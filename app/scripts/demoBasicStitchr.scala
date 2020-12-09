@@ -30,6 +30,7 @@
   *
   * Avro  before 2.4 is part of the distribution
   * spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
+  * spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.12:3.0.0-preview
   *
   * You can find a copy ready to use under nhachem/stitchr-demo
   */
@@ -87,6 +88,7 @@ logging.log.info("done with q2 and q4")
 // store in data lake
 print(s"storing web_sales in the data lake ")
 // adding web_sales as a direct example of how to materialize
+// is being deprecated... this step will not do the copy
 val (viewName3, dfm3) = getDataSet("file3__tpcds__web_sales").materialize
 
 // show all tables assumes applogLevel = INFO

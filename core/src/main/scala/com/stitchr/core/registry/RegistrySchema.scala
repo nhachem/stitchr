@@ -125,7 +125,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
             jdbc
               .readDF(
                   s"""select d.id,
-               | CONCAT(p.name, '${objectRefDelimiter}', d.container, '${objectRefDelimiter}', object_name) as object_ref,
+               | coalesce(d.object_key, CONCAT(p.name, '${objectRefDelimiter}', d.container, '${objectRefDelimiter}', object_name)) as object_ref,
                | d.format,
                | d.storage_type, d.mode,
                | d.container, d.object_type,
@@ -283,7 +283,8 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
             jdbc
               .readDF(
                   s"""select id,
-               | CONCAT(object_name, '_', data_persistence_src_id) as object_ref,
+               | coalesce(d.object_key, CONCAT(p.name, '${objectRefDelimiter}', d.container, '${objectRefDelimiter}', object_name)) as object_ref,
+//               | CONCAT(object_name, '_', data_persistence_src_id) as object_ref,
                | format,
                | storage_type,
                | mode,
