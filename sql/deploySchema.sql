@@ -2,7 +2,7 @@
 
 --
 @data_persistence.sql
-@transform.sql -- includes inserts
+@transform_type.sql -- includes inserts
 @dataset_schema.sql
 @schema_column.sql -- rename to schema_def.sql?
 @dataset.sql

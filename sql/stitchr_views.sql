@@ -19,11 +19,11 @@ CREATE or replace VIEW
              partition_key,
              number_partitions,
              schema_id,
-             data_persistence_src_id,
-             data_persistence_dest_id,
+             data_persistence_id,
              log_timestamp,
              add_run_time_ref,
              write_mode
+                , object_key
                 ) AS
 SELECT
     d.id,
@@ -33,17 +33,17 @@ SELECT
     d.container,
     d.object_type,
     d.object_name,
-    dt.query,
+    coalesce(dt.query, 'NA') as query,
     d.partition_key,
     d.number_partitions,
     d.schema_id,
-    d.data_persistence_src_id,
-    dt.target_persistence_id AS data_persistence_dest_id,
+    d.data_persistence_id,
     d.log_timestamp,
-    dt.add_run_time_ref, -- may be an individual transform step
-    dt.write_mode -- need to  be added as a parameter of the transform not the dataset
-FROM dataset d JOIN dataset_transform dt
-    ON dt.source_dataset_id = d.id AND dt.transform_id = 1;
+    coalesce(dt.add_run_time_ref, false) add_run_time_ref, -- may be an individual transform step
+    coalesce(dt.write_mode, cast('overwrite' as character varying(15))) write_mode, -- need to  be added as a parameter of the transform not the dataset
+d.object_key
+FROM dataset d LEFT OUTER JOIN dataset_transform dt
+    ON dt.dataset_id = d.id;
 
 create or replace view schema_column_v as
     select schema_id as id
@@ -55,6 +55,7 @@ create or replace view schema_column_v as
          , is_nullable
     from schema_column;
 
+-- need to deprecate in code asap
 create or replace view 
 	batch_group_v as 
 	select id
