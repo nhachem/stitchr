@@ -66,8 +66,7 @@ object AutoRegisterService {
             partition_key = "",
             number_partitions = 1,
             schema_id = -1,
-            data_persistence_src_id = dataPersistence.id,
-            data_persistence_dest_id = -1
+            data_persistence_id = dataPersistence.id
         )
       }
       .toList

@@ -50,8 +50,7 @@ object Encoders {
    * @param partition_key
    * @param number_partitions
    * @param schema_id
-   * @param data_persistence_src_id
-   * @param data_persistence_dest_id
+   * @param data_persistence_id
    * @param add_run_time_ref
    * @param write_mode
    */
@@ -68,9 +67,7 @@ object Encoders {
       partition_key: String,
       number_partitions: Int,
       schema_id: Int,
-      data_persistence_src_id: Int,
-      data_persistence_dest_id: Int = -1 // added to specify where we move an object -1 means don't move, 0 means temp space (should populate that in the data_persistence table)
-      ,
+      data_persistence_id: Int,
       add_run_time_ref: Boolean = false,
       write_mode: String = "append"
   )
@@ -206,7 +203,7 @@ object Encoders {
   val dataPersistenceEncoder: Encoder[DataPersistence] = org.apache.spark.sql.Encoders.product[DataPersistence]
 
   // empty structures
-  val emptyDs = new DataSet(-1, "EmptyDataSet_0", "", "", "", "", "", "EmptyDataSet", "", "", -1, -1, 0, -1)
+  val emptyDs = new DataSet(-1, "EmptyDataSet_0", "", "", "", "", "", "EmptyDataSet", "", "", -1, -1, -1)
   val emptyDp: DataPersistence = new DataPersistence(-1, "EmptyDataPersistence", "", "", "", "", -1, "", "", "", -1, "prefer", "open")
   val emptyDependency: Dependency = Dependency(null, null, null.asInstanceOf[Int], null, null, null.asInstanceOf[Int], null.asInstanceOf[Int])
 }

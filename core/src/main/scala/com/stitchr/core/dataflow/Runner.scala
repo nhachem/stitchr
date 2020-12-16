@@ -112,8 +112,7 @@ object Runner {
           "partition_key",
           "number_partitions",
           "schema_id",
-          "data_persistence_src_id",
-          "data_persistence_dest_id",
+          "data_persistence_id",
           "add_run_time_ref",
           "write_mode"
       )
@@ -146,8 +145,7 @@ object Runner {
           col("dfr.storage_type"),
           col("dfr.query"),
           col("dfr.schema_id"),
-          // col("dfl.data_persistence_id"),
-          col("dfr.data_persistence_dest_id").as("data_persistence_id"), // to be replaced by one persustence
+          col("dfr.data_persistence_id"),
           col("dfr.add_run_time_ref"),
           col("dfr.write_mode")
       )

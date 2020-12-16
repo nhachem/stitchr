@@ -159,7 +159,7 @@ object RegistryService {
   }
 
   def getDataSet(objectName: String, DataPersistenceId: Int): DataSet = {
-    val ds = dataSetDS.filter(r => r.object_name == objectName && r.data_persistence_src_id == DataPersistenceId)
+    val ds = dataSetDS.filter(r => r.object_name == objectName && r.data_persistence_id == DataPersistenceId)
 
     if (ds.count() > 1)
       logging.log.warn("number of dataset rows returned is greater than 1 and is " + dataSetDS.filter(r => r.object_name == objectName).count().toString)
@@ -179,34 +179,6 @@ object RegistryService {
       case `nint` => // insert
       case _      => // update
     }
-  }
-
-  def extendedFromDataSet(ds: DataSet): ExtendedDataSet =
-    ExtendedDataSet(
-        ds.id,
-        ds.format,
-        ds.storage_type,
-        ds.mode,
-        ds.container,
-        ds.object_type,
-        ds.object_name,
-        ds.query,
-        ds.partition_key,
-        ds.number_partitions,
-        //   ds.priority_level,
-        //   ds.dataset_state_id,
-        getSchema(ds.schema_id),
-        getDataPersistence(ds.data_persistence_src_id),
-        getDataPersistence(ds.data_persistence_dest_id)
-    )
-
-  def getExtendedDataSet(id: Int): ExtendedDataSet = { // id is the DataSet here... NH: 8/3/2019. ExtendedDataSet will replace DataSet as we better encapsulate once
-
-    // id should be the PK so this should never happen
-    if (dataSetDS.filter(r => r.id == id).count() > 1)
-      logging.log.warn("number of dataset rows returned is greater than 1 and is " + dataSetDS.filter(r => r.id == id).count().toString)
-
-    extendedFromDataSet(dataSetDS.filter(r => r.id == id).take(1)(0))
   }
 
   /**
@@ -364,22 +336,6 @@ object RegistryService {
     ds.registerDataSetSchema()
     logging.log.info(s"registered schema $ds")
   }
-
-  /**
-   *
-   *
-   * @return Extended Dataset where FKs are optional.
-   */
-  def getJsonExtendedtDataset(id: Int): String =
-    toJson[ExtendedDataSet](extendedFromDataSet(getDataSet(id)))
-
-  /**
-   *
-   * @param jDataSet is a json rep with id as optiponal that is passed to the function.
-   * @return Dataset where FKs are optional.
-   */
-  def putJsonExtendedtDatasetFromDataset(jDataSet: String): ExtendedDataSet =
-    extendedFromDataSet(fromJson[DataSet](jDataSet))
 
   /**
    *

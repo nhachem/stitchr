@@ -52,7 +52,7 @@ object RegistrySchema {
       storage: String,
       relative_url: String,
       description: String,
-      data_persistence_src_id: String
+      data_persistence_id: String
   )
 
 // may use later
@@ -69,8 +69,7 @@ object RegistrySchema {
     .add("partition_key", StringType)
     .add("number_partitions", IntegerType)
     .add("schema_id", IntegerType)
-    .add("data_persistence_src_id", IntegerType)
-    .add("data_persistence_dest_id", IntegerType)
+    .add("data_persistence_id", IntegerType)
     .add("add_run_time_ref", BooleanType)
     .add("write_mode", StringType)
 
@@ -133,13 +132,12 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | d.partition_key,
                | d.number_partitions,
                | d.schema_id,
-               | d.data_persistence_src_id,
-               | d.data_persistence_dest_id,
+               | d.data_persistence_id,
                | d.add_run_time_ref,
                | d.write_mode
                | from ${dataCatalogSchema}.${dataCatalogDataset} d
                | join ${dataCatalogSchema}.${dataCatalogDataPersistence} p
-               | on d.data_persistence_src_id = p.id""".stripMargin
+               | on d.data_persistence_id = p.id""".stripMargin
               )
               .cache(),
             jdbc
@@ -218,8 +216,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               "partition_key",
               "number_partitions",
               "schema_id",
-              "data_persistence_src_id",
-              "data_persistence_dest_id",
+              "data_persistence_id",
               "add_run_time_ref",
               "write_mode"
             )
@@ -230,7 +227,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
            dfD.withColumn("id_", dfD.col("id")
              .cast(IntegerType)).drop("id")
              .withColumnRenamed("id_", "id")
-             .join(dfP0, dfD("data_persistence_src_id") === dfP0("pers_id"), "inner")
+             .join(dfP0, dfD("data_persistence_id") === dfP0("pers_id"), "inner")
              .withColumn ("object_ref", concat (dfP0.col ("name"), lit(objectRefDelimiter),
                dfD.col("container"), lit(objectRefDelimiter), dfD.col ("object_name")))
             .select("id",
@@ -245,8 +242,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
           "partition_key",
           "number_partitions",
           "schema_id",
-          "data_persistence_src_id",
-          "data_persistence_dest_id",
+          "data_persistence_id",
           "add_run_time_ref",
           "write_mode")
              .cache()
@@ -284,7 +280,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               .readDF(
                   s"""select id,
                | coalesce(d.object_key, CONCAT(p.name, '${objectRefDelimiter}', d.container, '${objectRefDelimiter}', object_name)) as object_ref,
-//               | CONCAT(object_name, '_', data_persistence_src_id) as object_ref,
+//               | CONCAT(object_name, '_', data_persistence_id) as object_ref,
                | format,
                | storage_type,
                | mode,
@@ -295,8 +291,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
                | partition_key,
                | number_partitions,
                | schema_id,
-               | data_persistence_src_id,
-               | data_persistence_dest_id,
+               | data_persistence_id,
                | add_run_time_ref
                | write_mode
                | from ${dataCatalogSchema}.${dataCatalogDataset}""".stripMargin
@@ -364,8 +359,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
         "partition_key",
         "number_partitions",
         "schema_id",
-        "data_persistence_src_id",
-        "data_persistence_dest_id",
+        "data_persistence_id",
         "add_run_time_ref",
         "write_mode"
     )
@@ -374,7 +368,7 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
   val groupListDF = batchGroupDF
     .join(batchGroupMembersDF, batchGroupDF.col("id") === batchGroupMembersDF.col("group_id"))
     .join(dataSetDF, dataSetDF.col("id") === batchGroupMembersDF.col("dataset_id"))
-    .select("group_id", "name", "dataset_id", "object_name", "data_persistence_src_id", "object_ref")
+    .select("group_id", "name", "dataset_id", "object_name", "data_persistence_id", "object_ref")
   //val extendedDataSetDs: Dataset[ExtendedDataSet] =
   //  dataSetDS.map{ r: DataSet => extendedFromDataSet(r) }
 

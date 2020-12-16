@@ -72,7 +72,6 @@ object ComputeService {
    */
   // def getDependencySet(queries: List[QueryNode], objectType: String = "file"): DataFrame = {
   def getDependencySet(queries: List[QueryNode]): DataFrame = {
-    // val filteredDatasetDF = datasetDF.filter(s"data_persistence_src_id = ${queryNode.data_persistence_id}")
     @tailrec
     def getDependencySet0(queries: List[QueryNode], df: DataFrame): DataFrame = { //, datasetDF: DataFrame): DataFrame = {
       val dependenciesDF: DataFrame = queries.foldLeft(df)(
@@ -98,8 +97,7 @@ object ComputeService {
         )
         // .filter(s"object_type = '$objectType' and mode in ('derived')")
         .filter(s" mode in ('derived')")
-        .select("id", "object_ref", "object_name", "query", "mode", "data_persistence_src_id")
-        .withColumnRenamed("data_persistence_src_id", "data_persistence_id")
+        .select("id", "object_ref", "object_name", "query", "mode", "data_persistence_id")
         .as(queryNodeEncoder)
       // anti dependencies. We pick only the non-base which have not been processed yet and encode as a DataSet(QueryNode)
       val depAnti =
@@ -139,7 +137,7 @@ object ComputeService {
        | d.object_name,
        | d.query,
        | d.mode,
-       | d.data_persistence_src_id as data_persistence_id
+       | d.data_persistence_id 
        | from dc_datasets d
        | where 1=1 
        | and d.object_ref in ('$objectReference')""".stripMargin
@@ -165,8 +163,7 @@ object ComputeService {
     // forcing a few parameters to filter for the use case
     val r = dataSetDF
       .filter(s"object_name = '$referenceObject' and storage_type = 'database' and mode = 'derived'")
-      .select("container", "object_name", "query", "object_type", "schema_id", "data_persistence_src_id")
-      .withColumnRenamed("data_persistence_src_id", "data_persistence_id")
+      .select("container", "object_name", "query", "object_type", "schema_id", "data_persistence_id")
       .collect()(0)
     val ddl = r(3) match {
       case "view" => s"create or replace view ${r(0)}.${r(1)} as ${r(2)} "
@@ -244,7 +241,7 @@ object ComputeService {
                 val dataSet = getDataSet(next._2.dataset_id)
                 // initialize object as it can be used for any type... This is a test. no need for the file url here for now?!
                 // NH EXPERIMENTAL... changed from ...
-                // initializeJdbcObject(next._2.object_name, null, 1, next._2.schema_id, next._2.data_persistence_src_id)
+                // initializeJdbcObject(next._2.object_name, null, 1, next._2.schema_id, next._2.data_persistence_id)
                 dataSet.initializeJdbcObject
               //dataSet.init
 

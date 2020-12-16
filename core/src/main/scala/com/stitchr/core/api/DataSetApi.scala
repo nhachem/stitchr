@@ -53,7 +53,7 @@ object DataSetApi {
       // add session run time column if enabled
       val dfExtended = if (dataSet.add_run_time_ref) spark.table(dataSet.object_ref).addRunTimeRef else spark.table(dataSet.object_ref)
       // NH: 11/04/2020 the following should be changed when we get rid of source and dest persistence
-      val destPersistence = getDataPersistence(dataSet.data_persistence_dest_id)
+      val destPersistence = getDataPersistence(dataSet.data_persistence_id)
 
       val (dfResult, newDS) = destPersistence.persistence_type match {
         case "file" =>
@@ -84,19 +84,19 @@ object DataSetApi {
           }
           logging.log.info(s"reference object count is ${spark.table(dataSet.object_ref).count}")
           (
+              // NH: 12/11/20 will be deprecated and adjusted
               spark.read.format(formatType).load(fileUrl),
               dataSet.copy(
                   id = -1,
                   object_name = dataSet.object_ref,
                   // NH: this needs refactoring and deprecation for the next release
-                  object_ref = s"${dataSet.object_ref}_${dataSet.data_persistence_dest_id}",
+                  object_ref = dataSet.object_ref,
                   format = fileType,
                   storage_type = "file",
                   object_type = "file",
                   container = "",
                   mode = "base",
-                  data_persistence_src_id = dataSet.data_persistence_dest_id,
-                  data_persistence_dest_id = -1,
+                  data_persistence_id = dataSet.data_persistence_id,
                   query = s"${dataSet.object_ref}.$fileType"
               )
           )
@@ -109,18 +109,18 @@ object DataSetApi {
           jdbc.writeTable(dfExtended, dataSet.object_ref, dataSet.number_partitions, dataSet.write_mode)
           // TODO update need a dummy table all the time
           (
+              // NH: 12/11/20 will be deprecated and adjusted
               spark.table(dataSet.object_ref),
               dataSet.copy(
                   id = -1,
                   object_name = dataSet.object_ref,
-                  object_ref = s"${dataSet.object_ref}_${dataSet.data_persistence_dest_id}",
+                  object_ref = dataSet.object_ref,
                   format = dsn.storage_type,
                   storage_type = "database",
                   object_type = "table",
                   container = "public", // may need to override in next versions
                   mode = "base",
-                  data_persistence_src_id = dataSet.data_persistence_dest_id,
-                  data_persistence_dest_id = -1,
+                  data_persistence_id = dataSet.data_persistence_id,
                   query = s"${dataSet.object_ref}"
               )
           )
@@ -134,7 +134,7 @@ object DataSetApi {
 
       // TODO update the dataset table with the dataset new dataset object
       //
-      getDataSet(dataSet.object_name, dataSet.data_persistence_dest_id)
+      getDataSet(dataSet.object_name, dataSet.data_persistence_id)
 
       (newDS, dataSet.object_ref, dfResult)
     }
@@ -154,7 +154,7 @@ object DataSetApi {
       val numberOfPartitions = dataSet.number_partitions
 
       val schema = getSchema // need to trap that there is a real id > 0 ?!
-      val dataPersistence = getDataPersistence(dataSet.data_persistence_src_id)
+      val dataPersistence = getDataPersistence(dataSet.data_persistence_id)
       // NH: 7/25/2019. need to add a check if the table is already instantiated in the session. If yes we will skip and log a warning
       val (datasetDF, viewName) =
         dataSet.mode match {
@@ -196,7 +196,7 @@ object DataSetApi {
                 // contraint on jdbc pushdown: mode = base , and query is wrapped with () unless it is  a db object
                 // issue is that we can't decide on a partition key here and may be bound by performance... Need to investigate
                 val q = s"""select * from ${dataSet.query} as t"""
-                val dsn = getDataPersistence(dataSet.data_persistence_src_id)
+                val dsn = getDataPersistence(dataSet.data_persistence_id)
                 logging.log.info(s"data source persistence info is $dsn")
                 val jdbc = SparkJdbcImpl(dataSourceNode2JdbcProp(dsn))
 
@@ -223,7 +223,7 @@ object DataSetApi {
       //not needed val schema = getSchema(dataset.schema_id)
       val (datasetDF, viewName) = {
         val q = s"""select * from ${dataSet.container}.${dataSet.object_name}"""
-        val dsn = getDataPersistence(dataSet.data_persistence_src_id)
+        val dsn = getDataPersistence(dataSet.data_persistence_id)
         val jdbc = SparkJdbcImpl(dataSourceNode2JdbcProp(dsn))
 
         // NH: 6/27/19. note that we need to close the connection after each initialization?! unless we establish a more global sparkjdbc connection pool

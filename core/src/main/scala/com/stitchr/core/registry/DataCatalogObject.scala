@@ -116,8 +116,7 @@ object DataCatalogObject {
    | '${dataSet.partition_key}',
    | ${dataSet.number_partitions},
    | ${dataSet.schema_id},
-   | ${dataSet.data_persistence_src_id},
-   | ${dataSet.data_persistence_dest_id})""".stripMargin
+   | ${dataSet.data_persistence_id})""".stripMargin
 
     val updateStatement = s"""update dataset set
                            | format = '${dataSet.format}',
@@ -130,8 +129,7 @@ object DataCatalogObject {
                            | partition_key = '${dataSet.partition_key}',
                            | number_partitions = ${dataSet.number_partitions},
                            | schema_id = ${dataSet.schema_id},
-                           | data_persistence_src_id = ${dataSet.data_persistence_src_id},
-                           | data_persistence_dest_id = ${dataSet.data_persistence_dest_id}
+                           | data_persistence_src_id = ${dataSet.data_persistence_id},
                            | where id =  ${dataSet.id}""".stripMargin
 
     val deleteStatement = s""" delete from dataset where id = ${dataSet.id}"""
@@ -167,9 +165,9 @@ object DataCatalogObject {
           // NH: 8/14/2019using the construct for object_ref to make sure that we enforce properly the constraint ...
           // we will move towards setting object_ref as a derived attribute in the the dataset api
           // if (getDataSet(dataSet.object_ref).id == -1) insert[T]
-          if (getDataSet(s"${dataSet.object_name}_${dataSet.data_persistence_src_id}").id == -1) insert[T]
+          if (getDataSet(dataSet.object_ref).id == -1) insert[T]
           else
-            DcDataSet(dataSet.copy(id = getDataSet(s"${dataSet.object_name}_${dataSet.data_persistence_src_id}").id)).update
+            DcDataSet(dataSet.copy(id = getDataSet(dataSet.object_ref).id)).update
         } else update[T]
       else -1
   }

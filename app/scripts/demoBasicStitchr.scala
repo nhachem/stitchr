@@ -56,7 +56,8 @@ val configMap:Map[String, String] = spark.conf.getAll
  and 1 is for postgres tpcds
  */
 // files
-val ql0 = List("file3__tpcds__q2","file3__tpcds__q4")
+val persistence = "file0"
+val ql0 = List(s"${persistence}__tpcds__q2",s"${persistence}__tpcds__q4")
 
 val ds = new DerivationService
 
@@ -70,8 +71,8 @@ ds.deriveQueryList(ql0)
 infoListTables()
 
 /* persistence  id = 3 is file system */
-spark.sql("select * from file3__tpcds__q2").show(50)
-spark.sql("select * from file3__tpcds__q4").show(50)
+spark.sql(s"select * from ${persistence}__tpcds__q2").show(50)
+spark.sql(s"select * from ${persistence}__tpcds__q4").show(50)
 
 
 //import spark.sqlContext.implicits._
