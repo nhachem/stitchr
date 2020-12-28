@@ -26,8 +26,9 @@ import com.stitchr.core.registry.RegistryService.{ getDataPersistence, getDataSe
 import com.stitchr.core.registry.RegistrySchema.dataSetDF
 import com.stitchr.util.Util.time
 import com.stitchr.util.EnvConfig.{ appLogLevel, logging }
-import com.stitchr.core.util.Parse.logicalPlan
+import com.stitchr.core.util.Parse.{ logicalPlan, getQueryObjectMap, jinjaReplace }
 import com.stitchr.core.util.Convert.stripCurlyBrace
+import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.{ DataFrame, Dataset, Row }
 
 import scala.annotation.tailrec
@@ -158,17 +159,25 @@ object ComputeService {
     } // NH this is  a BUG 8/1/19. we should always expect one row from this call
   }
 
-  def generateDDL(referenceObject: String): String = {
+  /* this is used to generate DDL for target-based database engines... That is the derived "view" is associated
+  with the target engine (and thus all its associated dependencies are on that engine. Not a federated data use case.
+   */
+  def generateJdbcDDL(referenceObject: String): String = {
     // we will need to reflect object_ref instead of object_name but fine for now
     // forcing a few parameters to filter for the use case
+    // NH: 12/18/20 broken... we need to rewrite all dependent objects to use the container.object_name notation
+    // this may need jinja rewrite on the dependent objects... unless we override and simplify
     val r = dataSetDF
-      .filter(s"object_name = '$referenceObject' and storage_type = 'database' and mode = 'derived'")
+      .filter(s"object_ref = '$referenceObject' and storage_type = 'database' and mode = 'derived'")
       .select("container", "object_name", "query", "object_type", "schema_id", "data_persistence_id")
       .collect()(0)
+    val depMap: Map[String, String] = getQueryObjectMap(r { 2 }.toString)
+    val jdbcQuery = jinjaReplace(r { 2 }.toString, depMap)
     val ddl = r(3) match {
-      case "view" => s"create or replace view ${r(0)}.${r(1)} as ${r(2)} "
+      // NH: here we need to build a map and pass the query to jinja. This implimentation assumes all dependencies are in the db...
+      case "view" => s"create or replace view ${r(0)}.${r(1)} as $jdbcQuery "
       case "table" =>
-        s"create table if not exists ${r(0)}.${r(1)} as ${r(2)} " // note that we should not use "not exist".. but for now I don't want it to throw an error
+        s"create table if not exists ${r(0)}.${r(1)} as $jdbcQuery " // note that we should not use "not exist".. but for now I don't want it to throw an error
     }
     ddl
   }
@@ -228,14 +237,15 @@ object ComputeService {
                   .sql(query2InSessionRep(next._2.query, next._2.data_persistence_id))
                   .createTemporaryView(next._2.depends_on)
               case "database" => // assume here that we have one target engine with full pushdown (we use straight jdbc)
-                val ddl = generateDDL(next._2.object_ref)
+                val ddl = generateJdbcDDL(next._2.object_ref)
+                logging.log.info(s"ddl is ${ddl}")
                 // need to use the data source info!!
                 val dsn = getDataPersistence(next._2.data_persistence_id)
                 import com.stitchr.core.util.Convert._
                 // NH: use this to print the case class info
                 if (appLogLevel == "INFO") println(cC2Map(dsn))
                 val jdbc = new JdbcImpl(dataSourceNode2JdbcProp(dsn))
-
+                println(ddl)
                 jdbc.executeDDL(ddl)
                 // NH: 6/20/2019.we should add a DF handle to the new views/tables !! Would be perfect to do so based on some parameters(use dataset_state). Code would come here
                 val dataSet = getDataSet(next._2.dataset_id)

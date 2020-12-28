@@ -1,11 +1,11 @@
 name,persistence_type,storage_type,host,port,db,user,pwd,driver,fetchsize,id,sslmode,db_scope
 dummy,NA,NA,NA,-1,NA,NA,NA,NA,-1,-1,disable,open,disable,open
- file0,file,file://,/tmp/data,-1,stitchr,NA,NA,NA,-1,0,disable,open
- postgresql1,jdbc,postgresql,216.195.29.110,5432,tpcds,nabil,nabil,org.postgresql.Driver,10000,1,disable,open
- datalake0,file,file://,/tmp/demo/stitchr,-1,datalake,NA,NA,NA,-1,2,disable,open
- file3,file,file://,/Users/nabilhachem,-1,data/demo,NA,NA,NA,-1,3,disable,open
- postgresql4,jdbc,postgresql,10.20.255.73,5432,tpcds,tpcds,tpcds,org.postgresql.Driver,10000,4,disable,open
- postgresql5,jdbc,postgresql,localhost,5432,publish,pub,pub,org.postgresql.Driver,10000,5,disable,open
- postgresql6,jdbc,postgresql,localhost,5432,airflow,airflow,airflow,org.postgresql.Driver,10000,6,disable,open
- postgresql7,jdbc,postgresql,localhost,5432,tpcds,tpcds,tpcds,org.postgresql.Driver,10000,7,disable,open
+file0,file,file://,/tmp/data,-1,stitchr,NA,NA,NA,-1,0,disable,open
+postgresql1,jdbc,postgresql,localhost,5433,tpcds,tpcds,tpcds,org.postgresql.Driver,10000,1,disable,open
+datalake0,file,file://,/tmp/demo/stitchr,-1,datalake,NA,NA,NA,-1,2,disable,open
+file3,file,file://,/Users/nabilhachem,-1,data/demo,NA,NA,NA,-1,3,disable,open
+postgresql4,jdbc,postgresql,10.20.255.73,5432,tpcds,tpcds,tpcds,org.postgresql.Driver,10000,4,disable,open
+postgresql5,jdbc,postgresql,localhost,5432,publish,pub,pub,org.postgresql.Driver,10000,5,disable,open
+postgresql6,jdbc,postgresql,localhost,5432,airflow,airflow,airflow,org.postgresql.Driver,10000,6,disable,open
+postgresql7,jdbc,postgresql,localhost,5432,tpcds,tpcds,tpcds,org.postgresql.Driver,10000,7,disable,open
  

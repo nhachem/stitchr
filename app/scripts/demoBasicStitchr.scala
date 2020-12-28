@@ -29,7 +29,7 @@
   * generate the data using tpcds tools and place in that directory before the demo.
   *
   * Avro  before 2.4 is part of the distribution
-  * spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
+  * spark-shell --conf spark.sql.hive.metastore.version=2.3.7 --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
   * spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.12:3.0.0-preview
   *
   * You can find a copy ready to use under nhachem/stitchr-demo
@@ -37,7 +37,7 @@
 
 import com.stitchr.util.SharedSession.spark
 import com.stitchr.app.DerivationService
-import com.stitchr.app.DataMoveService.instantiateQueryList
+import com.stitchr.app.DataTransformService.instantiateQueryList
 import com.stitchr.core.registry.RegistryService.{getDataSet, getObjectRef}
 import com.stitchr.util.EnvConfig.logging
 import com.stitchr.core.api.DataSetApi.Implicits

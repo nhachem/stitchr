@@ -23,6 +23,7 @@ import com.stitchr.core.dbapi.SparkJdbcImpl
 import com.stitchr.core.util.Convert.config2JdbcProp
 import com.stitchr.util.SharedSession.spark
 import org.apache.spark.sql.{ DataFrame, Dataset }
+import org.apache.spark.sql.functions.{concat, lit, coalesce}
 
 object RegistrySchema {
 
@@ -218,33 +219,33 @@ had to edit and replace nulls with -q for now and bypass the use of boolean ype
               "schema_id",
               "data_persistence_id",
               "add_run_time_ref",
-              "write_mode"
+              "write_mode",
+              "object_key"
             )
 
         ( {
-        import org.apache.spark.sql.functions.{concat, lit}
           // convoluted but fine for now... maybe better to use cast straight in the select above?
            dfD.withColumn("id_", dfD.col("id")
              .cast(IntegerType)).drop("id")
              .withColumnRenamed("id_", "id")
              .join(dfP0, dfD("data_persistence_id") === dfP0("pers_id"), "inner")
-             .withColumn ("object_ref", concat (dfP0.col ("name"), lit(objectRefDelimiter),
-               dfD.col("container"), lit(objectRefDelimiter), dfD.col ("object_name")))
-            .select("id",
+             .withColumn ("object_ref", coalesce(dfD.col("object_key"), concat (dfP0.col ("name"), lit(objectRefDelimiter),
+               dfD.col("container"), lit(objectRefDelimiter), dfD.col ("object_name"))))
+             .select("id",
               "object_ref",
-          "format",
-          "storage_type",
-          "mode",
-          "container",
-          "object_type",
-          "object_name",
-          "query",
-          "partition_key",
-          "number_partitions",
-          "schema_id",
-          "data_persistence_id",
-          "add_run_time_ref",
-          "write_mode")
+              "format",
+              "storage_type",
+              "mode",
+              "container",
+              "object_type",
+              "object_name",
+              "query",
+              "partition_key",
+              "number_partitions",
+              "schema_id",
+              "data_persistence_id",
+              "add_run_time_ref",
+              "write_mode")
              .cache()
         },
             spark.read

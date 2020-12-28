@@ -35,7 +35,7 @@ import com.stitchr.util.Util.time
 import com.stitchr.util.database.CatalogUtil._
 import com.stitchr.util.Threaded
 
-object DataMoveService {
+object DataTransformService {
 
   /**
    *  this is focusing on one type of persistence
@@ -88,7 +88,7 @@ object DataMoveService {
    *
    * @param ql is a list of object_ref computed as <object_name>_<data_persistence_src_id> from the dataset DC table
    */
-  def moveDataSetList(ql: List[String], threaded: Boolean = threaded): Unit = {
+  def transformDataSetList(ql: List[String], threaded: Boolean = threaded): Unit = {
 
     spark.sparkContext.setLogLevel(logLevel)
 
@@ -104,7 +104,7 @@ object DataMoveService {
 
 }
 
-object MoveDataSetGroup extends App {
+object TransformDataSetGroup extends App {
   spark.sparkContext.setLogLevel(logLevel)
   // just list the session info
   val configMap: Map[String, String] = spark.conf.getAll
@@ -123,7 +123,7 @@ object MoveDataSetGroup extends App {
     val ql: List[String] = getQueryReferenceList(groupName)
 
     logging.log.info(s"list of queries is $ql")
-    DataMoveService.moveDataSetList(ql)
+    DataTransformService.transformDataSetList(ql)
   }
 
 }
@@ -131,7 +131,7 @@ object MoveDataSetGroup extends App {
 /*
 may replace the DataIngestService (or be merged with it)
  */
-object MoveDataSetList extends App {
+object TransformDataSetList extends App {
   spark.sparkContext.setLogLevel(logLevel)
   // just list the session info
   val configMap: Map[String, String] = spark.conf.getAll
@@ -148,7 +148,7 @@ object MoveDataSetList extends App {
 
     val ql = args(0).toString.split(",").toList
     logging.log.info(s"list of queries is $ql")
-    DataMoveService.moveDataSetList(ql)
+    DataTransformService.transformDataSetList(ql)
   }
 
 }

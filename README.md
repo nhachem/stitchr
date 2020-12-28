@@ -68,24 +68,28 @@ As expected we inherit from Spark's APIs and do not re-invent the wheel.
 We do not compute the min/max but resort to runtime round robin bucketing based on the level of specified parallelism, and wrap the driver accordingly.
 
 
-### Data Movement Use Cases ###
-#### Move a group of Data Objects from a Source Container to a Destination Container
-* Move a group of DataSets
+### Data Transformation Use Cases ###
+In the current version, full federation is supported. A dataset is identified by the 3-attributes Persistence/Container/Dataset_name. The constraint is that all objects that we transform come from the same source persistence layer. This constraint will be removed in upcoming versions so that one could use federated queries. 
+Any transformation that can be supported through (Spark)SQL can be specified. This covers all use cases outlined in the overview section.
+ We are also working on adding UDF support through the Data Catalog metadata. 
+ 
+#### Transform DataSet Objects from different sources to a target persistence container
+* Transform a group of DataSets
 
-    ```$STITCHR_ROOT/bash/moveDatSetGroup.sh```
+    ```$STITCHR_ROOT/bash/transformDatSetGroup.sh```
      
 takes one argument which is the name of the group to run. The system reads the set of DataSet objects associated with the group and moves them to the target destination. Finally it will register or update the registry with the new moved objects.
    
-* Move a list of object references
+* Transform a list of object references
   
-    ``` $STITCHR_ROOT/bash/moveDatSetList.sh ```
+    ``` $STITCHR_ROOT/bash/transformDatSetList.sh ```
 
 is passed a comma-delimited list of object references and performs the same function of moving those objects to individually specified target containers. All of that is supported by registering the proper metadata information in the DC registry.
 
 The basic entry point for moving a data object is in `com.stitchr.app.DataMoveService` with
 ```
 // ql is a list of references to DataSet
-def moveDataSetList(ql: List[String]): Unit = 
+def transformDataSetList(ql: List[String]): Unit = 
        // instantiate the derived views
        ql.foldLeft()(
            (_, next) => {
@@ -96,13 +100,15 @@ def moveDataSetList(ql: List[String]): Unit =
 ```
 
 ``` $STITCHR_ROOT/bash/runExamples.sh```
-runs a battery of tests moving a group of objects as well as a list of objects
+runs a battery of tests transforming a group/lidt of objects as well as a list of object
 
-#### Move objects from a JDBC source persistence by specifying the object as a select query.
+#### Transform objects from a JDBC source persistence by specifying the object as a select query.
 
-This is supported by providing the select query in the  DataSet.query attribute and tagging the DataSet.mode as "base". The system will then push down the query to the source JDBC persistence and return a handle to the result initialized in the runtime in session database. The materialization of the result to any target can be associated as well.
+This is supported by providing the select query in the DataSet.query attribute and tagging the DataSet.mode as "base." 
+The system will then push down the query to the source JDBC persistence and return a handle to the result initialized 
+in the runtime in-session database. The materialization of the result to any target can be associated as well.
 ### DataSet object and Data Persistence container registration 
-     
+     NOTE: THIS IS NOT SUPPORTED AT THIS MOMENT AND TURNED OFF
 #### Automated Registration of a set of DataSet from a JDBC persistence source
 
 This is supported through `com.stitchr.app.AutoRegisterService`. 
@@ -134,8 +140,7 @@ An Example Json DataSet object is
 "partition_key":null,
 "number_partitions":1,
 "schema_id":8,
-"data_persistence_src_id":3,
-"data_persistence_dest_id":0
+"data_persistence_id":3
 }
 ```
 
@@ -162,15 +167,6 @@ com.stitchr.core.registry.RegistryService.getJsonDataPersistence
 com.stitchr.core.registry.RegistryService.getJsonSchema
 ```
 
-### Data Transformation 
-In the current version, The constraint is that all objects that we transform come from the same source persistence layer. This constraint will be removed in upcoming versions so that one could use federated queries. 
-The constraint right now is more tied to keep the complexity burden on the user low. To enable it properly we need to, either constrain the object references globally or assume the query writer can specify object references across different persistence containers.
-This would put an extra burden on the developer of such queries as we would need to introduce template support for query rewrites (with tools such as JinJa). 
-We do use Jinja in a very specific case and constrain the query writers to always alias the main table/view objects and enclose the dependency objects with `{{ }}`  (such as `{{ person }} as p`)
- 
-Taking into account the above restriction, any transformation that can be supported through (Spark)SQL can be specified. This covers Use cases 1 and 2 we outlined in the overview section.
- We are also working on adding UDF support through the Data Catalog metadata. 
-
 ### Miscelaneous Features
 #### Tracking run_time
 The attribute `add_run_time_ref` in `DataSet`, when set to true implies adding a column `run_time_ref` of type timestamp to the target dataset object (if that column is not already added). 
@@ -189,7 +185,7 @@ While not on the critical path, we will be modifying the code to use futures.
 
 ### where does it fit
 Data loading, transformation, integration and extraction is based on computational and data processing patterns around  composable functional transformations, lazy evaluation and  immutable data. 
-The DataStitchr (or just Stitchr) architecture is viewed as a set of data transformations from a data  zone to another zone, going though any intermediate and necessary persistence zones. 
+The DataStitchr (or just Stitchr) architecture is viewed as a set of data transformations from a data zone to another zone, going though any intermediate and necessary persistence zones. 
 It can serve as the tool used to implement any of the data processing phases in a data platform.
 
 ![Data Analytic Processing Platform](images/DataPlatformProcessingPipeline.jpg)

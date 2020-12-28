@@ -33,7 +33,7 @@ source ./bash/stitchr_env.sh
 
 
 echo $@
-STITCHR_CLASS="com.stitchr.app.MoveDataSetGroup"
+STITCHR_CLASS="com.stitchr.app.TransformDataSetGroup"
 
 # for a cluster deployment better use deploy_mode
 #    --deploy-mode client \
@@ -45,6 +45,7 @@ $SPARK_HOME/bin/spark-submit \
     --master $MASTER \
     --jars JARS \
      --packages org.apache.spark:spark-avro_$STITCHR_SCALA_VERSION:$STITCHR_SPARK_VERSION \
+     --conf spark.sql.hive.metastore.version=2.3.7 \
      --class $STITCHR_CLASS\
      "$STITCHR_JAR" \
      "$@"

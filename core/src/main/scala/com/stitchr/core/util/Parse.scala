@@ -21,15 +21,23 @@ import com.stitchr.util.SharedSession.spark
 
 import scala.collection.mutable.HashMap
 import com.hubspot.jinjava._
+import com.stitchr.core.util.Convert.stripCurlyBrace
 
 import scala.collection.JavaConversions._
 import com.typesafe.config.Config
+import org.apache.spark.sql.catalyst.analysis.UnresolvedRelation
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 
 object Parse {
 
-  def jinjaReplace(q: String, context: HashMap[String, Object]): String = {
+  def getQueryObjectMap(q: String): Map[String, String] = {
+    val plan = logicalPlan(stripCurlyBrace(q))
+    // add a check on mode .... if database then map else keep as is...
+    // NH 12/22/20 BUG: this will fail if we override with object_key... best is to do it object by object (getting the dataset object and pulling container.object_name
+    plan.collect { case r: UnresolvedRelation => (r.tableName, s"""${r.tableName.split("__")(1)}.${r.tableName.split("__")(2)}""") }.toMap
+  }
 
+  def jinjaReplace(q: String, context: Map[String, String]): String = {
     val jinjava = new Jinjava
     jinjava.render(q, context)
   }
