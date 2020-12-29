@@ -39,7 +39,7 @@ export defaultOutputDir=/tmp
 ## set it up if JAVA_HOME is not set export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_211.jdk/Contents/Home
 ## export PATH=$SPARK_HOME/bin:$PATH
 
-export VERSION=0.2.0
+export VERSION=0.3.0
 export MASTER=local[4]
 # export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
 export STITCHR_JAR=$STITCHR_ROOT/app/target/stitchr-app-$VERSION-uber.jar
