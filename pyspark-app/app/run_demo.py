@@ -53,37 +53,37 @@ as well as if we invoke different instances of Stitchr
 
 """
 
-ss2 = s.derive_query('file3__tpcds__q2')
+ss2 = s.derive_query('file0__tpcds__q2')
 
 sc2 = ss2.catalog.container.sqlContext()
 sc2.tables().show()
-ss2.catalog.container.table('file3__tpcds__q2').show(False)
+ss2.catalog.container.table('file0__tpcds__q2').show(False)
 
-ss4 = s.derive_query('file3__tpcds__q4')
+ss4 = s.derive_query('file0__tpcds__q4')
 
 sc4 = ss4.catalog.container.sqlContext()
 
 sc4.tables().show()
 
-ss2.catalog.container.table('file3__tpcds__q4').show(False)
+ss2.catalog.container.table('file0__tpcds__q4').show(False)
 sc2.tables().show()
 
-ss4.catalog.container.table("file3__tpcds__q2").show(False)
+ss4.catalog.container.table("file0__tpcds__q2").show(False)
 ## envirornment that  we can work with ss2 or ss4 ... as those are containers to the spark session on the jvm side
 sc4.tables().show()
 
-ss4.catalog.container.table("file3__tpcds__q4").show(False)
+ss4.catalog.container.table("file0__tpcds__q4").show(False)
 
-ss2.catalog.container.table("file3__tpcds__q4").show(False)
+ss2.catalog.container.table("file0__tpcds__q4").show(False)
 sc2.tables().show()
 
 ## new instance of Stitchr  that shares same session
 
 s1 = Stitchr(spark, spark.sparkContext)
-ss = s1.derive_query('file3__tpcds__q2')
+ss = s1.derive_query('file0__tpcds__q2')
 
 sc = ss.catalog.container.sqlContext()
 sc.tables().show()
-ss.catalog.container.table("file3__tpcds__q2").show(False)
+ss.catalog.container.table("file0__tpcds__q2").show(False)
 
-ss.catalog.container.table('file3__tpcds__q2').show(False)
+ss.catalog.container.table('file0__tpcds__q2').show(False)

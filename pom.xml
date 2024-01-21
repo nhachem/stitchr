@@ -28,8 +28,9 @@
     <scala.version>${scala.binary.version}.10</scala.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <spark.version>3.0.0</spark.version>
+    <spark.version>3.5.0</spark.version>
     <hadoop.version>2.7.4</hadoop.version>
+    <hadoop.version>3.0.0</hadoop.version>
     <yarn.version>${hadoop.version}</yarn.version>
     <maven.version>3.6.0</maven.version>
 

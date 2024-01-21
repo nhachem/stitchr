@@ -312,7 +312,7 @@ One can run the transformation DAG in different ways: the simplest is purely seq
         source $STITCHR_ROOT/bash/stichr_env.sh
         ## note that Avro before spark 2.4 is part of the distribution
         spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.11:2.4.3
-    
+        spark-shell --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar --packages org.apache.spark:spark-avro_2.12:3.5.0
         in the shell
         :load <path-to-root-code>/app/scripts/demoBasicStitchr.scala
     
@@ -327,8 +327,8 @@ after you set up your environment properly (python 3.7)
     
     to run interactively using pyspark: in the directory where the run_demo.py is located (pyspark-app/app/) run
     
-    pyspark --jars $STITCHR_ROOT/app/target/stitchr-app-<$VERSION>-jar-with-dependencies.jar
-    
+    pyspark --jars $STITCHR_ROOT/app/target/stitchr-app-$VERSION-jar-with-dependencies.jar
+
     then at the prompt type
     
     import run_demo
